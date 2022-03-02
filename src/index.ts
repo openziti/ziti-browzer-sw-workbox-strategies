@@ -1,5 +1,5 @@
 
-import { ZitiFirstStrategy } from './zitiFirstStrategy.js';
+import { ZitiFirstStrategy } from './ZitiFirstStrategy.js';
 
 export {
     ZitiFirstStrategy,
