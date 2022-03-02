@@ -1,7 +1,7 @@
 {
   "name": "@openziti/ziti-browzer-sw-workbox-strategies",
   "version": "0.1.0",
-  "description": "",
+  "description": "Custom Workbox Strategies used as part of the OpenZiti browZer stack",
   "main": "src/index.js",
   "scripts": {
     "build": "gulp build",
@@ -10,13 +10,16 @@
     "test": "node_modules/.bin/mocha --require @babel/register"
   },
   "company": "NetFoundry",
-  "homepage": "https://ziti.dev",
   "keywords": [
+    "ziti",
+    "zero trust",
+    "zero-trust",
+    "browZer",
+    "browser",
+    "js",
+    "javascript",
     "workbox-strategy",
     "netfoundry",
-    "ziti",
-    "browser",
-    "browzer",
     "workbox"
   ],
   "license": "Apache-2.0",
@@ -54,6 +57,15 @@
     "type": "git",
     "url": "https://github.com/openziti/ziti-browzer-sw-workbox-strategies.git"
   },
+  "author": {
+    "name": "NetFoundry",
+    "url": "http://netfoundry.io",
+    "email": "openziti@netfoundry.io"
+  },
+  "bugs": {
+    "url": "https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues"
+  },
+  "homepage": "https://github.com/openziti/ziti-browzer-sw-workbox-strategies",
   "babel": {
     "plugins": [
       "dynamic-import-node"
