@@ -12,7 +12,7 @@ web applications over a zero trust [Ziti Network](https://ziti.dev/about)
 Learn about Ziti at [ziti.dev](https://ziti.dev)
 
 
-[![WASM-Build](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/workflows/Build/badge.svg?branch=main)]()
+[![Build](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/workflows/Build/badge.svg?branch=main)]()
 [![CodeQL](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/workflows/CodeQL/badge.svg?branch=main)]()
 [![Issues](https://img.shields.io/github/issues-raw/openziti/ziti-browzer-sw-workbox-strategies)]()
 
