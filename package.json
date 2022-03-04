@@ -75,7 +75,7 @@
     ]
   },
   "dependencies": {
-    "@openziti/libcrypto-js": "^0.6.8",
+    "@openziti/libcrypto-js": "^0.6.11",
     "workbox-core": "^6.5.0",
     "workbox-expiration": "^6.5.0",
     "workbox-strategies": "^6.5.0"
