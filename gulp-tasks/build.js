@@ -30,7 +30,7 @@ module.exports = {
   build: series(
     cleanSequence,
     transpile_typescript,
-    build_bundle,
+    // build_bundle,
   ),
   clean: cleanSequence,
 };
