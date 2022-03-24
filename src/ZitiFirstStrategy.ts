@@ -4,7 +4,8 @@ import {StrategyHandler} from 'workbox-strategies/StrategyHandler.js';
 import {NetworkFirst} from 'workbox-strategies/NetworkFirst.js';
 import {StrategyOptions} from 'workbox-strategies/Strategy.js';
 
-import libcrypto from '@openziti/libcrypto-js';
+import {LibCrypto} from '@openziti/libcrypto-js';
+import {ZitiBrowzerEdgeClient} from '@openziti/ziti-browzer-edge-client';
 
 import {logger} from './logger.js';
 
@@ -30,6 +31,7 @@ export interface ZitiFirstOptions extends StrategyOptions {
 class ZitiFirstStrategy extends NetworkFirst {
   private readonly _zitiNetworkTimeoutSeconds: number;
   private readonly _libcrypto: any;
+  private _ZitiBrowzerEdgeClient: any;
   private _libcryptoInitialized: boolean;
 
   /**
@@ -53,9 +55,17 @@ class ZitiFirstStrategy extends NetworkFirst {
 
     this._zitiNetworkTimeoutSeconds = options.zitiNetworkTimeoutSeconds || 0;
 
-    // Get a ref to the libCrypto WASM module
-    this._libcrypto = new libcrypto();
+    // Get a ref to the LibCrypto WASM module
+    this._libcrypto = new LibCrypto();
     this._libcryptoInitialized = false;
+
+    //
+    this._ZitiBrowzerEdgeClient = new ZitiBrowzerEdgeClient(
+      {
+        domain: '', //TODO
+        logger: logger,
+      }
+    );
   }
 
   /**
