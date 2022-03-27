@@ -4,13 +4,12 @@ import {StrategyHandler} from 'workbox-strategies/StrategyHandler.js';
 import {NetworkFirst} from 'workbox-strategies/NetworkFirst.js';
 import {StrategyOptions} from 'workbox-strategies/Strategy.js';
 
-import {LibCrypto} from '@openziti/libcrypto-js';
-import {ZitiBrowzerEdgeClient} from '@openziti/ziti-browzer-edge-client';
-
-import {logger} from './logger.js';
+import { ZitiBrowzerCore } from '@openziti/ziti-browzer-core';
 
 
 export interface ZitiFirstOptions extends StrategyOptions {
+  logLevel?: string;
+  controllerApi?: string;
   zitiNetworkTimeoutSeconds?: number;
 }
 
@@ -29,23 +28,19 @@ export interface ZitiFirstOptions extends StrategyOptions {
  *
  */
 class ZitiFirstStrategy extends NetworkFirst {
+
   private readonly _zitiNetworkTimeoutSeconds: number;
-  private readonly _libcrypto: any;
-  private _ZitiBrowzerEdgeClient: any;
-  private _libcryptoInitialized: boolean;
+  private readonly _logLevel: string;
+  private readonly _controllerApi: string;
+  private _core: any;
+  private _logger: any;
+  private _context: any;
+  private _initialized: boolean;
 
   /**
    * @param {Object} [options]
-   * @param {string} [options.cacheName] Cache name to store and retrieve
-   * requests. Defaults to cache names provided by
-   * {@link workbox-core.cacheNames}.
-   * @param {Array<Object>} [options.plugins] [Plugins]{@link https://developers.google.com/web/tools/workbox/guides/using-plugins}
-   * to use in conjunction with this caching strategy.
-   * @param {Object} [options.fetchOptions] Values passed along to the
-   * [`init`](https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch#Parameters)
-   * of [non-navigation](https://github.com/GoogleChrome/workbox/issues/1796)
-   * `fetch()` requests made by this strategy.
-   * @param {Object} [options.matchOptions] [`CacheQueryOptions`](https://w3c.github.io/ServiceWorker/#dictdef-cachequeryoptions)
+   * @param {string} [options._logLevel] Which level to log at
+   * @param {string} [options._controllerApi] Location of Ziti Controller
    * @param {number} [options.zitiNetworkTimeoutSeconds] If set, any network requests
    * that fail to respond within the timeout will fallback to the cache.
    *
@@ -54,37 +49,55 @@ class ZitiFirstStrategy extends NetworkFirst {
     super(options);
 
     this._zitiNetworkTimeoutSeconds = options.zitiNetworkTimeoutSeconds || 0;
-
-    // Get a ref to the LibCrypto WASM module
-    this._libcrypto = new LibCrypto();
-    this._libcryptoInitialized = false;
-
-    //
-    this._ZitiBrowzerEdgeClient = new ZitiBrowzerEdgeClient(
-      {
-        domain: '', //TODO
-        logger: logger,
-      }
-    );
+    this._logLevel = options.logLevel || 'Silent';
+    this._controllerApi = options.controllerApi || '<controllerApi-not-configured>';
+    this._initialized = false;
   }
+
+
+  /**
+   * Do all work necessry ro initialize the ZitiFirstStrategy instance
+   */
+  async _initialize() {
+
+    if (this._initialized) throw Error("Already initialized; Cannot call .initialize() twice on instance.");
+
+    this._core = new ZitiBrowzerCore({});
+    this._logger = this._core.createZitiLogger({
+      logLevel: this._logLevel,
+    });
+
+    this._logger.trace(`ZitiFirstStrategy: ctor() entered`);
+
+    this._context = this._core.createZitiContext({
+      logger: this._logger,
+      controllerApi: this._controllerApi,
+    });
+
+    await this._context.initialize(); // this instantiates the internal WebAssembly
+
+    this._initialized = true;
+
+    this._logger.trace(`ZitiFirstStrategy._initialize complete`);
+  }
+
 
   /**
    * @private
    * @param {Request|string} request A request to run this strategy for.
-   * @param {workbox-strategies.StrategyHandler} handler The event that
-   *     triggered the request.
+   * @param {workbox-strategies.StrategyHandler} handler The event that triggered the request.
    * @return {Promise<Response>}
    */
   async _handle(request: Request, handler: StrategyHandler): Promise<Response> {
 
-    // Load and instantiate the libCrypto WASM
-    if (!this._libcryptoInitialized) {
-        await this._libcrypto.initialize(); 
-    }
+    if (!this._initialized) { this._initialize() }
 
     // TEMP: demo the keypair generation via libCrypto WASM, on _every_ request
-    let privateKeyPEM = this._libcrypto.generateECKey({});
-    logger.log(`${privateKeyPEM}`);
+    // let privateKeyPEM = this._libcrypto.generateECKey({});
+    // logger.log(`${privateKeyPEM}`);
+    let privateKeyPEM = this._context.generateECKey({});
+    this._logger.trace(privateKeyPEM);
+
 
     const logs: any[] = [];
 
