@@ -3,6 +3,10 @@ import {WorkboxError} from 'workbox-core/_private/WorkboxError.js';
 import {StrategyHandler} from 'workbox-strategies/StrategyHandler.js';
 import {NetworkFirst} from 'workbox-strategies/NetworkFirst.js';
 import {StrategyOptions} from 'workbox-strategies/Strategy.js';
+import {Mutex} from 'async-mutex';
+import { v4 as uuidv4 } from 'uuid';
+
+
 
 import { ZitiBrowzerCore } from '@openziti/ziti-browzer-core';
 
@@ -36,6 +40,8 @@ class ZitiFirstStrategy extends NetworkFirst {
   private _logger: any;
   private _context: any;
   private _initialized: boolean;
+  private _initializationMutex: any;
+  private _uuid: any;
 
   /**
    * @param {Object} [options]
@@ -52,34 +58,52 @@ class ZitiFirstStrategy extends NetworkFirst {
     this._logLevel = options.logLevel || 'Silent';
     this._controllerApi = options.controllerApi || '<controllerApi-not-configured>';
     this._initialized = false;
+
+    this._initializationMutex = new Mutex();
+    this._uuid = uuidv4();
   }
 
 
   /**
-   * Do all work necessry ro initialize the ZitiFirstStrategy instance
+   * Do all work necessry to initialize the ZitiFirstStrategy instance.
+   * 
    */
   async _initialize() {
 
-    if (this._initialized) throw Error("Already initialized; Cannot call .initialize() twice on instance.");
+    // Run the init sequence within a critical-section
+    await this._initializationMutex.runExclusive(async () => {
 
-    this._core = new ZitiBrowzerCore({});
-    this._logger = this._core.createZitiLogger({
-      logLevel: this._logLevel,
-      suffix: 'SW'
+      if (!this._initialized) {
+
+        this._core = new ZitiBrowzerCore({});
+        this._logger = this._core.createZitiLogger({
+          logLevel: this._logLevel,
+          suffix: 'SW'
+        });
+        this._logger.trace(`ZitiBrowzerCore created`);
+  
+        this._context = this._core.createZitiContext({
+          logger: this._logger,
+          controllerApi: this._controllerApi,
+        });
+        this._logger.trace(`ZitiContext created`);
+  
+        await this._context.initialize(); // this instantiates the internal WebAssembly
+  
+        this._logger.trace(`ZitiContext '${this._uuid}' initialized`);
+  
+        this._initialized = true;
+  
+      }
+
+    })
+    .catch(( err: any ) => {
+      this._logger.error(err);
+      return new Promise( async (_, reject) => {
+        reject( err );
+      });
     });
 
-    this._logger.trace(`ZitiFirstStrategy: ctor() entered`);
-
-    this._context = this._core.createZitiContext({
-      logger: this._logger,
-      controllerApi: this._controllerApi,
-    });
-
-    await this._context.initialize(); // this instantiates the internal WebAssembly
-
-    this._initialized = true;
-
-    this._logger.trace(`ZitiFirstStrategy._initialize complete`);
   }
 
 
@@ -91,13 +115,14 @@ class ZitiFirstStrategy extends NetworkFirst {
    */
   async _handle(request: Request, handler: StrategyHandler): Promise<Response> {
 
-    if (!this._initialized) { this._initialize() }
+    // 
+    await this._initialize()
 
     // TEMP: demo the keypair generation via libCrypto WASM, on _every_ request
     // let privateKeyPEM = this._libcrypto.generateECKey({});
     // logger.log(`${privateKeyPEM}`);
-    let privateKeyPEM = this._context.generateECKey({});
-    this._logger.trace(privateKeyPEM);
+    // let privateKeyPEM = this._context.generateECKey({});
+    // this._logger.trace(privateKeyPEM);
 
 
     const logs: any[] = [];
@@ -208,8 +233,11 @@ class ZitiFirstStrategy extends NetworkFirst {
     let error;
     let response;
     try {
+      this._logger.trace(`doing fetch for: `, request);
       response = await handler.fetchAndCachePut(request);
+      this._logger.trace(`Got response: `, response);
     } catch (fetchError) {
+      this._logger.trace(`Got error: `, fetchError);
       if (fetchError instanceof Error) {
         error = fetchError;
       }
