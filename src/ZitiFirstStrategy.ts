@@ -65,6 +65,7 @@ class ZitiFirstStrategy extends NetworkFirst {
     this._core = new ZitiBrowzerCore({});
     this._logger = this._core.createZitiLogger({
       logLevel: this._logLevel,
+      suffix: 'SW'
     });
 
     this._logger.trace(`ZitiFirstStrategy: ctor() entered`);

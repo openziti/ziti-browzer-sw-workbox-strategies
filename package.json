@@ -79,7 +79,7 @@
     ]
   },
   "dependencies": {
-    "@openziti/ziti-browzer-core": "^0.2.4",
+    "@openziti/ziti-browzer-core": "^0.2.5",
     "workbox-core": "^6.5.0",
     "workbox-expiration": "^6.5.0",
     "workbox-strategies": "^6.5.0"
