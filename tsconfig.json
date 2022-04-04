@@ -11,11 +11,12 @@
     "allowSyntheticDefaultImports": true,
     "noUnusedParameters": true,
     "preserveConstEnums": true,
+    "resolveJsonModule": true,
     "strict": true,
     "target": "es2017",
     "tsBuildInfoFile": "./tsconfig.tsbuildinfo"
   },
-  "include": ["src/*.ts"],
+  "include": ["src/*.ts", "package.json"],
   "exclude": [],
   "references": []
 }

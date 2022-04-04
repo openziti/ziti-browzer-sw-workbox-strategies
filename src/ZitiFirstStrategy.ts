@@ -7,13 +7,17 @@ import {Mutex} from 'async-mutex';
 import { v4 as uuidv4 } from 'uuid';
 
 
-
 import { ZitiBrowzerCore } from '@openziti/ziti-browzer-core';
+
+import pjson from '../package.json';
+import { buildInfo } from './buildInfo'
 
 
 export interface ZitiFirstOptions extends StrategyOptions {
+  zitiBrowzerServiceWorkerGlobalScope?: any;
   logLevel?: string;
   controllerApi?: string;
+  decodedJWTtoken?: any;
   zitiNetworkTimeoutSeconds?: number;
 }
 
@@ -33,9 +37,11 @@ export interface ZitiFirstOptions extends StrategyOptions {
  */
 class ZitiFirstStrategy extends NetworkFirst {
 
+  private readonly _zitiBrowzerServiceWorkerGlobalScope: any;
   private readonly _zitiNetworkTimeoutSeconds: number;
   private readonly _logLevel: string;
   private readonly _controllerApi: string;
+  private readonly _decodedJWTtoken: any;
   private _core: any;
   private _logger: any;
   private _context: any;
@@ -45,8 +51,10 @@ class ZitiFirstStrategy extends NetworkFirst {
 
   /**
    * @param {Object} [options]
+   * @param {string} [options._zitiBrowzerServiceWorkerGlobalScope] config dsts
    * @param {string} [options._logLevel] Which level to log at
    * @param {string} [options._controllerApi] Location of Ziti Controller
+   * @param {Object} [options.decodedJWTtoken] JWT info
    * @param {number} [options.zitiNetworkTimeoutSeconds] If set, any network requests
    * that fail to respond within the timeout will fallback to the cache.
    *
@@ -54,13 +62,22 @@ class ZitiFirstStrategy extends NetworkFirst {
   constructor(options: ZitiFirstOptions = {}) {
     super(options);
 
+    this._zitiBrowzerServiceWorkerGlobalScope = options.zitiBrowzerServiceWorkerGlobalScope || 0;
     this._zitiNetworkTimeoutSeconds = options.zitiNetworkTimeoutSeconds || 0;
     this._logLevel = options.logLevel || 'Silent';
     this._controllerApi = options.controllerApi || '<controllerApi-not-configured>';
+    this._decodedJWTtoken = options.decodedJWTtoken || {};
     this._initialized = false;
 
     this._initializationMutex = new Mutex();
     this._uuid = uuidv4();
+
+    this._core = new ZitiBrowzerCore({});
+    this._logger = this._core.createZitiLogger({
+      logLevel: this._logLevel,
+      suffix: 'SW'
+    });
+    this._logger.trace(`ZitiFirstStrategy ctor completed`);
   }
 
 
@@ -69,22 +86,25 @@ class ZitiFirstStrategy extends NetworkFirst {
    * 
    */
   async _initialize() {
-
+    
     // Run the init sequence within a critical-section
     await this._initializationMutex.runExclusive(async () => {
 
       if (!this._initialized) {
-
-        this._core = new ZitiBrowzerCore({});
-        this._logger = this._core.createZitiLogger({
-          logLevel: this._logLevel,
-          suffix: 'SW'
-        });
-        this._logger.trace(`ZitiBrowzerCore created`);
   
+        if (typeof this._zitiBrowzerServiceWorkerGlobalScope._decodedJWTtoken === 'undefined') {
+          return
+        }
+
         this._context = this._core.createZitiContext({
-          logger: this._logger,
-          controllerApi: this._controllerApi,
+          logger:         this._logger,
+          controllerApi:  this._controllerApi,
+          sdkType:        pjson.name,
+          sdkVersion:     pjson.version,
+          sdkBranch:      buildInfo.sdkBranch,
+          sdkRevision:    buildInfo.sdkRevision,
+          updbUser:       this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.decodedJWT.updbUser,
+          updbPswd:       this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.decodedJWT.updbPswd,
         });
         this._logger.trace(`ZitiContext created`);
   
@@ -92,6 +112,8 @@ class ZitiFirstStrategy extends NetworkFirst {
   
         this._logger.trace(`ZitiContext '${this._uuid}' initialized`);
   
+        await this._context.enroll(); // this acquires an ephemeral Cert
+
         this._initialized = true;
   
       }
@@ -117,13 +139,6 @@ class ZitiFirstStrategy extends NetworkFirst {
 
     // 
     await this._initialize()
-
-    // TEMP: demo the keypair generation via libCrypto WASM, on _every_ request
-    // let privateKeyPEM = this._libcrypto.generateECKey({});
-    // logger.log(`${privateKeyPEM}`);
-    // let privateKeyPEM = this._context.generateECKey({});
-    // this._logger.trace(privateKeyPEM);
-
 
     const logs: any[] = [];
 
