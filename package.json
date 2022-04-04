@@ -4,6 +4,7 @@
   "description": "Custom Workbox Strategies used as part of the OpenZiti browZer stack",
   "main": "src/index.js",
   "scripts": {
+    "prebuild": "node scripts/prebuild.mjs",
     "build": "gulp build",
     "clean": "gulp clean",
     "gulp": "gulp",
@@ -36,6 +37,7 @@
     "@rollup/plugin-replace": "^4.0.0",
     "@rollup/plugin-typescript": "^8.3.1",
     "@surma/rollup-plugin-off-main-thread": "^2.2.3",
+    "@types/jwt-decode": "^3.1.0",
     "@types/uuid": "^8.3.4",
     "babel-plugin-dynamic-import-node": "^2.3.3",
     "babel-plugin-transform-async-to-promises": "^0.8.15",
@@ -80,8 +82,9 @@
     ]
   },
   "dependencies": {
-    "@openziti/ziti-browzer-core": "^0.3.0",
+    "@openziti/ziti-browzer-core": "^0.4.0",
     "async-mutex": "^0.3.2",
+    "jwt-decode": "^3.1.2",
     "uuid": "^8.3.2",
     "workbox-core": "^6.5.0",
     "workbox-expiration": "^6.5.0",
