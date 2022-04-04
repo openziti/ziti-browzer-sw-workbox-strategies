@@ -80,7 +80,7 @@
     ]
   },
   "dependencies": {
-    "@openziti/ziti-browzer-core": "^0.3.0",
+    "@openziti/ziti-browzer-core": "^0.4.0",
     "async-mutex": "^0.3.2",
     "uuid": "^8.3.2",
     "workbox-core": "^6.5.0",
