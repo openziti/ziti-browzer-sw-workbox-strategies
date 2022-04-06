@@ -5,6 +5,7 @@ import {NetworkFirst} from 'workbox-strategies/NetworkFirst.js';
 import {StrategyOptions} from 'workbox-strategies/Strategy.js';
 import {Mutex} from 'async-mutex';
 import { v4 as uuidv4 } from 'uuid';
+import { isUndefined } from 'lodash-es';
 
 
 import { ZitiBrowzerCore } from '@openziti/ziti-browzer-core';
@@ -17,7 +18,6 @@ export interface ZitiFirstOptions extends StrategyOptions {
   zitiBrowzerServiceWorkerGlobalScope?: any;
   logLevel?: string;
   controllerApi?: string;
-  decodedJWTtoken?: any;
   zitiNetworkTimeoutSeconds?: number;
 }
 
@@ -41,7 +41,6 @@ class ZitiFirstStrategy extends NetworkFirst {
   private readonly _zitiNetworkTimeoutSeconds: number;
   private readonly _logLevel: string;
   private readonly _controllerApi: string;
-  private readonly _decodedJWTtoken: any;
   private _core: any;
   private _logger: any;
   private _context: any;
@@ -54,7 +53,6 @@ class ZitiFirstStrategy extends NetworkFirst {
    * @param {string} [options._zitiBrowzerServiceWorkerGlobalScope] config dsts
    * @param {string} [options._logLevel] Which level to log at
    * @param {string} [options._controllerApi] Location of Ziti Controller
-   * @param {Object} [options.decodedJWTtoken] JWT info
    * @param {number} [options.zitiNetworkTimeoutSeconds] If set, any network requests
    * that fail to respond within the timeout will fallback to the cache.
    *
@@ -66,7 +64,6 @@ class ZitiFirstStrategy extends NetworkFirst {
     this._zitiNetworkTimeoutSeconds = options.zitiNetworkTimeoutSeconds || 0;
     this._logLevel = options.logLevel || 'Silent';
     this._controllerApi = options.controllerApi || '<controllerApi-not-configured>';
-    this._decodedJWTtoken = options.decodedJWTtoken || {};
     this._initialized = false;
 
     this._initializationMutex = new Mutex();
@@ -90,9 +87,16 @@ class ZitiFirstStrategy extends NetworkFirst {
     // Run the init sequence within a critical-section
     await this._initializationMutex.runExclusive(async () => {
 
+      this._logger.trace(`_initialize entered`);
+
       if (!this._initialized) {
   
-        if (typeof this._zitiBrowzerServiceWorkerGlobalScope._decodedJWTtoken === 'undefined') {
+        if (isUndefined(this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig) || 
+            isUndefined(this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.decodedJWT)
+        ) {
+          debugger
+          this._logger.trace(`_zitiConfig.decodedJWT not defined`);
+
           return
         }
 
@@ -136,6 +140,8 @@ class ZitiFirstStrategy extends NetworkFirst {
    * @return {Promise<Response>}
    */
   async _handle(request: Request, handler: StrategyHandler): Promise<Response> {
+
+    this._logger.trace(`_handle entered for: `, request);
 
     // 
     await this._initialize()
