@@ -1,3 +1,12 @@
+# [0.4.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.3.0...v0.4.0) (2022-04-12)
+
+
+### Features
+
+* phase5 ([#25](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/25)) ([5639106](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/5639106dd9f94eb54237a8fbdac2b1128953c223))
+
+
+
 # [0.3.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.2.0...v0.3.0) (2022-04-06)
 
 
