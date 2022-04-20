@@ -49,7 +49,7 @@
     "gulp": "^4.0.2",
     "mocha": "^9.2.1",
     "rimraf": "^3.0.2",
-    "rollup": "^2.68.0",
+    "rollup": "^2.70.2",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-terser": "^7.0.2",
@@ -83,13 +83,13 @@
     ]
   },
   "dependencies": {
-    "@openziti/ziti-browzer-core": "^0.6.1",
+    "@openziti/ziti-browzer-core": "^0.7.0",
     "async-mutex": "^0.3.2",
     "jwt-decode": "^3.1.2",
     "lodash-es": "^4.17.21",
     "uuid": "^8.3.2",
-    "workbox-core": "^6.5.0",
-    "workbox-expiration": "^6.5.0",
-    "workbox-strategies": "^6.5.0"
+    "workbox-core": "^6.5.3",
+    "workbox-expiration": "^6.5.3",
+    "workbox-strategies": "^6.5.3"
   }
 }

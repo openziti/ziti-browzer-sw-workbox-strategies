@@ -4,8 +4,7 @@ import {StrategyHandler} from 'workbox-strategies/StrategyHandler.js';
 import {NetworkFirst} from 'workbox-strategies/NetworkFirst.js';
 import {StrategyOptions} from 'workbox-strategies/Strategy.js';
 import {Mutex} from 'async-mutex';
-import { v4 as uuidv4 } from 'uuid';
-import { isUndefined } from 'lodash-es';
+import { isUndefined, isEqual } from 'lodash-es';
 
 
 import { ZitiBrowzerCore } from '@openziti/ziti-browzer-core';
@@ -19,6 +18,13 @@ export interface ZitiFirstOptions extends StrategyOptions {
   logLevel?: string;
   controllerApi?: string;
   zitiNetworkTimeoutSeconds?: number;
+  uuid?: string;
+}
+
+type ZitiShouldRouteResult = {
+  routeOverZiti?: boolean | false;
+  serviceName?: string | '';
+  url?: string | '';
 }
 
 /**
@@ -42,8 +48,8 @@ class ZitiFirstStrategy extends NetworkFirst {
   private readonly _logLevel: string;
   private readonly _controllerApi: string;
   private _core: any;
-  private _logger: any;
-  private _context: any;
+  private logger: any;
+  private _zitiContext: any;
   private _initialized: boolean;
   private _initializationMutex: any;
   private _uuid: any;
@@ -67,17 +73,37 @@ class ZitiFirstStrategy extends NetworkFirst {
     this._initialized = false;
 
     this._initializationMutex = new Mutex();
-    this._uuid = uuidv4();
+    this._uuid = options.uuid;
 
     this._core = new ZitiBrowzerCore({});
-    this._logger = this._core.createZitiLogger({
+    this.logger = this._core.createZitiLogger({
       logLevel: this._logLevel,
       suffix: 'SW'
     });
-    this._logger.trace(`ZitiFirstStrategy ctor completed`);
+    this.logger.trace(`ZitiFirstStrategy ctor completed`);
   }
 
 
+/**
+ * Remain in lazy-sleepy loop until z-b-runtime sends us the _zitiConfig
+ * 
+ */
+  async await_zitiConfig() {
+    let self = this;
+    let ctr = 0;
+    return new Promise((resolve: any, reject: any) => {
+      (function waitFor_zitiConfig() {
+        if (isUndefined(self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig)) {
+          console.log('_zitiBrowzerServiceWorkerGlobalScope._zitiConfig undefined for UUID: ', self._uuid)
+          if (ctr++ > 10) { return reject() }
+          setTimeout(waitFor_zitiConfig, 500);  
+        } else {
+          return resolve();
+        }
+      })();
+    });
+  }
+  
   /**
    * Do all work necessry to initialize the ZitiFirstStrategy instance.
    * 
@@ -87,21 +113,20 @@ class ZitiFirstStrategy extends NetworkFirst {
     // Run the init sequence within a critical-section
     await this._initializationMutex.runExclusive(async () => {
 
-      this._logger.trace(`_initialize entered`);
-
       if (!this._initialized) {
-  
+
+        this.logger.trace(`_initialize entered`);
+
         if (isUndefined(this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig) || 
             isUndefined(this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.decodedJWT)
         ) {
-          debugger
-          this._logger.trace(`_zitiConfig.decodedJWT not defined`);
-
-          return
+          await this.await_zitiConfig();
+          // this.logger.error(`_zitiConfig.decodedJWT not defined`);
+          // return
         }
 
-        this._context = this._core.createZitiContext({
-          logger:         this._logger,
+        this._zitiContext = this._core.createZitiContext({
+          logger:         this.logger,
           controllerApi:  this._controllerApi,
           sdkType:        pjson.name,
           sdkVersion:     pjson.version,
@@ -109,14 +134,15 @@ class ZitiFirstStrategy extends NetworkFirst {
           sdkRevision:    buildInfo.sdkRevision,
           updbUser:       this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.decodedJWT.updbUser,
           updbPswd:       this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.decodedJWT.updbPswd,
+          httpAgentTargetHost: this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.host,
         });
-        this._logger.trace(`ZitiContext created`);
+        this.logger.trace(`ZitiContext created`);
   
-        await this._context.initialize(); // this instantiates the internal WebAssembly
+        await this._zitiContext.initialize(); // this instantiates the internal WebAssembly
   
-        this._logger.trace(`ZitiContext '${this._uuid}' initialized`);
+        this.logger.trace(`ZitiContext '${this._uuid}' initialized`);
   
-        await this._context.enroll(); // this acquires an ephemeral Cert
+        await this._zitiContext.enroll(); // this acquires an ephemeral Cert
 
         this._initialized = true;
   
@@ -124,11 +150,95 @@ class ZitiFirstStrategy extends NetworkFirst {
 
     })
     .catch(( err: any ) => {
-      this._logger.error(err);
+      this.logger.error(err);
       return new Promise( async (_, reject) => {
         reject( err );
       });
     });
+
+  }
+
+
+  /**
+   * Determine if this request should be routed over Ziti, or over raw internet.
+   * 
+   * @private
+   * @param {Request} request The request from the fetch event.
+   * @return {ZitiShouldRouteResult} If request should go over Ziti we return a (possibly adjusted) URL
+
+   */
+  async _shouldRouteOverZiti(request: Request) {
+
+    let result: ZitiShouldRouteResult = {}
+    
+    this.logger.trace(`_shouldRouteOverZiti starting`);
+
+    result.routeOverZiti = false;  // default is to route over raw internet
+
+    // We want to intercept fetch requests that target the Ziti HTTP Agent... that is...
+    // ...we want to intercept any request from the web app that targets the server from 
+    // which the app was loaded.
+  
+    var regex = new RegExp( this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.self.host, 'g' );
+    var regexSlash = new RegExp( /^\//, 'g' );
+    var regexDotSlash = new RegExp( /^\.\//, 'g' );
+  
+    if (request.url.match( regex )) { // yes, the request is targeting the Ziti HTTP Agent
+
+      let isExpired = await this._zitiContext.isCertExpired();
+  
+      var newUrl = new URL( request.url );
+
+      // If seeking root page, do NOT route over Ziti.  Instead, we 
+      if ( newUrl.pathname === '/' ) {
+
+        this.logger.trace('_shouldRouteOverZiti: root path, bypassing intercept of [%s]: ', request.url);
+
+      }
+      else {
+
+        newUrl.hostname = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.host;
+        newUrl.port = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.port;
+        this.logger.trace( '_shouldRouteOverZiti: transformed URL: ', newUrl.toString());
+    
+        result.serviceName = await this._zitiContext.shouldRouteOverZiti( newUrl );
+        this.logger.trace(`_shouldRouteOverZiti result.serviceName[%o]`, result.serviceName);
+  
+        if (isEqual(result.serviceName, '')) { // If we have no config associated with the hostname:port, do not intercept
+          this.logger.warn('_shouldRouteOverZiti: no associated config, bypassing intercept of [%s]', request.url);
+        } else {
+          result.url = newUrl.toString();
+          result.routeOverZiti = true;
+        }   
+  
+      }
+    
+    } 
+    else if ( (request.url.match( regexSlash )) || ((request.url.match( regexDotSlash ))) ) { // the request starts with a slash
+
+      this.logger.error(`_shouldRouteOverZiti implement me `);
+
+    } else {  // the request is targeting the raw internet
+
+      result.serviceName = await this._zitiContext.shouldRouteOverZiti( request.url );
+      this.logger.trace(`_shouldRouteOverZiti result.serviceName[%o]`, result.serviceName);
+
+      if (isUndefined(result.serviceName) || isEqual(result.serviceName, '')) { // If we have no config associated with the hostname:port
+
+        this.logger.warn('_shouldRouteOverZiti: no associated config, bypassing intercept of [%s]', request.url);
+  
+      } else {
+
+        result.url = request.url;
+        result.routeOverZiti = true;
+  
+      }
+
+    }  
+
+    this.logger.trace(`_shouldRouteOverZiti result[%o]`, result);
+
+    return result;
 
   }
 
@@ -141,15 +251,31 @@ class ZitiFirstStrategy extends NetworkFirst {
    */
   async _handle(request: Request, handler: StrategyHandler): Promise<Response> {
 
-    this._logger.trace(`_handle entered for: `, request);
+    this.logger.trace('_handle entered for on UUID: ', this._zitiBrowzerServiceWorkerGlobalScope._uuid)
 
-    // 
-    await this._initialize()
+    this.logger.trace(`_handle entered for: `, request.url);
 
     const logs: any[] = [];
 
     const promises: Promise<Response | undefined>[] = [];
     let timeoutId: number | undefined;
+
+    let shouldRoute: ZitiShouldRouteResult = {routeOverZiti: false}
+
+    let newUrl = new URL( request.url );
+
+    // If hitting the root page, we never go over Ziti, and we let the browser route the request
+    // to the HTTP Agent.  This will cause the ziti-browser-runtime to be injected, and then the
+    // z-b-runtime will send us the zitiConfig, and we can start doing real work.
+    if ( newUrl.pathname !== '/' ) {
+
+      // If possibly going over Ziti, we must first complete the work
+      await this._initialize();   //  to ensure WASM is instantiated, 
+                                  //   we have a cert, etc
+      
+      // Now determine if we're going over Ziti or not
+      shouldRoute = await this._shouldRouteOverZiti(request);
+    }
 
     if (this._zitiNetworkTimeoutSeconds) {
       const {id, promise} = this._getZitiTimeoutPromise({request, logs, handler});
@@ -157,26 +283,54 @@ class ZitiFirstStrategy extends NetworkFirst {
       promises.push(promise);
     }
 
-    const networkPromise = this._getNetworkPromise({
-      timeoutId,
-      request,
-      logs,
-      handler,
-    });
+    let networkPromise = null;
+    let zitiNetworkPromise = null;
 
-    promises.push(networkPromise);
+    if (!shouldRoute.routeOverZiti) {
+
+      this.logger.trace(`_handle: ------- routing over raw internet ----------`);
+
+      networkPromise = this._getNetworkPromise({
+        timeoutId,
+        request,
+        logs,
+        handler,
+      });
+  
+      promises.push(networkPromise);
+  
+    } else {
+
+      this.logger.trace(`_handle: ------- routing over Ziti ----------`);
+
+      const zitiNetworkPromise = this._getZitiNetworkPromise({
+        timeoutId,
+        shouldRoute,
+        request,
+        logs,
+        handler,
+      });
+  
+      promises.push(zitiNetworkPromise);
+
+    }
 
     const response = await handler.waitUntil(
       (async () => {
+
+        let netPromise = networkPromise || zitiNetworkPromise;
+
         // Promise.race() will resolve as soon as the first promise resolves.
         return (
           (await handler.waitUntil(Promise.race(promises))) ||
           // If Promise.race() resolved with null, it might be due to a network
           // timeout + a cache miss. If that were to happen, we'd rather wait until
-          // the networkPromise resolves instead of returning null.
+          // the netPromise (which is either over Ziti or raw internet) resolves 
+          // instead of returning null.
+          //
           // Note that it's fine to await an already-resolved promise, so we don't
           // have to check to see if it's still "in flight".
-          (await networkPromise)
+          (await netPromise)
         );
       })(),
     );
@@ -230,9 +384,35 @@ class ZitiFirstStrategy extends NetworkFirst {
     };
   }
 
+
+  /**
+   * 
+   * @param zitiRequest 
+   * @returns body|undefined
+   */
+  async getRequestBody( zitiRequest: any ) {
+    var requestBlob = await zitiRequest.blob();
+    if (requestBlob.size > 0) {
+        return ( requestBlob );
+    }
+    return ( undefined );
+  }
+
+  /**
+   * 
+   * @param headersObject 
+   */
+  dumpHeaders( headersObject: any) {
+    for (var pair of headersObject.entries()) {
+      this.logger.trace( 'dumpHeaders: ', pair[0], pair[1]);
+    }
+  }
+
+
   /**
    * @param {Object} options
    * @param {number|undefined} options.timeoutId
+   * @param {string} options.zitiURL
    * @param {Request} options.request
    * @param {Array} options.logs A reference to the logs Array.
    * @param {Event} options.event
@@ -240,25 +420,119 @@ class ZitiFirstStrategy extends NetworkFirst {
    *
    * @private
    */
-  async _getNetworkPromise({
+  async _getZitiNetworkPromise({
     timeoutId,
+    shouldRoute,
     request,
     logs,
     handler,
   }: {
+    timeoutId?: number;
+    shouldRoute: ZitiShouldRouteResult;
     request: Request;
     logs: any[];
-    timeoutId?: number;
     handler: StrategyHandler;
   }): Promise<Response | undefined> {
+
     let error;
     let response;
+
     try {
-      this._logger.trace(`doing fetch for: `, request);
-      response = await handler.fetchAndCachePut(request);
-      this._logger.trace(`Got response: `, response);
+
+      this.logger.trace(`doing Ziti fetch for: `, request.url);
+      // response = await handler.fetchAndCachePut(request);
+      // this.logger.trace(`Got response: `, response);
+
+      /**
+       * Instantiate a fresh HTTP Request object that we will push through the ziti-browzer-core which will:
+       * 
+       * 1) contain re-routed host
+       * 2) have any headers we need to pile on
+       * 3) prepare to stream out any body data associated with the intercepted request
+       */                 
+      const zitiRequest = new Request(request, {} );
+      
+      var neweaders = new Headers();
+      // for (var pair of zitiRequest.headers.entries()) {
+      //     neweaders.append( pair[0], pair[1] );
+      // }
+      // neweaders.append( 'referer', request.referrer );
+
+      // Propagate any Cookie values we have accumulated
+      let cookieHeaderValue = '';
+      // for (const cookie in self.cookieObject) {
+      //     if (cookie !== '') {
+      //         if (self.cookieObject.hasOwnProperty(cookie)) {
+      //             cookieHeaderValue += cookie + '=' + self.cookieObject[cookie] + '; ';
+      //         }
+      //     }
+      // }
+      // if (cookieHeaderValue !== '') {
+      //     neweaders.append( 'Cookie', cookieHeaderValue );
+      // }           
+                
+      var blob = await this.getRequestBody( zitiRequest );
+      var zitiResponse = await this._zitiContext.httpFetch(
+          shouldRoute.url, {
+              serviceName:    shouldRoute.serviceName,
+              method:         zitiRequest.method, 
+              headers:        neweaders,
+              mode:           zitiRequest.mode,
+              cache:          zitiRequest.cache,
+              credentials:    zitiRequest.credentials,
+              redirect:       zitiRequest.redirect,
+              referrerPolicy: zitiRequest.referrerPolicy,
+              body:           blob
+          }
+      );        
+
+      this.logger.trace(`Got zitiResponse: `, zitiResponse);
+
+      /**
+       * Now that ziti-browzer-core has returned us a ZitiResponse, instantiate a fresh native Response object that we 
+       * will return to the Browser. This requires us to:
+       * 
+       * 1) propagate the HTTP headers, status, etc
+       * 2) pipe the HTTP response body 
+       */
+
+      var zitiHeaders = zitiResponse.headers.raw();
+      var headers = new Headers();
+      const keys = Object.keys(zitiHeaders);
+      for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
+        const val = zitiHeaders[key][0];
+        headers.append( key, val);
+        this.logger.trace( 'ZitiFirstStrategy: zitiResponse.headers: ', key, val);
+      }
+      headers.append( 'x-ziti-browzer-sw-workbox-strategies-version', pjson.version );
+
+      var responseBlob = await zitiResponse.blob();
+      var responseBlobStream = responseBlob.stream();               
+      const responseStream = new ReadableStream({
+          start(controller) {
+              function push() {
+                  console.log(`ZitiFirstStrategy: push entered `);
+                  var chunk = responseBlobStream.read();
+                  console.log(`ZitiFirstStrategy: chunk is: `, chunk);
+                  if (chunk) {
+                      controller.enqueue(chunk);
+                      push();  
+                  } else {
+                      controller.close();
+                      return;
+                  }
+              };
+              push();
+          }
+      });
+
+      response = new Response( responseStream, { "status": zitiResponse.status, "headers":  headers } );
+      
+      this.logger.trace(`ZitiFirstStrategy: formed native response: `, response);
+
     } catch (fetchError) {
-      this._logger.trace(`Got error: `, fetchError);
+      this.logger.error(`Got error: `, fetchError);
       if (fetchError instanceof Error) {
         error = fetchError;
       }
@@ -285,10 +559,77 @@ class ZitiFirstStrategy extends NetworkFirst {
       if (process.env.NODE_ENV !== 'production') {
         if (response) {
           logs.push(
-            `Found a cached response in the '${this.cacheName}'` + ` cache.`,
+            // `Found a cached response in the '${this.cacheName}'` + ` cache.`,
           );
         } else {
-          logs.push(`No response found in the '${this.cacheName}' cache.`);
+          // logs.push(`No response found in the '${this.cacheName}' cache.`);
+        }
+      }
+    }
+
+    return response;
+  }
+
+    
+  /**
+   * @param {Object} options
+   * @param {number|undefined} options.timeoutId
+   * @param {Request} options.request
+   * @param {Array} options.logs A reference to the logs Array.
+   * @param {Event} options.event
+   * @return {Promise<Response>}
+   *
+   * @private
+   */
+  async _getNetworkPromise({
+    timeoutId,
+    request,
+    logs,
+    handler,
+  }: {
+    request: Request;
+    logs: any[];
+    timeoutId?: number;
+    handler: StrategyHandler;
+  }): Promise<Response | undefined> {
+    let error;
+    let response;
+    try {
+      this.logger.trace(`doing raw internet fetch for: `, request.url);
+      response = await handler.fetchAndCachePut(request);
+      this.logger.trace(`Got response: `, response);
+    } catch (fetchError) {
+      this.logger.trace(`Got error: `, fetchError);
+      if (fetchError instanceof Error) {
+        error = fetchError;
+      }
+    }
+
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+
+    if (process.env.NODE_ENV !== 'production') {
+      if (response) {
+        logs.push(`Got response from network.`);
+      } else {
+        logs.push(
+          `Unable to get a response from the network. Will respond ` +
+            `with a cached response.`,
+        );
+      }
+    }
+
+    if (error || !response) {
+      response = await handler.cacheMatch(request);
+
+      if (process.env.NODE_ENV !== 'production') {
+        if (response) {
+          logs.push(
+            // `Found a cached response in the '${this.cacheName}'` + ` cache.`,
+          );
+        } else {
+          // logs.push(`No response found in the '${this.cacheName}' cache.`);
         }
       }
     }
