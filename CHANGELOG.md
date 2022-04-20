@@ -1,3 +1,12 @@
+# [0.5.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.4.2...v0.5.0) (2022-04-20)
+
+
+### Features
+
+* intercepts ([#30](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/30)) ([b0d1d6d](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/b0d1d6df22789739ab6419bf0abaa4d85e9e003b))
+
+
+
 ## [0.4.2](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.4.1...v0.4.2) (2022-04-12)
 
 
