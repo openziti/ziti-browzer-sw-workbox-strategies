@@ -132,8 +132,8 @@ class ZitiFirstStrategy extends NetworkFirst {
           sdkVersion:     pjson.version,
           sdkBranch:      buildInfo.sdkBranch,
           sdkRevision:    buildInfo.sdkRevision,
-          updbUser:       this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.decodedJWT.updbUser,
-          updbPswd:       this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.decodedJWT.updbPswd,
+          token_type:     this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.decodedJWT.token_type,
+          access_token:   this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.decodedJWT.access_token,
           httpAgentTargetHost: this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.host,
         });
         this.logger.trace(`ZitiContext created`);
