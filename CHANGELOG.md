@@ -1,3 +1,12 @@
+# [0.6.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.5.0...v0.6.0) (2022-05-02)
+
+
+### Features
+
+* add IdP access_token handling ([#36](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/36)) ([bff33c9](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/bff33c9c8b629387771615ad7fe99d992f543a94))
+
+
+
 # [0.5.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.4.2...v0.5.0) (2022-04-20)
 
 
