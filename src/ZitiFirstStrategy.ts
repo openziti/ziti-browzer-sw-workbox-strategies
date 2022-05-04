@@ -512,9 +512,7 @@ class ZitiFirstStrategy extends NetworkFirst {
       const responseStream = new ReadableStream({
           start(controller) {
               function push() {
-                  console.log(`ZitiFirstStrategy: push entered `);
                   var chunk = responseBlobStream.read();
-                  console.log(`ZitiFirstStrategy: chunk is: `, chunk);
                   if (chunk) {
                       controller.enqueue(chunk);
                       push();  
