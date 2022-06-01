@@ -104,3 +104,4 @@ dist
 .tern-port
 
 src/buildInfo.ts
+.DS_Store
