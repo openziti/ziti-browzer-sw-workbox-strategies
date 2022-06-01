@@ -1,3 +1,7 @@
+## [0.6.2](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.6.1...v0.6.2) (2022-06-01)
+
+
+
 ## [0.6.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.6.0...v0.6.1) (2022-05-04)
 
 
