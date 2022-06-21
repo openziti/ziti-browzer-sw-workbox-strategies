@@ -1,3 +1,12 @@
+## [0.6.3](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.6.2...v0.6.3) (2022-06-21)
+
+
+### Bug Fixes
+
+* use httpAgent.target.service ([#60](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/60)) ([3d06b52](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/3d06b52ffbd9c35389e00de85763558150e25c68))
+
+
+
 ## [0.6.2](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.6.1...v0.6.2) (2022-06-01)
 
 
