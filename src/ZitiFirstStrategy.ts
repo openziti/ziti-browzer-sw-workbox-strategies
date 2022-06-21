@@ -1,7 +1,6 @@
 
 import {WorkboxError} from 'workbox-core/_private/WorkboxError.js';
 import {StrategyHandler} from 'workbox-strategies/StrategyHandler.js';
-import {NetworkFirst} from 'workbox-strategies/NetworkFirst.js';
 import {CacheFirst} from 'workbox-strategies/CacheFirst.js';
 import {StrategyOptions} from 'workbox-strategies/Strategy.js';
 import {Mutex} from 'async-mutex';
@@ -59,6 +58,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
   private _zitiContext: any;
   private _initialized: boolean;
   private _initializationMutex: any;
+  private _fetchMutex: any;
   private _uuid: any;
 
   /**
@@ -82,6 +82,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     regexControllerAPI = new RegExp( this._controllerApi, 'g' );
 
     this._initializationMutex = new Mutex();
+    this._fetchMutex = new Mutex();
     this._uuid = options.uuid;
 
     this._core = new ZitiBrowzerCore({});
@@ -93,10 +94,10 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
   }
 
 
-/**
- * Remain in lazy-sleepy loop until z-b-runtime sends us the _zitiConfig
- * 
- */
+  /**
+   * Remain in lazy-sleepy loop until z-b-runtime sends us the _zitiConfig
+   * 
+   */
   async await_zitiConfig() {
     let self = this;
     let ctr = 0;
@@ -113,7 +114,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
   }
   
   /**
-   * Do all work necessry to initialize the ZitiFirstStrategy instance.
+   * Do all work necessary to initialize the ZitiFirstStrategy instance.
    * 
    */
   async _initialize() {
@@ -189,6 +190,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     // which the app was loaded.
   
     var regex = new RegExp( this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.self.host, 'g' );
+    var targetServiceRegex = new RegExp( this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.service, 'g' );
   
     if (request.url.match( regex )) { // yes, the request is targeting the Ziti HTTP Agent
 
@@ -196,18 +198,22 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
   
       var newUrl = new URL( request.url );
 
-      // If seeking root page, do NOT route over Ziti.  Instead, we 
       if ( newUrl.pathname === '/' ) {
 
-        this.logger.trace('_shouldRouteOverZiti: root path, bypassing intercept of [%s]: ', request.url);
+        // this.logger.trace('_shouldRouteOverZiti: root path, bypassing intercept of [%s]: ', request.url);
+
+        result.url = request.url;
+        result.routeOverZiti = true;
+        result.serviceName = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.service;  
 
       }
-      else if ( (request.url.match( regexZBR )) || ((request.url.match( regexZBWASM ))) ) { // the request seeks z-b-r/wasm
+      else 
+      if ( (request.url.match( regexZBR )) || ((request.url.match( regexZBWASM ))) ) { // the request seeks z-b-r/wasm
         this.logger.trace('_shouldRouteOverZiti: z-b-r/wasm, bypassing intercept of [%s]: ', request.url);
       }  
       else {
 
-        newUrl.hostname = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.host;
+        newUrl.hostname = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.service;
         newUrl.port = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.port;
         this.logger.trace( '_shouldRouteOverZiti: transformed URL: ', newUrl.toString());
     
@@ -215,7 +221,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
         this.logger.trace(`_shouldRouteOverZiti result.serviceName[%o]`, result.serviceName);
   
         if (isEqual(result.serviceName, '')) { // If we have no config associated with the hostname:port, do not intercept
-          this.logger.warn('_shouldRouteOverZiti: no associated config, bypassing intercept of [%s]', request.url);
+          this.logger.warn('_shouldRouteOverZiti: no associated Ziti config, bypassing intercept of [%s]', request.url);
         } else {
           result.url = newUrl.toString();
           result.routeOverZiti = true;
@@ -227,6 +233,14 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     else if ( (request.url.match( regexZBR )) || ((request.url.match( regexZBWASM ))) ) { // the request seeks z-b-r/wasm
       this.logger.trace('_shouldRouteOverZiti: z-b-r/wasm, bypassing intercept of [%s]: ', request.url);
     }
+    else if (request.url.match( targetServiceRegex )) { // yes, the request is targeting the 'dark' web app
+
+      result.url = request.url;
+      result.routeOverZiti = true;
+      result.serviceName = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.service;
+
+    }
+
     else if ( (request.url.match( regexSlash )) || ((request.url.match( regexDotSlash ))) ) { // the request starts with a slash
 
       this.logger.error(`_shouldRouteOverZiti implement me `);
@@ -268,6 +282,9 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
     this.logger.trace(`_handle entered for: `, request.url);
 
+    // const release = await this._fetchMutex.acquire();
+    // try {
+
     let url = new URL(request.url);
     let useCache = true;
 
@@ -301,7 +318,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     // If hitting the root page, or Controller, or seeking z-b-runtime/WASM, then
     // we never go over Ziti, and we let the browser route the request to the HTTP Agent.  
     if ( 
-      (newUrl.pathname === '/' ) ||                   // seeking root page
+      // (newUrl.pathname === '/' ) ||                   // seeking root page
       (request.url.match( regexControllerAPI )) ||    // seeking Ziti Controller
       (request.url.match( regexZBR )) ||              // seeking Ziti BrowZer Runtime
       (request.url.match( regexZBWASM ))              // seeking Ziti BrowZer WASM
@@ -327,8 +344,8 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       promises.push(promise);
     }
 
-    let networkPromise = null;
-    let zitiNetworkPromise = null;
+    let networkPromise;
+    let zitiNetworkPromise;
 
     if (!shouldRoute.routeOverZiti) {
 
@@ -387,7 +404,130 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       await handler.waitUntil(handler.cachePut(request, response.clone()));
     }
 
+    if (url.pathname.match( regexSlash )) { // seeking root page of webapp
+      
+      this.logger.trace('we need to inject z-b-r onto this response ', response);
+
+      var ignore = false;
+  
+      var lowercaseUrl = request.url.toLowerCase();
+
+      if ((lowercaseUrl.indexOf('.js', request.url.length - 3) !== -1) ||
+          (lowercaseUrl.indexOf('.css', request.url.length - 4) !== -1)) {
+        ignore = true;
+      }
+        
+      if (!ignore) {
+
+        let zbrLocation = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.runtime.src;
+        let httpAgentLocation = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.self.host;
+
+    
+        // Inject the Ziti browZer Runtime at the front of <head> element so we are prepared to intercept as soon as possible over on the browser
+        let zbr_inject_html = `
+<!-- load Ziti browZer Runtime -->
+<script type="text/javascript" src="https://${zbrLocation}"></script>
+`;
+
+        let reH = new RegExp('<head>','gi');
+        let replace = `<head>${zbr_inject_html}`;
+
+        // let reCSP = new RegExp('^.*<meta\s*http-equiv="content-security-policy"\s*content="(.*)"\s*><s.*$','gi');
+        // let reCSP = new RegExp('content="([^"]*)','i');
+
+        if (response.body) {
+        
+          function streamingHEADReplace() {
+            let find  = '<head>'
+            let replace = `<head>${zbr_inject_html}`;
+  
+            let buffer = '';
+          
+            return new TransformStream({
+              transform(chunk, controller) {
+                buffer += chunk;
+                let outChunk = '';
+          
+                while (true) {
+                  const index = buffer.indexOf(find);
+                  if (index === -1) break;
+                  outChunk += buffer.slice(0, index) + replace;
+                  buffer = buffer.slice(index + find.length);
+                }
+          
+                outChunk += buffer.slice(0, -(find.length - 1));
+                buffer = buffer.slice(-(find.length - 1));
+                controller.enqueue(outChunk);
+              },
+              flush(controller) {
+                if (buffer) controller.enqueue(buffer);
+              }
+            })
+          }
+
+          function streamingCSPReplace() {
+            let find  = 'js.stripe.com/v3'; // TEMP
+            let replace = `${find} 'unsafe-eval' 'wasm-eval';`;
+  
+            let buffer = '';
+          
+            return new TransformStream({
+              transform(chunk, controller) {
+                buffer += chunk;
+                let outChunk = '';
+          
+                while (true) {
+                  const index = buffer.indexOf(find);
+                  if (index === -1) break;
+                  outChunk += buffer.slice(0, index) + replace;
+                  buffer = buffer.slice(index + find.length);
+                }
+          
+                outChunk += buffer.slice(0, -(find.length - 1));
+                buffer = buffer.slice(-(find.length - 1));
+                controller.enqueue(outChunk);
+              },
+              flush(controller) {
+                if (buffer) controller.enqueue(buffer);
+              }
+            })
+          }
+          
+          const bodyStream = response.body
+            .pipeThrough(new TextDecoderStream())
+            .pipeThrough(streamingHEADReplace())
+            .pipeThrough(streamingCSPReplace())
+            .pipeThrough(new TextEncoderStream());
+
+          const newHeaders = new Headers(response.headers);
+          // let cspheader = newHeaders.get('Content-Security-Policy');
+          // cspheader = cspheader + " * " + httpAgentLocation + " 'unsafe-inline' 'unsafe-eval' 'wasm-eval' blob:; worker-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-eval' blob:;"
+          // this.logger.trace('cspheader ', cspheader);
+          // newHeaders.set('Content-Security-Policy', "script-src 'self' " + httpAgentLocation + " 'unsafe-inline' 'unsafe-eval' 'wasm-eval' blob:; worker-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-eval' blob:;");
+          newHeaders.delete('Content-Security-Policy');
+          
+          // let newResponse = new Response(bodyStream, response);
+          const newResponse = new Response(bodyStream, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: newHeaders
+          });
+        
+          this.logger.trace('we injected z-b-r onto this (new) response ', newResponse);
+
+          return newResponse;
+        }
+
+      }
+    
+    }
+
     return response;
+
+    // } finally {
+    //   release();
+    // }
+
   }
 
   /**
@@ -521,7 +661,6 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
           newHeaders.append( 'Cookie', cookieHeaderValue );
       }
       
-      this.logger.debug(`cookieHeaderValue is: `, cookieHeaderValue);      
                 
       var blob = await this.getRequestBody( zitiRequest );
 
@@ -594,11 +733,11 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     }
 
     if (response) {
-      this.logger.debug(`Got response from network.`);
+      this.logger.debug(`Got response from Ziti network.`);
     } else {
       if (useCache) {
         this.logger.warn(
-          `Unable to get a response from the network. Will respond ` +
+          `Unable to get a response from Ziti network. Will respond ` +
             `with a cached response.`,
         );
       }
