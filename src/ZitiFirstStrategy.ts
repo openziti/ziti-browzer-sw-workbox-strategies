@@ -3,8 +3,9 @@ import {WorkboxError} from 'workbox-core/_private/WorkboxError.js';
 import {StrategyHandler} from 'workbox-strategies/StrategyHandler.js';
 import {CacheFirst} from 'workbox-strategies/CacheFirst.js';
 import {StrategyOptions} from 'workbox-strategies/Strategy.js';
-import {Mutex} from 'async-mutex';
+import {Mutex, withTimeout, Semaphore} from 'async-mutex';
 import { isUndefined, isEqual } from 'lodash-es';
+import * as cheerio from 'cheerio';
 
 
 import { ZitiBrowzerCore } from '@openziti/ziti-browzer-core';
@@ -31,7 +32,15 @@ var regexZBR      = new RegExp( /ziti-browzer-runtime/, 'g' );
 var regexZBWASM   = new RegExp( /libcrypto.wasm/,       'g' );
 var regexSlash    = new RegExp( /^\/$/,                 'g' );
 var regexDotSlash = new RegExp( /^\.\//,                'g' );
+var regexTextHtml = new RegExp( /text\/html/,           'i' );
+var regexCSS      = new RegExp( /^.*\.css$/,            'i' );
+var regexJS       = new RegExp( /^.*\.js$/,             'i' );
+var regexPNG      = new RegExp( /^.*\.png$/,            'i' );
+var regexJPG      = new RegExp( /^.*\.jpg$/,            'i' );
+var regexSVG      = new RegExp( /^.*\.svg$/,            'i' );
 var regexControllerAPI: any;
+
+var MAX_ZITI_FETCH_COUNT = 1;   // aka the maximum number of concurrent Ziti Network Requests (TEMP)
 
 /**
  * An initial (stub) implementation of a
@@ -58,8 +67,9 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
   private _zitiContext: any;
   private _initialized: boolean;
   private _initializationMutex: any;
-  private _fetchMutex: any;
+  private _fetchSemaphore: any;
   private _uuid: any;
+  private _rootPaths: any;
 
   /**
    * @param {Object} [options]
@@ -82,8 +92,9 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     regexControllerAPI = new RegExp( this._controllerApi, 'g' );
 
     this._initializationMutex = new Mutex();
-    this._fetchMutex = new Mutex();
+    this._fetchSemaphore = withTimeout(new Semaphore( MAX_ZITI_FETCH_COUNT ), 15000);
     this._uuid = options.uuid;
+    this._rootPaths = [];
 
     this._core = new ZitiBrowzerCore({});
     this.logger = this._core.createZitiLogger({
@@ -130,8 +141,6 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
             isUndefined(this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.decodedJWT)
         ) {
           await this.await_zitiConfig();
-          // this.logger.error(`_zitiConfig.decodedJWT not defined`);
-          // return
         }
 
         this._zitiContext = this._core.createZitiContext({
@@ -143,7 +152,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
           sdkRevision:    buildInfo.sdkRevision,
           token_type:     this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.decodedJWT.token_type,
           access_token:   this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.decodedJWT.access_token,
-          httpAgentTargetHost: this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.host,
+          httpAgentTargetService: this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.service,
         });
         this.logger.trace(`ZitiContext created`);
         this._zitiBrowzerServiceWorkerGlobalScope._zitiContext = this._zitiContext;
@@ -153,6 +162,8 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
         this.logger.trace(`ZitiContext '${this._uuid}' initialized`);
   
         await this._zitiContext.enroll(); // this acquires an ephemeral Cert
+
+        this._rootPaths.push(this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.path);
 
         this._initialized = true;
   
@@ -278,24 +289,26 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
    */
   async _handle(request: Request, handler: StrategyHandler): Promise<Response> {
 
-    this.logger.trace('_handle entered for UUID: ', this._zitiBrowzerServiceWorkerGlobalScope._uuid)
+    this.logger.trace(`_handle entered for: `, request.url, this._zitiBrowzerServiceWorkerGlobalScope._uuid);
 
-    this.logger.trace(`_handle entered for: `, request.url);
-
-    // const release = await this._fetchMutex.acquire();
-    // try {
-
+    let self = this;
+    let skipInject = false;
+    let useCache = false;
     let url = new URL(request.url);
-    let useCache = true;
+    let isRootPath = this._rootPaths.find((element: string) => element === `${url.pathname}`);
 
-    // Look for requests that should never received cached responses
+    // Look for requests that can receive cached responses
     if ( 
-      (request.url.match( regexControllerAPI )) ||    // seeking Ziti Controller
-      (request.url.match( regexZBR )) ||              // seeking Ziti BrowZer Runtime
-      (request.url.match( regexZBWASM )) ||           // seeking Ziti BrowZer WASM
-      (url.pathname.match( regexSlash ))              // seeking root page of webapp
+      (request.url.match( regexCSS )) ||    
+      (request.url.match( regexJS  )) ||         
+      (request.url.match( regexPNG )) ||         
+      (request.url.match( regexJPG )) ||      
+      (request.url.match( regexSVG ))
     ) {
-      useCache = false;
+      useCache = true;
+    }
+    if (request.url.match( regexZBR )) {
+      useCache = false; // do not cache the ZBR
     }
 
     if (useCache) {
@@ -305,190 +318,199 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       }
     }
 
-    const logs: any[] = [];
+    let response = await this._fetchSemaphore.runExclusive( async ( value: any ) => {
 
-    const promises: Promise<Response | undefined>[] = [];
-    let timeoutId: number | undefined;
-    let tryZiti: boolean | false;
+      self.logger.trace('_handle now inside _fetchSemaphore count[%o]: request.url[%o]', value, request.url);
 
-    let shouldRoute: ZitiShouldRouteResult = {routeOverZiti: false}
+      const logs: any[] = [];
 
-    let newUrl = new URL( request.url );
+      const promises: Promise<Response | undefined>[] = [];
+      let timeoutId: number | undefined;
+      let tryZiti: boolean | false;
 
-    // If hitting the root page, or Controller, or seeking z-b-runtime/WASM, then
-    // we never go over Ziti, and we let the browser route the request to the HTTP Agent.  
-    if ( 
-      // (newUrl.pathname === '/' ) ||                   // seeking root page
-      (request.url.match( regexControllerAPI )) ||    // seeking Ziti Controller
-      (request.url.match( regexZBR )) ||              // seeking Ziti BrowZer Runtime
-      (request.url.match( regexZBWASM ))              // seeking Ziti BrowZer WASM
-    ) {
-      tryZiti = false;
-    } else {
-      tryZiti = true;
-    }
+      let shouldRoute: ZitiShouldRouteResult = {routeOverZiti: false}
 
-    if ( tryZiti ) {
+      // If hitting the Controller, or seeking z-b-runtime|WASM, then
+      // we never go over Ziti, and we let the browser route the request 
+      // to the Controller or HTTP Agent.  
+      if ( 
+        // (isRootPath) ||
+        (request.url.match( regexControllerAPI )) ||    // seeking Ziti Controller
+        (request.url.match( regexZBR )) ||              // seeking Ziti BrowZer Runtime
+        (request.url.match( regexZBWASM ))              // seeking Ziti BrowZer WASM
+      ) {
+        tryZiti = false;
+      } else {
+        tryZiti = true;
+      }
 
-      // If possibly going over Ziti, we must first complete the work
-      await this._initialize();   //  to ensure WASM is instantiated, 
-                                  //   we have a cert, etc
-      
-      // Now determine if we're going over Ziti or not
-      shouldRoute = await this._shouldRouteOverZiti(request);
-    }
+      if ( tryZiti ) {
 
-    if (this._zitiNetworkTimeoutSeconds) {
-      const {id, promise} = this._getZitiTimeoutPromise({request, logs, handler});
-      timeoutId = id;
-      promises.push(promise);
-    }
+        // If possibly going over Ziti, we must first complete the work
+        await this._initialize();   //  to ensure WASM is instantiated, 
+                                    //   we have a cert, etc
+        
+        // Now determine if we're going over Ziti or not
+        shouldRoute = await this._shouldRouteOverZiti(request);
+      }
 
-    let networkPromise;
-    let zitiNetworkPromise;
+      if (this._zitiNetworkTimeoutSeconds) {
+        const {id, promise} = this._getZitiTimeoutPromise({request, logs, handler});
+        timeoutId = id;
+        promises.push(promise);
+      }
 
-    if (!shouldRoute.routeOverZiti) {
+      let networkPromise;
+      let zitiNetworkPromise;
 
-      this.logger.trace(`_handle: ------- routing over raw internet ----------`);
+      if (!shouldRoute.routeOverZiti) {
 
-      networkPromise = this._getNetworkPromise({
-        timeoutId,
-        request,
-        handler,
-        useCache,
+        this.logger.trace(`_handle: ------- routing over raw internet ----------`);
+
+        networkPromise = this._getNetworkPromise({
+          timeoutId,
+          request,
+          handler,
+          useCache,
+        });
+    
+        promises.push(networkPromise);
+    
+      } else {
+
+        this.logger.trace(`_handle: ------- routing over Ziti ----------`);
+
+        zitiNetworkPromise = this._getZitiNetworkPromise({
+          timeoutId,
+          shouldRoute,
+          request,
+          handler,
+          useCache,
+        });
+    
+        promises.push(zitiNetworkPromise);
+      }
+
+      const _response = await handler.waitUntil(
+        (async () => {
+
+          let netPromise = networkPromise || zitiNetworkPromise;
+
+          // Promise.race() will resolve as soon as the first promise resolves.
+          return (
+            (await handler.waitUntil(Promise.race(promises))) ||
+            // If Promise.race() resolved with null, it might be due to a network
+            // timeout + a cache miss. If that were to happen, we'd rather wait until
+            // the netPromise (which is either over Ziti or raw internet) resolves 
+            // instead of returning null.
+            //
+            // Note that it's fine to await an already-resolved promise, so we don't
+            // have to check to see if it's still "in flight".
+            (await netPromise)
+          );
+        })(),
+      ).catch(( err: any ) => {
+        this.logger.error(err);
+        return new Promise( async (_, reject) => {
+          reject( err );
+        });
       });
-  
-      promises.push(networkPromise);
-  
-    } else {
 
-      this.logger.trace(`_handle: ------- routing over Ziti ----------`);
+      self.logger.trace('_handle now inside _fetchSemaphore count[%o]: response for request.url[%o] is [%o]', value, request.url, _response);
 
-      zitiNetworkPromise = this._getZitiNetworkPromise({
-        timeoutId,
-        shouldRoute,
-        request,
-        handler,
-        useCache,
+      return _response;
+
+    }).catch(( err: any ) => {
+      this.logger.error(err);
+      return new Promise( async (_, reject) => {
+        reject( err );
       });
-  
-      promises.push(zitiNetworkPromise);
+    });
 
-    }
-
-    const response = await handler.waitUntil(
-      (async () => {
-
-        let netPromise = networkPromise || zitiNetworkPromise;
-
-        // Promise.race() will resolve as soon as the first promise resolves.
-        return (
-          (await handler.waitUntil(Promise.race(promises))) ||
-          // If Promise.race() resolved with null, it might be due to a network
-          // timeout + a cache miss. If that were to happen, we'd rather wait until
-          // the netPromise (which is either over Ziti or raw internet) resolves 
-          // instead of returning null.
-          //
-          // Note that it's fine to await an already-resolved promise, so we don't
-          // have to check to see if it's still "in flight".
-          (await netPromise)
-        );
-      })(),
-    );
+    self.logger.trace('_handle now exited from _fetchSemaphore request.url[%o]', request.url);
 
     if (!response) {
       throw new WorkboxError('no-response', {url: request.url});
+    }
+
+    const location = response.headers.get('Location');
+    const contentType = response.headers.get('Content-Type');
+
+    if ( location && response.status >= 300 && response.status < 400 ) {
+      if (!this._rootPaths.find((element: string) => element === `${location}`)) {
+        this._rootPaths.push(location);
+      }
+      skipInject = true;
     }
 
     if (useCache) {
       await handler.waitUntil(handler.cachePut(request, response.clone()));
     }
 
-    if (url.pathname.match( regexSlash )) { // seeking root page of webapp
+    if (!contentType || !contentType.match( regexTextHtml )) {
+      skipInject = true;
+    }
+
+    if (!skipInject) {
       
-      this.logger.trace('we need to inject z-b-r onto this response ', response);
-
       var ignore = false;
-  
-      var lowercaseUrl = request.url.toLowerCase();
-
-      if ((lowercaseUrl.indexOf('.js', request.url.length - 3) !== -1) ||
-          (lowercaseUrl.indexOf('.css', request.url.length - 4) !== -1)) {
-        ignore = true;
-      }
-        
+          
       if (!ignore) {
 
         let zbrLocation = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.runtime.src;
         let httpAgentLocation = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.self.host;
-
     
         // Inject the Ziti browZer Runtime at the front of <head> element so we are prepared to intercept as soon as possible over on the browser
         let zbr_inject_html = `
-<!-- load Ziti browZer Runtime -->
+<!-- load Ziti browZer Runtime (SW) -->
 <script type="text/javascript" src="https://${zbrLocation}"></script>
 `;
-
-        let reH = new RegExp('<head>','gi');
-        let replace = `<head>${zbr_inject_html}`;
-
-        // let reCSP = new RegExp('^.*<meta\s*http-equiv="content-security-policy"\s*content="(.*)"\s*><s.*$','gi');
-        // let reCSP = new RegExp('content="([^"]*)','i');
 
         if (response.body) {
         
           function streamingHEADReplace() {
-            let find  = '<head>'
-            let replace = `<head>${zbr_inject_html}`;
   
             let buffer = '';
-          
+                      
             return new TransformStream({
-              transform(chunk, controller) {
-                buffer += chunk;
-                let outChunk = '';
-          
-                while (true) {
-                  const index = buffer.indexOf(find);
-                  if (index === -1) break;
-                  outChunk += buffer.slice(0, index) + replace;
-                  buffer = buffer.slice(index + find.length);
-                }
-          
-                outChunk += buffer.slice(0, -(find.length - 1));
-                buffer = buffer.slice(-(find.length - 1));
-                controller.enqueue(outChunk);
-              },
-              flush(controller) {
-                if (buffer) controller.enqueue(buffer);
-              }
-            })
-          }
 
-          function streamingCSPReplace() {
-            let find  = 'js.stripe.com/v3'; // TEMP
-            let replace = `${find} 'unsafe-eval' 'wasm-eval';`;
-  
-            let buffer = '';
-          
-            return new TransformStream({
-              transform(chunk, controller) {
-                buffer += chunk;
-                let outChunk = '';
-          
-                while (true) {
-                  const index = buffer.indexOf(find);
-                  if (index === -1) break;
-                  outChunk += buffer.slice(0, index) + replace;
-                  buffer = buffer.slice(index + find.length);
+              transform(chunk, _controller) {
+
+                chunk = decodeURIComponent(chunk).replace(/\n/g,'').replace(/\t/g,'');
+
+                // Parse the HTML
+                const $ = cheerio.load(chunk);
+
+                let zbrElement = $('<script></script> ').attr('type', 'text/javascript').attr('src', `https://${zbrLocation}`).attr('defer', `defer`);
+
+                // Locate the CSP
+                let cspElement = $('meta[http-equiv="content-security-policy"]');
+
+                // If we found a CSP
+                if (cspElement.length > 0) {
+
+                  self.logger.trace('streamingHEADReplace: CSP found in html with content: ', cspElement.attr('content'));
+                  // then augment it to enable WASM load/xeq
+                  cspElement.attr('content', cspElement.attr('content') + ` 'unsafe-inline' 'unsafe-eval' 'wasm-eval' blob:; worker-src 'self' blob:; object-src 'self'`);
+                  self.logger.trace('streamingHEADReplace: CSP is now enhanced with content: ', cspElement.attr('content'));
+                  // Inject the ZBR immediately after the CSP
+                  cspElement.after(zbrElement);
+
+                  buffer += $.html();
                 }
-          
-                outChunk += buffer.slice(0, -(find.length - 1));
-                buffer = buffer.slice(-(find.length - 1));
-                controller.enqueue(outChunk);
+
+                // If we did NOT find a CSP
+                else {
+
+                  // Inject the ZBR immediately after the <HEAD>
+                  buffer += chunk.replace(/<head>/i,`<head>\n${zbr_inject_html}\n`);
+                }
               },
               flush(controller) {
-                if (buffer) controller.enqueue(buffer);
+                if (buffer) {
+                  self.logger.trace('streamingHEADReplace: response HTML is now: ', buffer);
+                  controller.enqueue(buffer);
+                }
               }
             })
           }
@@ -496,25 +518,17 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
           const bodyStream = response.body
             .pipeThrough(new TextDecoderStream())
             .pipeThrough(streamingHEADReplace())
-            .pipeThrough(streamingCSPReplace())
-            .pipeThrough(new TextEncoderStream());
+            .pipeThrough(new TextEncoderStream())
+            ;
 
           const newHeaders = new Headers(response.headers);
-          // let cspheader = newHeaders.get('Content-Security-Policy');
-          // cspheader = cspheader + " * " + httpAgentLocation + " 'unsafe-inline' 'unsafe-eval' 'wasm-eval' blob:; worker-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-eval' blob:;"
-          // this.logger.trace('cspheader ', cspheader);
-          // newHeaders.set('Content-Security-Policy', "script-src 'self' " + httpAgentLocation + " 'unsafe-inline' 'unsafe-eval' 'wasm-eval' blob:; worker-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-eval' blob:;");
-          newHeaders.delete('Content-Security-Policy');
           
-          // let newResponse = new Response(bodyStream, response);
           const newResponse = new Response(bodyStream, {
             status: response.status,
             statusText: response.statusText,
             headers: newHeaders
           });
         
-          this.logger.trace('we injected z-b-r onto this (new) response ', newResponse);
-
           return newResponse;
         }
 
@@ -523,11 +537,6 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     }
 
     return response;
-
-    // } finally {
-    //   release();
-    // }
-
   }
 
   /**
@@ -623,14 +632,12 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     useCache: boolean;
   }): Promise<Response | undefined> {
 
-    let error;
-    let response;
+    let error: any = null;
+    let response: Response | PromiseLike<Response | undefined> | undefined;
 
     try {
 
       this.logger.debug(`doing Ziti fetch for: `, request.url);
-      // response = await handler.fetchAndCachePut(request);
-      // this.logger.trace(`Got response: `, response);
 
       /**
        * Instantiate a fresh HTTP Request object that we will push through the ziti-browzer-core which will:
@@ -660,8 +667,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       if (cookieHeaderValue !== '') {
           newHeaders.append( 'Cookie', cookieHeaderValue );
       }
-      
-                
+          
       var blob = await this.getRequestBody( zitiRequest );
 
       var zitiResponse = await this._zitiContext.httpFetch(
@@ -692,10 +698,29 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       var headers = new Headers();
       const keys = Object.keys(zitiHeaders);
       for (let i = 0; i < keys.length; i++) {
-        const key = keys[i];
-        const val = zitiHeaders[key][0];
-        headers.append( key, val);
+        let key = keys[i];
+        let val = zitiHeaders[key][0];
         this.logger.trace( 'ZitiFirstStrategy: zitiResponse.headers: ', key, val);
+
+        if (key.toLowerCase() === 'set-cookie') {
+          headers.append( 'x-ziti-browzer-set-cookie', val );
+          this.logger.trace( 'ZitiFirstStrategy: sending SET_COOKIE cmd');
+          let resp = await this._zitiBrowzerServiceWorkerGlobalScope._sendMessageToClients( 
+            { 
+              type: 'SET_COOKIE',
+              payload: val
+            } 
+          );
+          this.logger.trace( 'ZitiFirstStrategy: SET_COOKIE response: ', resp);
+          let parts = val.split('=');
+          this._zitiBrowzerServiceWorkerGlobalScope._cookieObject[parts[0]] = parts[1];
+        } 
+        
+        else if (key.toLowerCase() === 'content-security-policy') {
+          val += ` 'unsafe-inline' 'unsafe-eval' 'wasm-eval' blob:; worker-src 'self' blob:; object-src 'self'`;
+        }
+        
+        headers.append( key, val);
       }
       headers.append( 'x-ziti-browzer-sw-workbox-strategies-version', pjson.version );
 
