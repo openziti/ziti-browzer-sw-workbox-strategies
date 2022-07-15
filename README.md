@@ -9,6 +9,7 @@
     <br>
     <b>
     This component contains a sub-component of the ServiceWorker used as part of the <a href="https://ziti.dev/about">OpenZiti</a> Zero Trust browZer stack</b>
+    
 </p>
 
 <p align="center">
