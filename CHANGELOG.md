@@ -1,3 +1,12 @@
+# [0.7.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.6.3...v0.7.0) (2022-07-15)
+
+
+### Features
+
+* Improved CSP handling; Zitified ZAC enablement ([#65](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/65)) ([c6a5d05](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/c6a5d05d2bd3a8d5ab7453776fc628186c60ea43))
+
+
+
 ## [0.6.3](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.6.2...v0.6.3) (2022-06-21)
 
 
