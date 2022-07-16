@@ -1,3 +1,19 @@
+# [0.10.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.6.3...v0.10.0) (2022-07-16)
+
+
+### Bug Fixes
+
+* Optional WASM Load ([#68](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/68)) ([819a87b](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/819a87b279a9861749e05726553bcab3004ae3e4))
+* semver bump ([#66](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/66)) ([e0946dd](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/e0946dd4d7e9c16f55977249b894c250ba2e6efc))
+* semver bump ([#67](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/67)) ([3001e78](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/3001e78a3175056dec0400335b32e63b953d98f7))
+
+
+### Features
+
+* Improved CSP handling; Zitified ZAC enablement ([#65](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/65)) ([c6a5d05](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/c6a5d05d2bd3a8d5ab7453776fc628186c60ea43))
+
+
+
 ## [0.6.3](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.6.2...v0.6.3) (2022-06-21)
 
 
