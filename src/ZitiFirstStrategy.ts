@@ -135,7 +135,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
       if (!this._initialized) {
 
-        this.logger.trace(`_initialize entered`);
+        this.logger.trace(`_initialize: entered`);
 
         if (isUndefined(this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig) || 
             isUndefined(this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.decodedJWT)
@@ -154,19 +154,26 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
           access_token:   this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.decodedJWT.access_token,
           httpAgentTargetService: this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.service,
         });
-        this.logger.trace(`ZitiContext created`);
+        this.logger.trace(`_initialize: ZitiContext created`);
         this._zitiBrowzerServiceWorkerGlobalScope._zitiContext = this._zitiContext;
   
-        await this._zitiContext.initialize(); // this instantiates the internal WebAssembly
+        await this._zitiContext.initialize({
+          loadWASM: true   // unlike the ZBR, here in the ZBSW, we always instantiate the internal WebAssembly
+        });
   
-        this.logger.trace(`ZitiContext '${this._uuid}' initialized`);
+        this.logger.trace(`_initialize: ZitiContext '${this._uuid}' initialized`);
+
+        await this._zitiContext.listControllerVersion();
   
         await this._zitiContext.enroll(); // this acquires an ephemeral Cert
+
+        this.logger.trace(`_initialize: ephemeral Cert acquired`);
 
         this._rootPaths.push(this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.path);
 
         this._initialized = true;
   
+        this.logger.trace(`_initialize: complete`);
       }
 
     })
