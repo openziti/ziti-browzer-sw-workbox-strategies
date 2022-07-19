@@ -123,6 +123,26 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       })();
     });
   }
+
+  /**
+   * Remain in lazy-sleepy loop until z-b-runtime notifies us that it has completed initialization
+   * 
+   */
+   async await_zbrInitialized() {
+    let self = this;
+    let ctr = 0;
+    return new Promise((resolve: any, _reject: any) => {
+      (function waitFor_zbrInitialized() {
+        if (self._zitiBrowzerServiceWorkerGlobalScope._zbrReloadPending) { // this gets reset when ZBR sends the SW the 
+          self.logger.trace(`await_zbrInitialized: ...waiting`);
+          if (ctr++ > 1) { return resolve() }
+          setTimeout(waitFor_zbrInitialized, 1000);
+        } else {
+          return resolve();
+        }
+      })();
+    });
+  }
   
   /**
    * Do all work necessary to initialize the ZitiFirstStrategy instance.
@@ -298,6 +318,18 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
     this.logger.trace(`_handle entered for: `, request.url, this._zitiBrowzerServiceWorkerGlobalScope._uuid);
 
+    if (this._zitiBrowzerServiceWorkerGlobalScope._zbrReloadPending) {
+      if (request.url.match( regexZBWASM )) {  // the ZBR loads the WASM during init, so we need to process that request; all others wait
+        /* NOP */
+      }
+      else if (request.url.match( regexControllerAPI )) {   // the ZBR hits the Ziti Controller during init, so we need to process that request; all others wait
+        /* NOP */
+      }
+      else {
+        await this.await_zbrInitialized();
+      }
+    }
+
     let self = this;
     let skipInject = false;
     let useCache = false;
@@ -316,6 +348,8 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     }
     if (request.url.match( regexZBR )) {
       useCache = false; // do not cache the ZBR
+      self._zitiBrowzerServiceWorkerGlobalScope._zbrReloadPending = true;
+      this.logger.trace(`_handle: setting  _zbrReloadPending=true`);
     }
 
     if (useCache) {
