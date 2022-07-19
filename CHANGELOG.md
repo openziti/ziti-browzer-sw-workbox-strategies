@@ -1,3 +1,12 @@
+## [0.10.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.10.0...v0.10.1) (2022-07-19)
+
+
+### Bug Fixes
+
+* OWASP JuiceShop fixes ([#71](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/71)) ([e2bce78](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/e2bce78d7f2bc2148510a229785fdb01f97ad00a))
+
+
+
 # [0.10.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.6.3...v0.10.0) (2022-07-16)
 
 
