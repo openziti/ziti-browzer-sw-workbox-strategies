@@ -1,3 +1,12 @@
+## [0.10.2](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.10.1...v0.10.2) (2022-07-19)
+
+
+### Bug Fixes
+
+* Pause for session cert sync to ER ([#72](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/72)) ([c6774b2](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/c6774b2e8e3e3ffa466f157f8be924693fb2bf00))
+
+
+
 ## [0.10.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.10.0...v0.10.1) (2022-07-19)
 
 
