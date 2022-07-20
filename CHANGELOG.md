@@ -1,3 +1,12 @@
+## [0.10.3](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.10.2...v0.10.3) (2022-07-20)
+
+
+### Bug Fixes
+
+* getMatchConfigInterceptV1 false positives ([#73](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/73)) ([81216b5](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/81216b5712b3124ba0bdd446b2a3643e3df0279f))
+
+
+
 ## [0.10.2](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.10.1...v0.10.2) (2022-07-19)
 
 
