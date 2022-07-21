@@ -40,7 +40,7 @@ var regexJPG      = new RegExp( /^.*\.jpg$/,            'i' );
 var regexSVG      = new RegExp( /^.*\.svg$/,            'i' );
 var regexControllerAPI: any;
 
-var MAX_ZITI_FETCH_COUNT = 1;   // aka the maximum number of concurrent Ziti Network Requests (TEMP)
+var MAX_ZITI_FETCH_COUNT = 10;   // aka the maximum number of concurrent Ziti Network Requests (TEMP)
 
 /**
  * An initial (stub) implementation of a
@@ -176,6 +176,8 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
         });
         this.logger.trace(`_initialize: ZitiContext created`);
         this._zitiBrowzerServiceWorkerGlobalScope._zitiContext = this._zitiContext;
+
+        this._zitiContext.setKeyTypeEC();
   
         await this._zitiContext.initialize({
           loadWASM: true   // unlike the ZBR, here in the ZBSW, we always instantiate the internal WebAssembly
