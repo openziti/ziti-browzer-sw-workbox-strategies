@@ -1,3 +1,12 @@
+## [0.10.4](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.10.3...v0.10.4) (2022-07-21)
+
+
+### Bug Fixes
+
+* Need for Speed: make EC keys the default ([#74](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/74)) ([0523375](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/0523375ac65f909ca3351bc35dd0600f1908988c))
+
+
+
 ## [0.10.3](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.10.2...v0.10.3) (2022-07-20)
 
 
