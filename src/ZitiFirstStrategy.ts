@@ -33,6 +33,7 @@ var regexZBWASM   = new RegExp( /libcrypto.wasm/,       'g' );
 var regexSlash    = new RegExp( /^\/$/,                 'g' );
 var regexDotSlash = new RegExp( /^\.\//,                'g' );
 var regexTextHtml = new RegExp( /text\/html/,           'i' );
+var regexImage    = new RegExp( /image\//,              'i' );
 var regexCSS      = new RegExp( /^.*\.css$/,            'i' );
 var regexJS       = new RegExp( /^.*\.js$/,             'i' );
 var regexPNG      = new RegExp( /^.*\.png$/,            'i' );
@@ -113,10 +114,24 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     let self = this;
     let ctr = 0;
     return new Promise((resolve: any, reject: any) => {
-      (function waitFor_zitiConfig() {
+      (async function waitFor_zitiConfig() {
         if (isUndefined(self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig)) {
-          if (ctr++ > 5) { return reject() }
-          setTimeout(waitFor_zitiConfig, 500);  
+          ctr++;
+          self.logger.trace(`await_zitiConfig: ...waiting [${ctr}]`);
+          if (ctr > 2) {
+            // Kick the ZBR, and request the config
+            self.logger.trace(`await_zitiConfig: sending ZITI_CONFIG_NEEDED to ZBR`);
+            await self._zitiBrowzerServiceWorkerGlobalScope._sendMessageToClients( 
+              { 
+                type: 'ZITI_CONFIG_NEEDED'
+              } 
+            );
+          }
+          else if (ctr > 5) { 
+            self.logger.trace(`await_zitiConfig: giving up`);
+            return reject('await_zitiConfig timeout') 
+          }
+          setTimeout(waitFor_zitiConfig, 250);  
         } else {
           return resolve();
         }
@@ -152,7 +167,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     
     // Run the init sequence within a critical-section
     await this._initializationMutex.runExclusive(async () => {
-
+      
       if (!this._initialized) {
 
         this.logger.trace(`_initialize: entered`);
@@ -163,39 +178,68 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
           await this.await_zitiConfig();
         }
 
-        this._zitiContext = this._core.createZitiContext({
-          logger:         this.logger,
-          controllerApi:  this._controllerApi,
-          sdkType:        pjson.name,
-          sdkVersion:     pjson.version,
-          sdkBranch:      buildInfo.sdkBranch,
-          sdkRevision:    buildInfo.sdkRevision,
-          token_type:     this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.decodedJWT.token_type,
-          access_token:   this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.decodedJWT.access_token,
-          httpAgentTargetService: this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.service,
-        });
-        this.logger.trace(`_initialize: ZitiContext created`);
-        this._zitiBrowzerServiceWorkerGlobalScope._zitiContext = this._zitiContext;
+        if (isUndefined(this._zitiContext)) {
 
-        this._zitiContext.setKeyTypeEC();
-  
-        await this._zitiContext.initialize({
-          loadWASM: true   // unlike the ZBR, here in the ZBSW, we always instantiate the internal WebAssembly
-        });
-  
-        this.logger.trace(`_initialize: ZitiContext '${this._uuid}' initialized`);
+          this._zitiContext = this._core.createZitiContext({
+            logger:         this.logger,
+            controllerApi:  this._controllerApi,
+            sdkType:        pjson.name,
+            sdkVersion:     pjson.version,
+            sdkBranch:      buildInfo.sdkBranch,
+            sdkRevision:    buildInfo.sdkRevision,
+            token_type:     this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.decodedJWT.token_type,
+            access_token:   this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.decodedJWT.access_token,
+            httpAgentTargetService: this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.service,
+          });
+          this.logger.trace(`_initialize: ZitiContext created`);
+          this._zitiBrowzerServiceWorkerGlobalScope._zitiContext = this._zitiContext;
+
+          this._zitiContext.setKeyTypeEC();
+    
+          await this._zitiContext.initialize({
+            loadWASM: true   // unlike the ZBR, here in the ZBSW, we always instantiate the internal WebAssembly
+          });
+    
+          this.logger.trace(`_initialize: ZitiContext '${this._uuid}' initialized`);
+
+        } else {
+
+          await this._zitiContext.reInitialize({
+          });
+    
+          this.logger.trace(`_initialize: ZitiContext '${this._uuid}' re-initialized`);
+
+        }
 
         await this._zitiContext.listControllerVersion();
   
-        await this._zitiContext.enroll(); // this acquires an ephemeral Cert
+        let result = await this._zitiContext.enroll(); // this acquires an ephemeral Cert
 
-        this.logger.trace(`_initialize: ephemeral Cert acquired`);
+        if (!result) {
+          
+          this.logger.trace(`_initialize: ephemeral Cert acquisition failed`);
 
-        this._rootPaths.push(this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.path);
+          // If we couldn't acquire a cert, it most likely means that the JWT from the IdP
+          //
+          let resp = await this._zitiBrowzerServiceWorkerGlobalScope._sendMessageToClients( 
+            { 
+              type: 'IDP_TOKEN_RESET_NEEDED'
+            } 
+          );
+          this.logger.trace( 'ZitiFirstStrategy: IDP_TOKEN_RESET_NEEDED response: ', resp);
 
-        this._initialized = true;
-  
-        this.logger.trace(`_initialize: complete`);
+          this.logger.trace(`_initialize: terminated`);
+
+        } else {
+          
+          this.logger.trace(`_initialize: ephemeral Cert acquisition succeeded`);
+
+          this._rootPaths.push(this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.path);
+
+          this._initialized = true;
+    
+          this.logger.trace(`_initialize: complete`);
+        }
       }
 
     })
