@@ -1,3 +1,12 @@
+## [0.10.5](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.10.4...v0.10.5) (2022-07-24)
+
+
+### Bug Fixes
+
+* JWT expiration improvements ([#75](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/75)) ([e6dc9e1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/e6dc9e1f8cd6a7a77516659ed7c05144960b3d61))
+
+
+
 ## [0.10.4](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.10.3...v0.10.4) (2022-07-21)
 
 
