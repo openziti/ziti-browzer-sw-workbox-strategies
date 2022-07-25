@@ -1,3 +1,12 @@
+## [0.10.6](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.10.5...v0.10.6) (2022-07-25)
+
+
+### Bug Fixes
+
+* correct missing Buffer reference ([#76](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/76)) ([72488f9](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/72488f92c7a3629ee353cb81125db6fce69babde))
+
+
+
 ## [0.10.5](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.10.4...v0.10.5) (2022-07-24)
 
 
