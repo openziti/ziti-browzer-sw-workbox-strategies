@@ -578,7 +578,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
                   self.logger.trace('streamingHEADReplace: CSP found in html with content: ', cspElement.attr('content'));
                   // then augment it to enable WASM load/xeq
-                  cspElement.attr('content', cspElement.attr('content') + ` 'unsafe-inline' 'unsafe-eval' 'wasm-eval' blob:; worker-src 'self' blob:; object-src 'self'`);
+                  cspElement.attr('content', cspElement.attr('content') + ` 'unsafe-eval'`);
                   self.logger.trace('streamingHEADReplace: CSP is now enhanced with content: ', cspElement.attr('content'));
                   // Inject the ZBR immediately after the CSP
                   cspElement.after(zbrElement);
@@ -804,7 +804,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
         } 
         
         else if (key.toLowerCase() === 'content-security-policy') {
-          val += ` 'unsafe-inline' 'unsafe-eval' 'wasm-eval' blob:; worker-src 'self' blob:; object-src 'self'`;
+          val += ` 'unsafe-eval'`;
         }
         
         headers.append( key, val);
