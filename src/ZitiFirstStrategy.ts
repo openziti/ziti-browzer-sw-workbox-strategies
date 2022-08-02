@@ -133,6 +133,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
           }
           setTimeout(waitFor_zitiConfig, 250);  
         } else {
+          self.logger.trace(`await_zitiConfig: config acquired`);
           return resolve();
         }
       })();
@@ -205,6 +206,8 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
         } else {
 
           await this._zitiContext.reInitialize({
+            token_type:     this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.decodedJWT.token_type,
+            access_token:   this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.decodedJWT.access_token,
           });
     
           this.logger.trace(`_initialize: ZitiContext '${this._uuid}' re-initialized`);
@@ -219,8 +222,10 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
           
           this.logger.trace(`_initialize: ephemeral Cert acquisition failed`);
 
-          // If we couldn't acquire a cert, it most likely means that the JWT from the IdP
-          //
+          // If we couldn't acquire a cert, it most likely means that the JWT from the IdP needs a refresh
+          
+          this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig = undefined;
+
           let resp = await this._zitiBrowzerServiceWorkerGlobalScope._sendMessageToClients( 
             { 
               type: 'IDP_TOKEN_RESET_NEEDED'
@@ -397,6 +402,10 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       self._zitiBrowzerServiceWorkerGlobalScope._zbrReloadPending = true;
       this.logger.trace(`_handle: setting  _zbrReloadPending=true`);
     }
+    else if ( isRootPath ) {
+      useCache = false; // do not cache root paths
+      this.logger.trace(`_handle: handling root path; not using cache`);
+    }
 
     if (useCache) {
       let cachResponse = await handler.cacheMatch(request);
@@ -408,8 +417,6 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     let response = await this._fetchSemaphore.runExclusive( async ( value: any ) => {
 
       self.logger.trace('_handle now inside _fetchSemaphore count[%o]: request.url[%o]', value, request.url);
-
-      const logs: any[] = [];
 
       const promises: Promise<Response | undefined>[] = [];
       let timeoutId: number | undefined;
@@ -442,7 +449,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       }
 
       if (this._zitiNetworkTimeoutSeconds) {
-        const {id, promise} = this._getZitiTimeoutPromise({request, logs, handler});
+        const {id, promise} = this._getZitiTimeoutPromise({request, handler});
         timeoutId = id;
         promises.push(promise);
       }
@@ -629,7 +636,6 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
   /**
    * @param {Object} options
    * @param {Request} options.request
-   * @param {Array} options.logs A reference to the logs array
    * @param {Event} options.event
    * @return {Promise<Response>}
    *
@@ -637,23 +643,17 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
    */
   private _getZitiTimeoutPromise({
     request,
-    logs,
     handler,
   }: {
     request: Request;
-    logs: any[];
     handler: StrategyHandler;
   }): {promise: Promise<Response | undefined>; id?: number} {
     let timeoutId;
+    let self = this;
     const timeoutPromise: Promise<Response | undefined> = new Promise(
       (resolve) => {
         const onNetworkTimeout = async () => {
-          if (process.env.NODE_ENV !== 'production') {
-            logs.push(
-              `Timing out the network response at ` +
-                `${this._zitiNetworkTimeoutSeconds} seconds.`,
-            );
-          }
+          self.logger.debug(`Timing out the network response at ${self._zitiNetworkTimeoutSeconds} seconds`);
           resolve(await handler.cacheMatch(request));
         };
         timeoutId = setTimeout(
@@ -699,7 +699,6 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
    * @param {number|undefined} options.timeoutId
    * @param {string} options.zitiURL
    * @param {Request} options.request
-   * @param {Array} options.logs A reference to the logs Array.
    * @param {Event} options.event
    * @return {Promise<Response>}
    *
@@ -870,7 +869,6 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
    * @param {Object} options
    * @param {number|undefined} options.timeoutId
    * @param {Request} options.request
-   * @param {Array} options.logs A reference to the logs Array.
    * @param {Event} options.event
    * @return {Promise<Response>}
    *
