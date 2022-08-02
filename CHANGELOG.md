@@ -1,3 +1,12 @@
+## [0.10.7](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.10.6...v0.10.7) (2022-08-02)
+
+
+### Bug Fixes
+
+* correct MM channel 'Loading...' issue ([#81](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/81)) ([108a33b](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/108a33b4f08cb97662414944e0b956dd120506f2))
+
+
+
 ## [0.10.6](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.10.5...v0.10.6) (2022-07-25)
 
 
