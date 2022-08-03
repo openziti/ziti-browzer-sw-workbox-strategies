@@ -41,17 +41,8 @@ var regexJPG      = new RegExp( /^.*\.jpg$/,            'i' );
 var regexSVG      = new RegExp( /^.*\.svg$/,            'i' );
 var regexControllerAPI: any;
 
-var MAX_ZITI_FETCH_COUNT = 10;   // aka the maximum number of concurrent Ziti Network Requests (TEMP)
-
 /**
- * An initial (stub) implementation of a
- * [Ziti network first]{@link }
- * request strategy.
- *
- * By default, this strategy will cache responses with a 200 status code as
- * well as [opaque responses]{@link https://developers.google.com/web/tools/workbox/guides/handle-third-party-requests}.
- * Opaque responses are are cross-origin requests where the response doesn't
- * support [CORS]{@link https://enable-cors.org/}.
+ * An implementation of a Ziti network request strategy.
  *
  * If the network request fails, and there is no cache match, this will throw
  * a `WorkboxError` exception.
@@ -68,7 +59,6 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
   private _zitiContext: any;
   private _initialized: boolean;
   private _initializationMutex: any;
-  private _fetchSemaphore: any;
   private _uuid: any;
   private _rootPaths: any;
 
@@ -94,7 +84,6 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     regexControllerAPI = new RegExp( controllerAPIURL.host, 'g' );
 
     this._initializationMutex = new Mutex();
-    this._fetchSemaphore = withTimeout(new Semaphore( MAX_ZITI_FETCH_COUNT ), 15000);
     this._uuid = options.uuid;
     this._rootPaths = [];
 
@@ -369,11 +358,11 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
    */
   _shouldUseCache(request: Request): boolean {
 
-    if (request.method !== 'GET') {   // Only cache GET responses
+    if (request.method !== 'GET') {                   // Only cache GET responses
       this.logger.trace(`_shouldUseCache: handling ${request.method} method; NOT using cache`);
       return false;
     }
-    if (request.url.match( regexControllerAPI )) {   // Never cache responses from Ziti Controller
+    if (request.url.match( regexControllerAPI )) {    // Never cache responses from Ziti Controller
       this.logger.trace(`_shouldUseCache: handling request to Ziti Controller; NOT using cache`);
       return false;
     }
@@ -383,14 +372,14 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       return false;
     }
 
-    if (request.url.match( regexSlash ) ) { // Never cache responses for root path
+    if (request.url.match( regexSlash ) ) {           // Never cache responses for root path
       this.logger.trace(`_shouldUseCache: handling request for '/'; NOT using cache`);
       return false;
     }
 
     let url = new URL(request.url);
     let isRootPath = this._rootPaths.find((element: string) => element === `${url.pathname}`);
-    if ( isRootPath ) {   // Do not cache the web app's root path
+    if ( isRootPath ) {                               // Do not cache the web app's root path
       this.logger.trace(`_shouldUseCache: handling request for ROOT path; NOT using cache`);
       return false;
     }
@@ -438,114 +427,97 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       }
     }
 
-    let response = await this._fetchSemaphore.runExclusive( async ( value: any ) => {
+    const promises: Promise<Response | undefined>[] = [];
+    let timeoutId: number | undefined;
+    let tryZiti: boolean | false;
+    let response: Response | undefined;
 
-      self.logger.trace('_handle now inside _fetchSemaphore count[%o]: request.url[%o]', value, request.url);
+    let shouldRoute: ZitiShouldRouteResult = {routeOverZiti: false}
 
-      const promises: Promise<Response | undefined>[] = [];
-      let timeoutId: number | undefined;
-      let tryZiti: boolean | false;
+    // If hitting the Controller, or seeking z-b-runtime|WASM, then
+    // we never go over Ziti, and we let the browser route the request 
+    // to the Controller or HTTP Agent.  
+    if ( 
+      (request.url.match( regexControllerAPI )) ||    // seeking Ziti Controller
+      (request.url.match( regexZBR )) ||              // seeking Ziti BrowZer Runtime
+      (request.url.match( regexZBWASM ))              // seeking Ziti BrowZer WASM
+    ) {
+      tryZiti = false;
+    } else {
+      tryZiti = true;
+    }
 
-      let shouldRoute: ZitiShouldRouteResult = {routeOverZiti: false}
+    if ( tryZiti ) {
 
-      // If hitting the Controller, or seeking z-b-runtime|WASM, then
-      // we never go over Ziti, and we let the browser route the request 
-      // to the Controller or HTTP Agent.  
-      if ( 
-        // (isRootPath) ||
-        (request.url.match( regexControllerAPI )) ||    // seeking Ziti Controller
-        (request.url.match( regexZBR )) ||              // seeking Ziti BrowZer Runtime
-        (request.url.match( regexZBWASM ))              // seeking Ziti BrowZer WASM
-      ) {
-        tryZiti = false;
-      } else {
-        tryZiti = true;
-      }
-
-      if ( tryZiti ) {
-
-        // If possibly going over Ziti, we must first complete the work
-        await this._initialize();   //  to ensure WASM is instantiated, 
-                                    //   we have a cert, etc
+      // If possibly going over Ziti, we must first complete the work
+      await this._initialize();   //  to ensure WASM is instantiated, 
+                                  //   we have a cert, etc
         
-        // Now determine if we're going over Ziti or not
-        shouldRoute = await this._shouldRouteOverZiti(request);
-      }
+      // Now determine if we're going over Ziti or not
+      shouldRoute = await this._shouldRouteOverZiti(request);
+    }
 
-      if (this._zitiNetworkTimeoutSeconds) {
-        const {id, promise} = this._getZitiTimeoutPromise({request, handler});
-        timeoutId = id;
-        promises.push(promise);
-      }
+    if (this._zitiNetworkTimeoutSeconds) {
+      const {id, promise} = this._getZitiTimeoutPromise({request, handler});
+      timeoutId = id;
+      promises.push(promise);
+    }
 
-      let networkPromise;
-      let zitiNetworkPromise;
+    let networkPromise;
+    let zitiNetworkPromise;
 
-      if (!shouldRoute.routeOverZiti) {
+    if (!shouldRoute.routeOverZiti) {
 
-        this.logger.trace(`_handle: ------- routing over raw internet ----------`);
+      this.logger.trace(`_handle: ------- routing over raw internet ----------`);
 
-        networkPromise = this._getNetworkPromise({
-          timeoutId,
-          request,
-          handler,
-          useCache,
-        });
-    
-        promises.push(networkPromise);
-    
-      } else {
-
-        this.logger.trace(`_handle: ------- routing over Ziti ----------`);
-
-        zitiNetworkPromise = this._getZitiNetworkPromise({
-          timeoutId,
-          shouldRoute,
-          request,
-          handler,
-          useCache,
-        });
-    
-        promises.push(zitiNetworkPromise);
-      }
-
-      const _response = await handler.waitUntil(
-        (async () => {
-
-          let netPromise = networkPromise || zitiNetworkPromise;
-
-          // Promise.race() will resolve as soon as the first promise resolves.
-          return (
-            (await handler.waitUntil(Promise.race(promises))) ||
-            // If Promise.race() resolved with null, it might be due to a network
-            // timeout + a cache miss. If that were to happen, we'd rather wait until
-            // the netPromise (which is either over Ziti or raw internet) resolves 
-            // instead of returning null.
-            //
-            // Note that it's fine to await an already-resolved promise, so we don't
-            // have to check to see if it's still "in flight".
-            (await netPromise)
-          );
-        })(),
-      ).catch(( err: any ) => {
-        this.logger.error(err);
-        return new Promise( async (_, reject) => {
-          reject( err );
-        });
+      networkPromise = this._getNetworkPromise({
+        timeoutId,
+        request,
+        handler,
+        useCache,
       });
+  
+      promises.push(networkPromise);
+  
+    } else {
 
-      self.logger.trace('_handle now inside _fetchSemaphore count[%o]: response for request.url[%o] is [%o]', value, request.url, _response);
+      this.logger.trace(`_handle: ------- routing over Ziti ----------`);
 
-      return _response;
+      zitiNetworkPromise = this._getZitiNetworkPromise({
+        timeoutId,
+        shouldRoute,
+        request,
+        handler,
+        useCache,
+      });
+  
+      promises.push(zitiNetworkPromise);
+    }
 
-    }).catch(( err: any ) => {
+    response = await handler.waitUntil(
+      (async () => {
+
+        let netPromise = networkPromise || zitiNetworkPromise;
+
+        // Promise.race() will resolve as soon as the first promise resolves.
+        return (
+          (await handler.waitUntil(Promise.race(promises))) ||
+          // If Promise.race() resolved with null, it might be due to a network
+          // timeout + a cache miss. If that were to happen, we'd rather wait until
+          // the netPromise (which is either over Ziti or raw internet) resolves 
+          // instead of returning null.
+          //
+          // Note that it's fine to await an already-resolved promise, so we don't
+          // have to check to see if it's still "in flight".
+          (await netPromise)
+        );
+      })(),
+    ).catch(( err: any ) => {
       this.logger.error(err);
       return new Promise( async (_, reject) => {
         reject( err );
       });
     });
-
-    self.logger.trace('_handle now exited from _fetchSemaphore request.url[%o]', request.url);
 
     if (!response) {
       throw new WorkboxError('no-response', {url: request.url});
@@ -649,9 +621,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
         
           return newResponse;
         }
-
       }
-    
     }
 
     return response;
