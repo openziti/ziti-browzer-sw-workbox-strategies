@@ -1,3 +1,12 @@
+# [0.11.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.10.7...v0.11.0) (2022-08-03)
+
+
+### Features
+
+* enhance SW caching ([#82](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/82)) ([1cba171](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/1cba171572879a987a133bc66e75b9063698b8ee))
+
+
+
 ## [0.10.7](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.10.6...v0.10.7) (2022-08-02)
 
 
