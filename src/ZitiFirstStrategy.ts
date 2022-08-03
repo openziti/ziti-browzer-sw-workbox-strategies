@@ -90,7 +90,8 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     this._controllerApi = options.controllerApi || '<controllerApi-not-configured>';
     this._initialized = false;
 
-    regexControllerAPI = new RegExp( this._controllerApi, 'g' );
+    var controllerAPIURL = new URL( this._controllerApi );
+    regexControllerAPI = new RegExp( controllerAPIURL.host, 'g' );
 
     this._initializationMutex = new Mutex();
     this._fetchSemaphore = withTimeout(new Semaphore( MAX_ZITI_FETCH_COUNT ), 15000);
@@ -358,6 +359,45 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
   }
 
+  /**
+   * Determine if this request can used previously cached response, or be routed over Ziti/internet.
+   * 
+   * @private
+   * @param {Request} request The request from the fetch event.
+   * @return {boolean} If request can used previously cached response
+
+   */
+  _shouldUseCache(request: Request): boolean {
+
+    if (request.method !== 'GET') {   // Only cache GET responses
+      this.logger.trace(`_shouldUseCache: handling ${request.method} method; NOT using cache`);
+      return false;
+    }
+    if (request.url.match( regexControllerAPI )) {   // Never cache responses from Ziti Controller
+      this.logger.trace(`_shouldUseCache: handling request to Ziti Controller; NOT using cache`);
+      return false;
+    }
+
+    if ( (request.url.match( regexZBR )) || ((request.url.match( regexZBWASM ))) ) { // Do not cache the ZBR/WASM
+      this.logger.trace(`_shouldUseCache: handling request for ZBR|WASM; NOT using cache`);
+      return false;
+    }
+
+    if (request.url.match( regexSlash ) ) { // Never cache responses for root path
+      this.logger.trace(`_shouldUseCache: handling request for '/'; NOT using cache`);
+      return false;
+    }
+
+    let url = new URL(request.url);
+    let isRootPath = this._rootPaths.find((element: string) => element === `${url.pathname}`);
+    if ( isRootPath ) {   // Do not cache the web app's root path
+      this.logger.trace(`_shouldUseCache: handling request for ROOT path; NOT using cache`);
+      return false;
+    }
+    
+    // Cache everything else
+    return true;
+  }
 
   /**
    * @private
@@ -383,28 +423,12 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
     let self = this;
     let skipInject = false;
-    let useCache = false;
+    let useCache = await this._shouldUseCache(request);
     let url = new URL(request.url);
-    let isRootPath = this._rootPaths.find((element: string) => element === `${url.pathname}`);
 
-    // Look for requests that can receive cached responses
-    if ( 
-      (request.url.match( regexCSS )) ||    
-      (request.url.match( regexJS  )) ||         
-      (request.url.match( regexPNG )) ||         
-      (request.url.match( regexJPG )) ||      
-      (request.url.match( regexSVG ))
-    ) {
-      useCache = true;
-    }
     if (request.url.match( regexZBR )) {
-      useCache = false; // do not cache the ZBR
       self._zitiBrowzerServiceWorkerGlobalScope._zbrReloadPending = true;
       this.logger.trace(`_handle: setting  _zbrReloadPending=true`);
-    }
-    else if ( isRootPath ) {
-      useCache = false; // do not cache root paths
-      this.logger.trace(`_handle: handling root path; not using cache`);
     }
 
     if (useCache) {
