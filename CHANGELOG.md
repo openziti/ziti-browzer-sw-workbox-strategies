@@ -1,3 +1,12 @@
+# [0.12.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.11.0...v0.12.0) (2022-08-03)
+
+
+### Features
+
+* no limits on simultaneous requests ([#83](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/83)) ([04480b3](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/04480b3de3848a3cef58e098e76e76e17541b3dd))
+
+
+
 # [0.11.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.10.7...v0.11.0) (2022-08-03)
 
 
