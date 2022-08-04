@@ -378,6 +378,10 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     }
 
     let url = new URL(request.url);
+    if ( url.pathname === '/' ) {                     // Do not cache the web app's root path
+      this.logger.trace(`_shouldUseCache: handling request for ROOT path; NOT using cache`);
+      return false;
+    }
     let isRootPath = this._rootPaths.find((element: string) => element === `${url.pathname}`);
     if ( isRootPath ) {                               // Do not cache the web app's root path
       this.logger.trace(`_shouldUseCache: handling request for ROOT path; NOT using cache`);
@@ -412,7 +416,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
     let self = this;
     let skipInject = false;
-    let useCache = await this._shouldUseCache(request);
+    let useCache = this._shouldUseCache(request);
     let url = new URL(request.url);
 
     if (request.url.match( regexZBR )) {
@@ -554,6 +558,9 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
         let zbr_inject_html = `
 <!-- load Ziti browZer Runtime (SW) -->
 <script type="text/javascript" src="https://${zbrLocation}"></script>
+<script src="https://cdn.jsdelivr.net/npm/polipop/dist/polipop.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/polipop/dist/css/polipop.core.min.css"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/polipop/dist/css/polipop.compact.min.css"/>
 `;
 
         if (response.body) {
@@ -572,6 +579,9 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
                 const $ = cheerio.load(chunk);
 
                 let zbrElement = $('<script></script> ').attr('type', 'text/javascript').attr('src', `https://${zbrLocation}`).attr('defer', `defer`);
+                let ppElement = $('<script></script> ').attr('id', 'ziti-browzer-pp').attr('type', 'text/javascript').attr('src', `https://cdn.jsdelivr.net/npm/polipop/dist/polipop.min.js`);
+                let ppCss1Element = $('<link> ').attr('id', 'ziti-browzer-ppcss').attr('rel', 'stylesheet').attr('href', `https://cdn.jsdelivr.net/npm/polipop/dist/css/polipop.core.min.css`);
+                let ppCss2Element = $('<link> ').attr('rel', 'stylesheet').attr('href', `https://cdn.jsdelivr.net/npm/polipop/dist/css/polipop.compact.min.css`);
 
                 // Locate the CSP
                 let cspElement = $('meta[http-equiv="content-security-policy"]');
@@ -581,10 +591,16 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
                   self.logger.trace('streamingHEADReplace: CSP found in html with content: ', cspElement.attr('content'));
                   // then augment it to enable WASM load/xeq
-                  cspElement.attr('content', cspElement.attr('content') + ` 'unsafe-eval'`);
+                  cspElement.attr('content', cspElement.attr('content') + ` cdn.jsdelivr.net/ 'unsafe-eval'`);
                   self.logger.trace('streamingHEADReplace: CSP is now enhanced with content: ', cspElement.attr('content'));
-                  // Inject the ZBR immediately after the CSP
-                  cspElement.after(zbrElement);
+
+                  // Inject the PP immediately after the CSP
+                  cspElement.after(ppCss1Element);
+                  cspElement.after(ppCss2Element);
+                  cspElement.after(ppElement);
+                  let ppEl = $('link[id="ziti-browzer-ppcss"]');
+                  // Inject the ZBR immediately after the PP
+                  ppEl.after(zbrElement);
 
                   buffer += $.html();
                 }
@@ -797,7 +813,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
         } 
         
         else if (key.toLowerCase() === 'content-security-policy') {
-          val += ` 'unsafe-eval'`;
+          val += ` cdn.jsdelivr.net/ 'unsafe-eval'`;
         }
         
         headers.append( key, val);
