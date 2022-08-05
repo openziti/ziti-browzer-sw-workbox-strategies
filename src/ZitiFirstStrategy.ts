@@ -103,20 +103,21 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
   async await_zitiConfig() {
     let self = this;
     let ctr = 0;
-    return new Promise((resolve: any, reject: any) => {
+    return new Promise((resolve: any, _reject: any) => {
       (async function waitFor_zitiConfig() {
         if (isUndefined(self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig)) {
           ctr++;
           self.logger.trace(`await_zitiConfig: ...waiting [${ctr}]`);
-          if (ctr > 10) { 
+          if (ctr == 10) {  // only do the unregister once
             self.logger.trace(`await_zitiConfig: initiating unregister`);
 
             // Let's try and 'reboot' the ZBR/SW pair
             await self._zitiBrowzerServiceWorkerGlobalScope._unregister();
 
-            return reject('await_zitiConfig timeout') 
+            setTimeout(waitFor_zitiConfig, 10000);  // this doesn't do much except cause us to wait for ourselves to be unregistered
+          } else {
+            setTimeout(waitFor_zitiConfig, 250);  
           }
-          setTimeout(waitFor_zitiConfig, 250);  
         } else {
           self.logger.trace(`await_zitiConfig: config acquired`);
           return resolve();
