@@ -108,9 +108,13 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
         if (isUndefined(self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig)) {
           ctr++;
           self.logger.trace(`await_zitiConfig: ...waiting [${ctr}]`);
-          if (ctr == 10) {  // only do the unregister once
+          if (ctr == 5) {  // kick the ZBR, and ask for the config
+            self.logger.trace( 'await_zitiConfig: sending ZITI_CONFIG_NEEDED msg to ZBR');  
+            self._zitiBrowzerServiceWorkerGlobalScope._sendMessageToClients( { type: 'ZITI_CONFIG_NEEDED'} );
+            setTimeout(waitFor_zitiConfig, 250);  
+          }
+          else if (ctr == 10) {  // only do the unregister once
             self.logger.trace(`await_zitiConfig: initiating unregister`);
-
             // Let's try and 'reboot' the ZBR/SW pair
             await self._zitiBrowzerServiceWorkerGlobalScope._unregister();
 
