@@ -1,3 +1,12 @@
+## [0.14.2](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.14.1...v0.14.2) (2022-08-05)
+
+
+### Bug Fixes
+
+* correct unneeded unregister/reloads ([#87](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/87)) ([7d1273d](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/7d1273dae86fcc29e19ebb7846f9426cd83ade8e))
+
+
+
 ## [0.14.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.14.0...v0.14.1) (2022-08-05)
 
 
