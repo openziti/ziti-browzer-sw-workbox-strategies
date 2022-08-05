@@ -1,3 +1,12 @@
+# [0.14.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.13.0...v0.14.0) (2022-08-05)
+
+
+### Features
+
+* add SW reload event mechanism ([#85](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/85)) ([7b03ef0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/7b03ef0e769d6b4c040658a2bf64787ed8afb253))
+
+
+
 # [0.13.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.12.0...v0.13.0) (2022-08-04)
 
 
