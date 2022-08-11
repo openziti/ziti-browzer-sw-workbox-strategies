@@ -136,14 +136,13 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
    */
    async await_zbrInitialized() {
     let self = this;
-    let ctr = 0;
     return new Promise((resolve: any, _reject: any) => {
       (function waitFor_zbrInitialized() {
         if (self._zitiBrowzerServiceWorkerGlobalScope._zbrReloadPending) { // this gets reset when ZBR sends the SW the 
           self.logger.trace(`await_zbrInitialized: ...waiting`);
-          if (ctr++ > 1) { return resolve() }
-          setTimeout(waitFor_zbrInitialized, 1000);
+          setTimeout(waitFor_zbrInitialized, 250);
         } else {
+          self.logger.trace(`await_zbrInitialized: ...acquired`);
           return resolve();
         }
       })();
@@ -392,6 +391,23 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     return true;
   }
 
+  _isRootPATH(request: Request): boolean {
+
+    if (request.url.match( regexSlash ) ) {          
+      return true;
+    }
+    let url = new URL(request.url);
+    if ( url.pathname === '/' ) {             
+      return true;
+    }
+    let isRootPath = this._rootPaths.find((element: string) => element === `${url.pathname}`);
+    if ( isRootPath ) {                             
+      return true;
+    }
+    
+    return false;
+  }
+
   /**
    * @private
    * @param {Request|string} request A request to run this strategy for.
@@ -411,6 +427,12 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       }
       else {
         await this.await_zbrInitialized();
+      }
+    }
+
+    if ((!this._isRootPATH(request)) && (!request.url.match( regexZBR ))) {       // if NOT in the process of bootstrapping from HTTP Agent
+      if (isUndefined(this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig) ) {  // ...and we don't yet have the zitiConfig from ZBR
+        await this.await_zitiConfig();                                            // ...then wait for ZBR to send it to us
       }
     }
 
@@ -434,6 +456,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     const promises: Promise<Response | undefined>[] = [];
     let timeoutId: number | undefined;
     let tryZiti: boolean | false;
+    let bootstrappingZBRFromSW: boolean | false;
     let response: Response | undefined;
 
     let shouldRoute: ZitiShouldRouteResult = {routeOverZiti: false}
@@ -449,6 +472,12 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       tryZiti = false;
     } else {
       tryZiti = true;
+      if (this._isRootPATH(request) ) {               // seeking root path
+        if (isUndefined(this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig) ) {  // ...but we don't yet have the zitiConfig from ZBR
+          tryZiti = false;                            // ...then we're bootstrapping, so load ZBR from HTTP Agent
+          bootstrappingZBRFromSW = true;
+        }
+      }
     }
 
     if ( tryZiti ) {
@@ -551,21 +580,11 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
           
       if (!ignore) {
 
-        let zbrLocation = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.runtime.src;
-        let httpAgentLocation = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.self.host;
-    
-        // Inject the Ziti browZer Runtime at the front of <head> element so we are prepared to intercept as soon as possible over on the browser
-        let zbr_inject_html = `
-<!-- load Ziti browZer Runtime (SW) -->
-<script type="text/javascript" src="https://${zbrLocation}"></script>
-<script src="https://cdn.jsdelivr.net/npm/polipop/dist/polipop.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/polipop/dist/css/polipop.core.min.css"/>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/polipop/dist/css/polipop.compact.min.css"/>
-`;
-
         if (response.body) {
-        
-          function streamingHEADReplace() {
+
+          let fromHttpAgent = false;
+
+          function detectFromHttpAgent() {
   
             let buffer = '';
                       
@@ -578,38 +597,97 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
                 // Parse the HTML
                 const $ = cheerio.load(chunk);
 
-                let zbrElement = $('<script></script> ').attr('type', 'text/javascript').attr('src', `https://${zbrLocation}`).attr('defer', `defer`);
-                let ppElement = $('<script></script> ').attr('id', 'ziti-browzer-pp').attr('type', 'text/javascript').attr('src', `https://cdn.jsdelivr.net/npm/polipop/dist/polipop.min.js`);
-                let ppCss1Element = $('<link> ').attr('id', 'ziti-browzer-ppcss').attr('rel', 'stylesheet').attr('href', `https://cdn.jsdelivr.net/npm/polipop/dist/css/polipop.core.min.css`);
-                let ppCss2Element = $('<link> ').attr('rel', 'stylesheet').attr('href', `https://cdn.jsdelivr.net/npm/polipop/dist/css/polipop.compact.min.css`);
+                let fromAgentEl = $('script[id="from-ziti-http-agent"]');
 
-                // Locate the CSP
-                let cspElement = $('meta[http-equiv="content-security-policy"]');
+                if (fromAgentEl.length > 0) {
 
-                // If we found a CSP
-                if (cspElement.length > 0) {
+                  fromHttpAgent = true;
 
-                  self.logger.trace('streamingHEADReplace: CSP found in html with content: ', cspElement.attr('content'));
-                  // then augment it to enable WASM load/xeq
-                  cspElement.attr('content', cspElement.attr('content') + ` cdn.jsdelivr.net/ 'unsafe-eval'`);
-                  self.logger.trace('streamingHEADReplace: CSP is now enhanced with content: ', cspElement.attr('content'));
+                  if (bootstrappingZBRFromSW) {
+                    self.logger.trace('detectFromHttpAgent: bootstrappingZBRFromSW [%o]', bootstrappingZBRFromSW);
 
-                  // Inject the PP immediately after the CSP
-                  cspElement.after(ppCss1Element);
-                  cspElement.after(ppCss2Element);
-                  cspElement.after(ppElement);
-                  let ppEl = $('link[id="ziti-browzer-ppcss"]');
-                  // Inject the ZBR immediately after the PP
-                  ppEl.after(zbrElement);
+                    let bootstrappingZBRFromSWElement = $('<script></script> ').attr('id', 'ziti-browzer-sw-bootstrap').attr('name', `ziti-browzer-sw-bootstrap`);
 
-                  buffer += $.html();
+                    fromAgentEl.before(bootstrappingZBRFromSWElement);
+
+                  }
+
                 }
 
-                // If we did NOT find a CSP
-                else {
+                buffer += $.html();
 
-                  // Inject the ZBR immediately after the <HEAD>
-                  buffer += chunk.replace(/<head>/i,`<head>\n${zbr_inject_html}\n`);
+              },
+              flush(controller) {
+                if (buffer) {
+                  self.logger.trace('detectFromHttpAgent: result [%o]', fromHttpAgent);
+                  controller.enqueue(buffer);
+                }
+              }
+            })
+          }
+        
+          function streamingHEADReplace() {
+  
+            let buffer = '';
+                      
+            return new TransformStream({
+
+              transform(chunk, _controller) {
+
+                chunk = decodeURIComponent(chunk).replace(/\n/g,'').replace(/\t/g,'');
+
+                if (!fromHttpAgent) {
+
+                  let zbrLocation = self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.runtime.src;
+
+                  // Parse the HTML
+                  const $ = cheerio.load(chunk);
+
+                  let zbrElement = $('<script></script> ').attr('type', 'text/javascript').attr('src', `https://${zbrLocation}`).attr('defer', `defer`);
+                  let ppElement = $('<script></script> ').attr('id', 'ziti-browzer-pp').attr('type', 'text/javascript').attr('src', `https://cdn.jsdelivr.net/npm/polipop/dist/polipop.min.js`);
+                  let ppCss1Element = $('<link> ').attr('id', 'ziti-browzer-ppcss').attr('rel', 'stylesheet').attr('href', `https://cdn.jsdelivr.net/npm/polipop/dist/css/polipop.core.min.css`);
+                  let ppCss2Element = $('<link> ').attr('rel', 'stylesheet').attr('href', `https://cdn.jsdelivr.net/npm/polipop/dist/css/polipop.compact.min.css`);
+
+                  // Locate the CSP
+                  let cspElement = $('meta[http-equiv="content-security-policy"]');
+
+                  // If we found a CSP
+                  if (cspElement.length > 0) {
+
+                    self.logger.trace('streamingHEADReplace: CSP found in html with content: ', cspElement.attr('content'));
+                    // then augment it to enable WASM load/xeq
+                    cspElement.attr('content', cspElement.attr('content') + ` cdn.jsdelivr.net/ 'unsafe-eval'`);
+                    self.logger.trace('streamingHEADReplace: CSP is now enhanced with content: ', cspElement.attr('content'));
+
+                    // Inject the PP immediately after the CSP
+                    cspElement.after(ppCss1Element);
+                    cspElement.after(ppCss2Element);
+                    cspElement.after(ppElement);
+                    let ppEl = $('link[id="ziti-browzer-ppcss"]');
+                    // Inject the ZBR immediately after the PP
+                    ppEl.after(zbrElement);
+
+                    buffer += $.html();
+                  }
+
+                  // If we did NOT find a CSP
+                  else {
+    
+                    // Inject the Ziti browZer Runtime at the front of <head> element so we are prepared to intercept as soon as possible over on the browser
+                    let zbr_inject_html = `
+<!-- load Ziti browZer Runtime (SW) -->
+<script type="text/javascript" src="https://${zbrLocation}"></script>
+<script src="https://cdn.jsdelivr.net/npm/polipop/dist/polipop.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/polipop/dist/css/polipop.core.min.css"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/polipop/dist/css/polipop.compact.min.css"/>
+`;
+                    // Inject the ZBR immediately after the <HEAD>
+                    buffer += chunk.replace(/<head>/i,`<head>\n${zbr_inject_html}\n`);
+                  }
+                } else {
+
+                  buffer += chunk;
+                
                 }
               },
               flush(controller) {
@@ -623,6 +701,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
           
           const bodyStream = response.body
             .pipeThrough(new TextDecoderStream())
+            .pipeThrough(detectFromHttpAgent())
             .pipeThrough(streamingHEADReplace())
             .pipeThrough(new TextEncoderStream())
             ;
