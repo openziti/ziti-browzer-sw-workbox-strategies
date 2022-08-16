@@ -1,3 +1,12 @@
+## [0.15.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.15.0...v0.15.1) (2022-08-16)
+
+
+### Bug Fixes
+
+* initiate proper ZBR bootstrapping by SW ([#91](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/91)) ([98e9336](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/98e9336662dc1020e3164301a7e56fa32c404f79))
+
+
+
 # [0.15.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.14.2...v0.15.0) (2022-08-11)
 
 
