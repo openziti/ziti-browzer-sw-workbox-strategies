@@ -29,6 +29,7 @@ type ZitiShouldRouteResult = {
 }
 
 var regexZBR      = new RegExp( /ziti-browzer-runtime/, 'g' );
+var regexEdgeClt  = new RegExp( /\/edge\/client\/v1/, 'g' );
 var regexZBWASM   = new RegExp( /libcrypto.wasm/,       'g' );
 var regexSlash    = new RegExp( /^\/$/,                 'g' );
 var regexDotSlash = new RegExp( /^\.\//,                'g' );
@@ -100,14 +101,14 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
    * Remain in lazy-sleepy loop until z-b-runtime sends us the _zitiConfig
    * 
    */
-  async await_zitiConfig() {
+  async await_zitiConfig(request: Request) {
     let self = this;
     let ctr = 0;
     return new Promise((resolve: any, _reject: any) => {
       (async function waitFor_zitiConfig() {
         if (isUndefined(self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig)) {
           ctr++;
-          self.logger.trace(`await_zitiConfig: ...waiting [${ctr}]`);
+          self.logger.trace(`await_zitiConfig: ...waiting [${ctr}] for [${request.url}]`);
           if (ctr == 5) {  // kick the ZBR, and ask for the config
             self.logger.trace( 'await_zitiConfig: sending ZITI_CONFIG_NEEDED msg to ZBR');  
             self._zitiBrowzerServiceWorkerGlobalScope._sendMessageToClients( { type: 'ZITI_CONFIG_NEEDED'} );
@@ -123,7 +124,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
             setTimeout(waitFor_zitiConfig, 250);  
           }
         } else {
-          self.logger.trace(`await_zitiConfig: config acquired`);
+          self.logger.trace(`await_zitiConfig: config acquired for [${request.url}]`);
           return resolve();
         }
       })();
@@ -134,15 +135,15 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
    * Remain in lazy-sleepy loop until z-b-runtime notifies us that it has completed initialization
    * 
    */
-   async await_zbrInitialized() {
+   async await_zbrInitialized(request: Request) {
     let self = this;
     return new Promise((resolve: any, _reject: any) => {
       (function waitFor_zbrInitialized() {
         if (self._zitiBrowzerServiceWorkerGlobalScope._zbrReloadPending) { // this gets reset when ZBR sends the SW the 
-          self.logger.trace(`await_zbrInitialized: ...waiting`);
+          self.logger.trace(`await_zbrInitialized: ...waiting for [${request.url}]`);
           setTimeout(waitFor_zbrInitialized, 250);
         } else {
-          self.logger.trace(`await_zbrInitialized: ...acquired`);
+          self.logger.trace(`await_zbrInitialized: ...acquired for [${request.url}]`);
           return resolve();
         }
       })();
@@ -153,7 +154,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
    * Do all work necessary to initialize the ZitiFirstStrategy instance.
    * 
    */
-  async _initialize() {
+  async _initialize(request: Request) {
     
     // Run the init sequence within a critical-section
     await this._initializationMutex.runExclusive(async () => {
@@ -165,7 +166,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
         if (isUndefined(this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig) || 
             isUndefined(this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.decodedJWT)
         ) {
-          await this.await_zitiConfig();
+          await this.await_zitiConfig(request);
         }
 
         if (isUndefined(this._zitiContext)) {
@@ -361,6 +362,12 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       this.logger.trace(`_shouldUseCache: handling ${request.method} method; NOT using cache`);
       return false;
     }
+    
+    if (request.url.match( regexEdgeClt )) {          // Never cache responses from Ziti Controller
+      this.logger.trace(`_shouldUseCache: handling request to Ziti Controller; NOT using cache`);
+      return false;
+    }
+
     if (request.url.match( regexControllerAPI )) {    // Never cache responses from Ziti Controller
       this.logger.trace(`_shouldUseCache: handling request to Ziti Controller; NOT using cache`);
       return false;
@@ -426,13 +433,15 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
         /* NOP */
       }
       else {
-        await this.await_zbrInitialized();
+        await this.await_zbrInitialized(request);
       }
     }
 
     if ((!this._isRootPATH(request)) && (!request.url.match( regexZBR ))) {       // if NOT in the process of bootstrapping from HTTP Agent
       if (isUndefined(this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig) ) {  // ...and we don't yet have the zitiConfig from ZBR
-        await this.await_zitiConfig();                                            // ...then wait for ZBR to send it to us
+        if (!request.url.match( regexEdgeClt )) {                                 // ...and NOT hitting the controller
+          await this.await_zitiConfig(request);                                   // ...then wait for ZBR to send zitiConfig to us
+        }
       }
     }
 
@@ -465,7 +474,8 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     // we never go over Ziti, and we let the browser route the request 
     // to the Controller or HTTP Agent.  
     if ( 
-      (request.url.match( regexControllerAPI )) ||    // seeking Ziti Controller
+      (request.url.match( regexEdgeClt )) ||          // seeking Ziti Controller
+      (request.url.match( regexControllerAPI )) ||    //    "     "      "
       (request.url.match( regexZBR )) ||              // seeking Ziti BrowZer Runtime
       (request.url.match( regexZBWASM ))              // seeking Ziti BrowZer WASM
     ) {
@@ -483,7 +493,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     if ( tryZiti ) {
 
       // If possibly going over Ziti, we must first complete the work
-      await this._initialize();   //  to ensure WASM is instantiated, 
+      await this._initialize(request);   //  to ensure WASM is instantiated, 
                                   //   we have a cert, etc
         
       // Now determine if we're going over Ziti or not
