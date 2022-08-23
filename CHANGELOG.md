@@ -1,3 +1,12 @@
+## [0.15.2](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.15.1...v0.15.2) (2022-08-23)
+
+
+### Bug Fixes
+
+* correct libsodium e2e encryption regression ([#93](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/93)) ([59bbba8](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/59bbba89fd31c70502e891192b2f5cffe3d8c5f6))
+
+
+
 ## [0.15.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.15.0...v0.15.1) (2022-08-16)
 
 
