@@ -247,6 +247,16 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
   }
 
+  _sendServiceUnavailable(_zitiBrowzerServiceWorkerGlobalScope: any, newUrl: any) {
+    _zitiBrowzerServiceWorkerGlobalScope._sendMessageToClients( 
+      { 
+        type: 'SERVICE_UNAVAILABLE_TO_IDENTITY',
+        payload: {
+          message: `Ziti Service ${newUrl.hostname} is unavailable to your identity; Notify your administrator.`
+        }
+      } 
+    )
+  }
 
   /**
    * Determine if this request should be routed over Ziti, or over raw internet.
@@ -299,8 +309,9 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
         result.serviceName = await this._zitiContext.shouldRouteOverZiti( newUrl );
         this.logger.trace(`_shouldRouteOverZiti result.serviceName[%o]`, result.serviceName);
   
-        if (isEqual(result.serviceName, '')) { // If we have no config associated with the hostname:port, do not intercept
+        if (isUndefined(result.serviceName) || isEqual(result.serviceName, '')) { // If we have no config associated with the hostname:port, do not intercept
           this.logger.warn('_shouldRouteOverZiti: no associated Ziti config, bypassing intercept of [%s]', request.url);
+          setTimeout(this._sendServiceUnavailable, 250, this._zitiBrowzerServiceWorkerGlobalScope, newUrl);
         } else {
           result.url = newUrl.toString();
           result.routeOverZiti = true;
