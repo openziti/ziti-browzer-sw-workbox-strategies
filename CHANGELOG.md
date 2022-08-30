@@ -1,3 +1,12 @@
+# [0.16.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.15.3...v0.16.0) (2022-08-30)
+
+
+### Features
+
+* add IdP host to CSP ([#96](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/96)) ([c964acb](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/c964acb9b27c1c408ab7cdb429141b22de25013c))
+
+
+
 ## [0.15.3](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.15.2...v0.15.3) (2022-08-30)
 
 
