@@ -143,7 +143,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
         if (self._zitiBrowzerServiceWorkerGlobalScope._zbrReloadPending) { // this gets reset when ZBR sends the SW the 
           self.logger.trace(`await_zbrInitialized: ...waiting for [${request.url}]`);
           ctr++;
-          if (ctr > 10) {return reject();}
+          if (ctr > 40) {return reject();}
           setTimeout(waitFor_zbrInitialized, 250);
         } else {
           self.logger.trace(`await_zbrInitialized: ...acquired for [${request.url}]`);
