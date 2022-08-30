@@ -1,3 +1,12 @@
+## [0.16.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.16.0...v0.16.1) (2022-08-30)
+
+
+### Bug Fixes
+
+* allow longer ZBR init time ([#97](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/97)) ([a030b0b](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/a030b0bd13cea8c55b519fef040008fff5499e2e))
+
+
+
 # [0.16.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.15.3...v0.16.0) (2022-08-30)
 
 
