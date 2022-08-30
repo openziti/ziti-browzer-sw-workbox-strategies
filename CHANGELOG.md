@@ -1,3 +1,12 @@
+## [0.15.3](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.15.2...v0.15.3) (2022-08-30)
+
+
+### Bug Fixes
+
+* correct IdP token refresh issue ([#95](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/95)) ([6d6cb2a](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/6d6cb2a8196e4d373ebbf9e02551d90e9e9817dc))
+
+
+
 ## [0.15.2](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.15.1...v0.15.2) (2022-08-23)
 
 
