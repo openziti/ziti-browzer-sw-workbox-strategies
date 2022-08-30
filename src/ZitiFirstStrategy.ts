@@ -137,10 +137,13 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
    */
    async await_zbrInitialized(request: Request) {
     let self = this;
-    return new Promise((resolve: any, _reject: any) => {
+    let ctr = 0;
+    return new Promise((resolve: any, reject: any) => {
       (function waitFor_zbrInitialized() {
         if (self._zitiBrowzerServiceWorkerGlobalScope._zbrReloadPending) { // this gets reset when ZBR sends the SW the 
           self.logger.trace(`await_zbrInitialized: ...waiting for [${request.url}]`);
+          ctr++;
+          if (ctr > 10) {return reject();}
           setTimeout(waitFor_zbrInitialized, 250);
         } else {
           self.logger.trace(`await_zbrInitialized: ...acquired for [${request.url}]`);
@@ -213,15 +216,10 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
           this.logger.trace(`_initialize: ephemeral Cert acquisition failed`);
 
           // If we couldn't acquire a cert, it most likely means that the JWT from the IdP needs a refresh
-          
-          this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig = undefined;
 
-          let resp = await this._zitiBrowzerServiceWorkerGlobalScope._sendMessageToClients( 
-            { 
-              type: 'IDP_TOKEN_RESET_NEEDED'
-            } 
-          );
-          this.logger.trace( 'ZitiFirstStrategy: IDP_TOKEN_RESET_NEEDED response: ', resp);
+          this.logger.trace(`await_zitiConfig: initiating unregister`);
+          
+          await this._zitiBrowzerServiceWorkerGlobalScope._unregister(); // Let's try and 'reboot' the ZBR/SW pair
 
           this.logger.trace(`_initialize: terminated`);
 
@@ -444,7 +442,11 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
         /* NOP */
       }
       else {
-        await this.await_zbrInitialized(request);
+        await this.await_zbrInitialized(request).catch( async ( _err: any ) => {
+          this.logger.debug(`ZBR init not responding`);
+          await this._zitiBrowzerServiceWorkerGlobalScope._unregister();  
+          throw new WorkboxError('no-response', {url: request.url});
+        });    
       }
     }
 
@@ -669,6 +671,8 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
                   let ppCss1Element = $('<link> ').attr('id', 'ziti-browzer-ppcss').attr('rel', 'stylesheet').attr('href', `https://cdn.jsdelivr.net/npm/polipop/dist/css/polipop.core.min.css`);
                   let ppCss2Element = $('<link> ').attr('rel', 'stylesheet').attr('href', `https://cdn.jsdelivr.net/npm/polipop/dist/css/polipop.compact.min.css`);
 
+                  let hkElement = $('<script></script> ').attr('id', 'ziti-browzer-rhk').attr('type', 'text/javascript').attr('src', `https://unpkg.com/hotkeys-js/dist/hotkeys.min.js`).attr('crossorigin', `crossorigin`);
+
                   // Locate the CSP
                   let cspElement = $('meta[http-equiv="content-security-policy"]');
 
@@ -677,13 +681,14 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
                     self.logger.trace('streamingHEADReplace: CSP found in html with content: ', cspElement.attr('content'));
                     // then augment it to enable WASM load/xeq
-                    cspElement.attr('content', cspElement.attr('content') + ` cdn.jsdelivr.net/ 'unsafe-eval'`);
+                    cspElement.attr('content', cspElement.attr('content') + ` cdn.jsdelivr.net/ unpkg.com/ 'unsafe-eval'`);
                     self.logger.trace('streamingHEADReplace: CSP is now enhanced with content: ', cspElement.attr('content'));
 
                     // Inject the PP immediately after the CSP
                     cspElement.after(ppCss1Element);
                     cspElement.after(ppCss2Element);
                     cspElement.after(ppElement);
+                    cspElement.after(hkElement);
                     let ppEl = $('link[id="ziti-browzer-ppcss"]');
                     // Inject the ZBR immediately after the PP
                     ppEl.after(zbrElement);
@@ -701,6 +706,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 <script src="https://cdn.jsdelivr.net/npm/polipop/dist/polipop.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/polipop/dist/css/polipop.core.min.css"/>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/polipop/dist/css/polipop.compact.min.css"/>
+<script crossorigin src="https://unpkg.com/hotkeys-js/dist/hotkeys.min.js"></script>
 `;
                     // Inject the ZBR immediately after the <HEAD>
                     buffer += chunk.replace(/<head>/i,`<head>\n${zbr_inject_html}\n`);
@@ -913,7 +919,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
         } 
         
         else if (key.toLowerCase() === 'content-security-policy') {
-          val += ` cdn.jsdelivr.net/ 'unsafe-eval'`;
+          val += ` cdn.jsdelivr.net/ unpkg.com/ 'unsafe-eval'`;
         }
         
         headers.append( key, val);
@@ -1019,6 +1025,22 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
     if (response) {
       this.logger.debug(`Got response from network.`);
+
+      /**
+       * If we get a failed respose that is also an 'opaqueredirect', it is most likely
+       * because the attempt to fetch something served by the HTTP Agent is being canceled,
+       * then redirected to the IdP (re)authentication URL.
+       * 
+       * HACK ALERT:
+       * For reaons currently unknown, if we do NOT unregister the SW, before letting 
+       * the OIDC middleware continue, it will fail... 
+       * So, we force an unregister of the SW here to keep the (re)authentication flow working.
+       */
+      if (!response.ok && ( response.type === 'opaqueredirect' ) ) {
+        this.logger.debug(`Got 'opaqueredirect' response from network; doing SW unregister now`);
+        await this._zitiBrowzerServiceWorkerGlobalScope._unregister();
+      }
+  
     } else {
       if (useCache) {
         this.logger.warn(
