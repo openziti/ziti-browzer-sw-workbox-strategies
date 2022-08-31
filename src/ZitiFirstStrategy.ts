@@ -382,10 +382,12 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       return false;
     }
 
-    if ( (request.url.match( regexZBR )) || ((request.url.match( regexZBWASM ))) ) { // Do not cache the ZBR/WASM
-      this.logger.trace(`_shouldUseCache: handling request for ZBR|WASM; NOT using cache`);
-      return false;
-    }
+    // We will allow the SW to cache teh ZBR/WASM files ...for the moment
+    //
+    // if ( (request.url.match( regexZBR )) || ((request.url.match( regexZBWASM ))) ) { // Do not cache the ZBR/WASM
+    //   this.logger.trace(`_shouldUseCache: handling request for ZBR|WASM; NOT using cache`);
+    //   return false;
+    // }
 
     if (request.url.match( regexSlash ) ) {           // Never cache responses for root path
       this.logger.trace(`_shouldUseCache: handling request for '/'; NOT using cache`);
@@ -670,6 +672,8 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
                   let ppElement = $('<script></script> ').attr('id', 'ziti-browzer-pp').attr('type', 'text/javascript').attr('src', `https://cdn.jsdelivr.net/npm/polipop/dist/polipop.min.js`);
                   let ppCss1Element = $('<link> ').attr('id', 'ziti-browzer-ppcss').attr('rel', 'stylesheet').attr('href', `https://cdn.jsdelivr.net/npm/polipop/dist/css/polipop.core.min.css`);
                   let ppCss2Element = $('<link> ').attr('rel', 'stylesheet').attr('href', `https://cdn.jsdelivr.net/npm/polipop/dist/css/polipop.compact.min.css`);
+                  let hmElement = $('<script></script> ').attr('id', 'ziti-browzer-hm').attr('type', 'text/javascript').attr('src', `https://cdn.jsdelivr.net/npm/hystmodal@0.5.1/dist/hystmodal.min.js`);
+                  let hmCss1Element = $('<link> ').attr('id', 'ziti-browzer-hmcss').attr('rel', 'stylesheet').attr('href', `https://cdn.jsdelivr.net/npm/hystmodal@0.5.1/dist/hystmodal.min.css`);
 
                   let hkElement = $('<script></script> ').attr('id', 'ziti-browzer-rhk').attr('type', 'text/javascript').attr('src', `https://unpkg.com/hotkeys-js/dist/hotkeys.min.js`).attr('crossorigin', `crossorigin`);
 
@@ -689,6 +693,8 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
                     cspElement.after(ppCss2Element);
                     cspElement.after(ppElement);
                     cspElement.after(hkElement);
+                    cspElement.after(hmElement);
+                    cspElement.after(hmCss1Element);
                     let ppEl = $('link[id="ziti-browzer-ppcss"]');
                     // Inject the ZBR immediately after the PP
                     ppEl.after(zbrElement);
@@ -706,7 +712,9 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 <script src="https://cdn.jsdelivr.net/npm/polipop/dist/polipop.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/polipop/dist/css/polipop.core.min.css"/>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/polipop/dist/css/polipop.compact.min.css"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hystmodal@0.5.1/dist/hystmodal.min.css"/>
 <script crossorigin src="https://unpkg.com/hotkeys-js/dist/hotkeys.min.js"></script>
+<script crossorigin src="https://cdn.jsdelivr.net/npm/hystmodal@0.5.1/src/hystmodal.min.js"></script>
 `;
                     // Inject the ZBR immediately after the <HEAD>
                     buffer += chunk.replace(/<head>/i,`<head>\n${zbr_inject_html}\n`);
