@@ -1,3 +1,12 @@
+# [0.17.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.16.1...v0.17.0) (2022-08-31)
+
+
+### Features
+
+* hotKey modal support ([#99](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/99)) ([bc0dcc4](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/bc0dcc4345b0914a07acfacc350a01e3d0bf4e01))
+
+
+
 ## [0.16.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.16.0...v0.16.1) (2022-08-30)
 
 
