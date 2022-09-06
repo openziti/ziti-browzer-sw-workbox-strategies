@@ -1,3 +1,12 @@
+# [0.18.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.17.0...v0.18.0) (2022-09-06)
+
+
+### Features
+
+* client-side logLevel control ([#102](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/102)) ([5ee0a72](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/5ee0a722d9729f2e1c8c0c9c4fddb81df4949318))
+
+
+
 # [0.17.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.16.1...v0.17.0) (2022-08-31)
 
 
