@@ -29,7 +29,8 @@ type ZitiShouldRouteResult = {
 }
 
 var regexZBR      = new RegExp( /ziti-browzer-runtime/, 'g' );
-var regexEdgeClt  = new RegExp( /\/edge\/client\/v1/, 'g' );
+var regexZBRLogo  = new RegExp( /ziti-browzer-logo/,    'g' );
+var regexEdgeClt  = new RegExp( /\/edge\/client\/v1/,   'g' );
 var regexZBWASM   = new RegExp( /libcrypto.wasm/,       'g' );
 var regexSlash    = new RegExp( /^\/$/,                 'g' );
 var regexDotSlash = new RegExp( /^\.\//,                'g' );
@@ -147,6 +148,8 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
           setTimeout(waitFor_zbrInitialized, 250);
         } else {
           self.logger.trace(`await_zbrInitialized: ...acquired for [${request.url}]`);
+          self.logger.trace(`await_zbrInitialized: ...setting logLevel to [${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.sw.logLevel}]`);
+          self.logger.logLevel = self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.sw.logLevel;
           return resolve();
         }
       })();
@@ -295,8 +298,8 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
       }
       else 
-      if ( (request.url.match( regexZBR )) || ((request.url.match( regexZBWASM ))) ) { // the request seeks z-b-r/wasm
-        this.logger.trace('_shouldRouteOverZiti: z-b-r/wasm, bypassing intercept of [%s]: ', request.url);
+      if ( (request.url.match( regexZBR )) || (request.url.match( regexZBWASM )) || (request.url.match( regexZBRLogo )) ) { // the request seeks z-b-r/wasm/logo
+        this.logger.trace('_shouldRouteOverZiti: z-b-r/wasm/logo, bypassing intercept of [%s]: ', request.url);
       }  
       else {
 
@@ -492,6 +495,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       (request.url.match( regexEdgeClt )) ||          // seeking Ziti Controller
       (request.url.match( regexControllerAPI )) ||    //    "     "      "
       (request.url.match( regexZBR )) ||              // seeking Ziti BrowZer Runtime
+      (request.url.match( regexZBRLogo )) ||          // seeking Ziti BrowZer Logo
       (request.url.match( regexZBWASM ))              // seeking Ziti BrowZer WASM
     ) {
       tryZiti = false;
@@ -685,7 +689,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
                     self.logger.trace('streamingHEADReplace: CSP found in html with content: ', cspElement.attr('content'));
                     // then augment it to enable WASM load/xeq
-                    cspElement.attr('content', cspElement.attr('content') + ` cdn.jsdelivr.net unpkg.com ${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.idp.host} 'unsafe-eval'`);
+                    cspElement.attr('content', cspElement.attr('content') + ` cdn.jsdelivr.net unpkg.com ${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.idp.host} 'unsafe-eval' 'unsafe-inline'`);
                     self.logger.trace('streamingHEADReplace: CSP is now enhanced with content: ', cspElement.attr('content'));
 
                     // Inject the PP immediately after the CSP
@@ -927,7 +931,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
         } 
         
         else if (key.toLowerCase() === 'content-security-policy') {
-          val += ` cdn.jsdelivr.net unpkg.com ${this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.idp.host} 'unsafe-eval'`;
+          val += ` cdn.jsdelivr.net unpkg.com ${this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.idp.host} 'unsafe-eval' 'unsafe-inline'`;
         }
         
         headers.append( key, val);
