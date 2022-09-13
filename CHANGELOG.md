@@ -1,3 +1,12 @@
+## [0.18.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.18.0...v0.18.1) (2022-09-13)
+
+
+### Bug Fixes
+
+* don't hang if some wsER's are offline ([#103](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/103)) ([04e4791](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/04e479128d6b751e609d48367228dc94ded7ebb4))
+
+
+
 # [0.18.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.17.0...v0.18.0) (2022-09-06)
 
 
