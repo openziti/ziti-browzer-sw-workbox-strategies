@@ -1,3 +1,12 @@
+## [0.18.2](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.18.1...v0.18.2) (2022-10-07)
+
+
+### Bug Fixes
+
+* adjust ZBR regex ([#109](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/109)) ([e840359](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/e84035969567685cfc6a53f5343129b14b57e041))
+
+
+
 ## [0.18.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.18.0...v0.18.1) (2022-09-13)
 
 
