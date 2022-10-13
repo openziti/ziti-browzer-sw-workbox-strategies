@@ -28,7 +28,7 @@ type ZitiShouldRouteResult = {
   url?: string | '';
 }
 
-var regexZBR      = new RegExp( /ziti-browzer-runtime\.js/, 'g' );
+var regexZBR      = new RegExp( /ziti-browzer-runtime-[0-9a-f]{8}\.js/, 'gi' );
 var regexZBRLogo  = new RegExp( /ziti-browzer-logo/,    'g' );
 var regexEdgeClt  = new RegExp( /\/edge\/client\/v1/,   'g' );
 var regexZBWASM   = new RegExp( /libcrypto.wasm/,       'g' );
