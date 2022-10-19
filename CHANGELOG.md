@@ -1,3 +1,12 @@
+## [0.18.4](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.18.3...v0.18.4) (2022-10-19)
+
+
+### Bug Fixes
+
+* channel/ws close handling ([#113](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/113)) ([4c657ac](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/4c657acb743129b5c8de3d801e10719ccf2637aa))
+
+
+
 ## [0.18.3](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.18.2...v0.18.3) (2022-10-13)
 
 
