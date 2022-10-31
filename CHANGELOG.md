@@ -1,3 +1,12 @@
+## [0.18.5](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.18.4...v0.18.5) (2022-10-31)
+
+
+### Bug Fixes
+
+* bump to core 0.16.12 ([#115](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/115)) ([8ad3983](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/8ad3983c584c2e60f7d3f7bf3fdb3849edba3afb))
+
+
+
 ## [0.18.4](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.18.3...v0.18.4) (2022-10-19)
 
 
