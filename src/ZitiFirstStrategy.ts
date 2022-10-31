@@ -32,6 +32,10 @@ var regexZBR      = new RegExp( /ziti-browzer-runtime-[0-9a-f]{8}\.js/, 'gi' );
 var regexZBRLogo  = new RegExp( /ziti-browzer-logo/,    'g' );
 var regexEdgeClt  = new RegExp( /\/edge\/client\/v1/,   'g' );
 var regexZBWASM   = new RegExp( /libcrypto.wasm/,       'g' );
+var regexHystmodal = new RegExp( /hystmodal/,           'g' );
+// var regexPolipop  = new RegExp( /polipop/,              'g' );
+// var regexHotkeys  = new RegExp( /hotkeys-js/,           'g' );
+
 var regexSlash    = new RegExp( /^\/$/,                 'g' );
 var regexDotSlash = new RegExp( /^\.\//,                'g' );
 var regexTextHtml = new RegExp( /text\/html/,           'i' );
@@ -148,8 +152,8 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
           setTimeout(waitFor_zbrInitialized, 250);
         } else {
           self.logger.trace(`await_zbrInitialized: ...acquired for [${request.url}]`);
-          self.logger.trace(`await_zbrInitialized: ...setting logLevel to [${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.sw.logLevel}]`);
-          self.logger.logLevel = self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.sw.logLevel;
+          self.logger.trace(`await_zbrInitialized: ...setting logLevel to [${self._logLevel}]`);
+          self.logger.logLevel = self._logLevel;
           return resolve();
         }
       })();
@@ -496,6 +500,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       (request.url.match( regexControllerAPI )) ||    //    "     "      "
       (request.url.match( regexZBR )) ||              // seeking Ziti BrowZer Runtime
       (request.url.match( regexZBRLogo )) ||          // seeking Ziti BrowZer Logo
+      (request.url.match( regexHystmodal )) ||        // seeking Ziti Hystmodal
       (request.url.match( regexZBWASM ))              // seeking Ziti BrowZer WASM
     ) {
       tryZiti = false;
@@ -676,8 +681,14 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
                   let ppElement = $('<script></script> ').attr('id', 'ziti-browzer-pp').attr('type', 'text/javascript').attr('src', `https://cdn.jsdelivr.net/npm/polipop/dist/polipop.min.js`);
                   let ppCss1Element = $('<link> ').attr('id', 'ziti-browzer-ppcss').attr('rel', 'stylesheet').attr('href', `https://cdn.jsdelivr.net/npm/polipop/dist/css/polipop.core.min.css`);
                   let ppCss2Element = $('<link> ').attr('rel', 'stylesheet').attr('href', `https://cdn.jsdelivr.net/npm/polipop/dist/css/polipop.compact.min.css`);
-                  let hmElement = $('<script></script> ').attr('id', 'ziti-browzer-hm').attr('type', 'text/javascript').attr('src', `https://cdn.jsdelivr.net/npm/hystmodal@0.5.1/dist/hystmodal.min.js`);
-                  let hmCss1Element = $('<link> ').attr('id', 'ziti-browzer-hmcss').attr('rel', 'stylesheet').attr('href', `https://cdn.jsdelivr.net/npm/hystmodal@0.5.1/dist/hystmodal.min.css`);
+                  let hmElement = $('<script></script> ')
+                      .attr('id', 'ziti-browzer-hm')
+                      .attr('type', 'text/javascript')
+                      .attr('src', `https://${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.self.host}/hystmodal.min.js`);
+                  let hmCss1Element = $('<link> ')
+                      .attr('id', 'ziti-browzer-hmcss')
+                      .attr('rel', 'stylesheet')
+                      .attr('href', `https://${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.self.host}/hystmodal.min.css`);
 
                   let hkElement = $('<script></script> ').attr('id', 'ziti-browzer-rhk').attr('type', 'text/javascript').attr('src', `https://unpkg.com/hotkeys-js/dist/hotkeys.min.js`).attr('crossorigin', `crossorigin`);
 
@@ -716,9 +727,9 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 <script src="https://cdn.jsdelivr.net/npm/polipop/dist/polipop.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/polipop/dist/css/polipop.core.min.css"/>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/polipop/dist/css/polipop.compact.min.css"/>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hystmodal@0.5.1/dist/hystmodal.min.css"/>
+<link rel="stylesheet" href="https://${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.self.host}/hystmodal.min.css"/>
 <script crossorigin src="https://unpkg.com/hotkeys-js/dist/hotkeys.min.js"></script>
-<script crossorigin src="https://cdn.jsdelivr.net/npm/hystmodal@0.5.1/src/hystmodal.min.js"></script>
+<script crossorigin src="https://${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.self.host}/hystmodal.min.js"></script>
 `;
                     // Inject the ZBR immediately after the <HEAD>
                     buffer += chunk.replace(/<head>/i,`<head>\n${zbr_inject_html}\n`);
