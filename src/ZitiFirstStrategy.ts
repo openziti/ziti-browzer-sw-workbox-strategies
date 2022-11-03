@@ -124,13 +124,16 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
             // Let's try and 'reboot' the ZBR/SW pair
             await self._zitiBrowzerServiceWorkerGlobalScope._unregister();
 
-            setTimeout(waitFor_zitiConfig, 10000);  // this doesn't do much except cause us to wait for ourselves to be unregistered
+            setTimeout(waitFor_zitiConfig, 3000);  // this doesn't do much except cause us to wait for ourselves to be unregistered
+          }
+          else if (ctr == 13) {
+            return resolve( -1 );
           } else {
             setTimeout(waitFor_zitiConfig, 250);  
           }
         } else {
           self.logger.trace(`await_zitiConfig: config acquired for [${request.url}]`);
-          return resolve();
+          return resolve( 0 );
         }
       })();
     });
@@ -224,7 +227,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
           // If we couldn't acquire a cert, it most likely means that the JWT from the IdP needs a refresh
 
-          this.logger.trace(`await_zitiConfig: initiating unregister`);
+          this.logger.trace(`_initialize: initiating unregister`);
           
           await this._zitiBrowzerServiceWorkerGlobalScope._unregister(); // Let's try and 'reboot' the ZBR/SW pair
 
@@ -443,6 +446,38 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
     this.logger.trace(`_handle entered for: `, request.url, this._zitiBrowzerServiceWorkerGlobalScope._uuid);
 
+    /**
+     * If the ZBR hasn't sent a ping in teh last few seconds, it's probably not there.
+     * This can happen when the SW is running, and the user does a hard-reload of the 
+     * page (i.e. clicks browser's refresh button), and the URL was NOT the root URL 
+     * of the web app.  
+     * 
+     * In this case, we initiate a page reboot to get the ZBR back on its feet.
+     */
+    if (!this._isRootPATH(request)) {
+      let pingDelta = Date.now() - this._zitiBrowzerServiceWorkerGlobalScope._zbrPingTimestamp;
+      this.logger.trace(`pingDelta is ${pingDelta}`);
+      if ( pingDelta > 5000) {
+        let newUrl = new URL(request.url);
+
+        let extension = newUrl.pathname.split(/[#?]/)[0]?.split('.')?.pop()?.trim();
+        this.logger.trace(`newUrl.pathname is ${newUrl.pathname}, extension is ${extension}`);
+        // if (!this._zitiBrowzerServiceWorkerGlobalScope._zbrReloadPending) {
+        if (extension && extension.includes('/')) {
+          this._zitiBrowzerServiceWorkerGlobalScope._zbrPingTimestamp = (Date.now() - 1000);
+          let redirectResponse = new Response('', {
+              status: 302,
+              statusText: 'Found',
+              headers: {
+                Location: '/'
+              }
+            }
+          );
+          return redirectResponse;
+        }
+      }
+    }
+
     if (this._zitiBrowzerServiceWorkerGlobalScope._zbrReloadPending) {
       if (request.url.match( regexZBWASM )) {  // the ZBR loads the WASM during init, so we need to process that request; all others wait
         /* NOP */
@@ -462,7 +497,18 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     if ((!this._isRootPATH(request)) && (!request.url.match( regexZBR ))) {       // if NOT in the process of bootstrapping from HTTP Agent
       if (isUndefined(this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig) ) {  // ...and we don't yet have the zitiConfig from ZBR
         if (!request.url.match( regexEdgeClt )) {                                 // ...and NOT hitting the controller
-          await this.await_zitiConfig(request);                                   // ...then wait for ZBR to send zitiConfig to us
+          let result: any = await this.await_zitiConfig(request);                      // ...then wait for ZBR to send zitiConfig to us
+          if (result < 0) {
+            let redirectResponse = new Response('', {                             // If ZBR is AWOL, initiate top-level page reboot
+                status: 302,
+                statusText: 'Found',
+                headers: {
+                  Location: '/'
+                }
+              }
+            );
+            return redirectResponse;
+          };
         }
       }
     }
@@ -677,6 +723,8 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
                   // Parse the HTML
                   const $ = cheerio.load(chunk);
 
+                  self.logger.trace('streamingHEADReplace: HTML before modifications is: ', $.html());
+
                   let zbrElement = $('<script></script> ').attr('type', 'text/javascript').attr('src', `https://${zbrLocation}`).attr('defer', `defer`);
                   let ppElement = $('<script></script> ').attr('id', 'ziti-browzer-pp').attr('type', 'text/javascript').attr('src', `https://cdn.jsdelivr.net/npm/polipop/dist/polipop.min.js`);
                   let ppCss1Element = $('<link> ').attr('id', 'ziti-browzer-ppcss').attr('rel', 'stylesheet').attr('href', `https://cdn.jsdelivr.net/npm/polipop/dist/css/polipop.core.min.css`);
@@ -719,20 +767,20 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
                   // If we did NOT find a CSP
                   else {
-    
+
+                    // Locate the HEAD
+                    let headElement = $('head');
+
                     // Inject the Ziti browZer Runtime at the front of <head> element so we are prepared to intercept as soon as possible over on the browser
-                    let zbr_inject_html = `
-<!-- load Ziti browZer Runtime (SW) -->
-<script type="text/javascript" src="https://${zbrLocation}"></script>
-<script src="https://cdn.jsdelivr.net/npm/polipop/dist/polipop.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/polipop/dist/css/polipop.core.min.css"/>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/polipop/dist/css/polipop.compact.min.css"/>
-<link rel="stylesheet" href="https://${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.self.host}/hystmodal.min.css"/>
-<script crossorigin src="https://unpkg.com/hotkeys-js/dist/hotkeys.min.js"></script>
-<script crossorigin src="https://${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.self.host}/hystmodal.min.js"></script>
-`;
-                    // Inject the ZBR immediately after the <HEAD>
-                    buffer += chunk.replace(/<head>/i,`<head>\n${zbr_inject_html}\n`);
+                    headElement.prepend(zbrElement);
+                    headElement.prepend(hmCss1Element);
+                    headElement.prepend(hmElement);
+                    headElement.prepend(hkElement);
+                    headElement.prepend(ppElement);
+                    headElement.prepend(ppCss2Element);
+                    headElement.prepend(ppCss1Element);
+
+                    buffer += $.html();
                   }
                 } else {
 
@@ -742,7 +790,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
               },
               flush(controller) {
                 if (buffer) {
-                  self.logger.trace('streamingHEADReplace: response HTML is now: ', buffer);
+                  self.logger.trace('streamingHEADReplace: HTML after modifications is: ', buffer);
                   controller.enqueue(buffer);
                 }
               }
