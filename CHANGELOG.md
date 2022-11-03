@@ -1,3 +1,12 @@
+# [0.19.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.18.5...v0.19.0) (2022-11-03)
+
+
+### Features
+
+* hard refresh recovery ([#116](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/116)) ([68da683](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/68da683a8e81570d4e895af0c84c20c400504182))
+
+
+
 ## [0.18.5](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.18.4...v0.18.5) (2022-10-31)
 
 
