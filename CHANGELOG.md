@@ -1,3 +1,12 @@
+# [0.20.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.19.0...v0.20.0) (2022-11-18)
+
+
+### Features
+
+* ZBR CSS handling, logLevel bugfix ([#119](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/119)) ([98bd2bb](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/98bd2bb6db8576d25d4f2951214eedf971aee5fb))
+
+
+
 # [0.19.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.18.5...v0.19.0) (2022-11-03)
 
 
