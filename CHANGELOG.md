@@ -1,3 +1,12 @@
+## [0.20.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.20.0...v0.20.1) (2022-11-21)
+
+
+### Bug Fixes
+
+* host the 'toast' locally, not in CDN ([#120](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/120)) ([f1d3be9](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/f1d3be94dc5064c16fb2b019bd589b407f81fb04))
+
+
+
 # [0.20.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.19.0...v0.20.0) (2022-11-18)
 
 
