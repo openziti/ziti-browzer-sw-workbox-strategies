@@ -34,8 +34,8 @@ var regexZBRcss   = new RegExp( /ziti-browzer-css/,     'g' );
 var regexEdgeClt  = new RegExp( /\/edge\/client\/v1/,   'g' );
 var regexZBWASM   = new RegExp( /libcrypto.wasm/,       'g' );
 var regexHystmodal = new RegExp( /hystmodal/,           'g' );
-// var regexPolipop  = new RegExp( /polipop/,              'g' );
-// var regexHotkeys  = new RegExp( /hotkeys-js/,           'g' );
+var regexPolipop  = new RegExp( /polipop/,              'g' );
+var regexHotkeys  = new RegExp( /hotkeys/,              'g' );
 
 var regexSlash    = new RegExp( /^\/$/,                 'g' );
 var regexDotSlash = new RegExp( /^\.\//,                'g' );
@@ -545,6 +545,8 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       (request.url.match( regexZBRLogo )) ||          // seeking Ziti BrowZer Logo
       (request.url.match( regexZBRcss )) ||           // seeking Ziti BrowZer CSS
       (request.url.match( regexHystmodal )) ||        // seeking Ziti Hystmodal
+      (request.url.match( regexPolipop )) ||          // seeking Ziti Polipop
+      (request.url.match( regexHotkeys )) ||          // seeking Ziti Hotkeys
       (request.url.match( regexZBWASM ))              // seeking Ziti BrowZer WASM
     ) {
       tryZiti = false;
@@ -736,9 +738,17 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
                     self.logger.trace('streamingHEADReplace: HTML before modifications is: ', $.html());
 
                     let zbrElement = $('<script></script> ').attr('type', 'text/javascript').attr('src', `https://${zbrLocation}`); //.attr('defer', `defer`);
-                    let ppElement = $('<script></script> ').attr('id', 'ziti-browzer-pp').attr('type', 'text/javascript').attr('src', `https://cdn.jsdelivr.net/npm/polipop/dist/polipop.min.js`);
-                    let ppCss1Element = $('<link> ').attr('id', 'ziti-browzer-ppcss').attr('rel', 'stylesheet').attr('href', `https://cdn.jsdelivr.net/npm/polipop/dist/css/polipop.core.min.css`);
-                    let ppCss2Element = $('<link> ').attr('rel', 'stylesheet').attr('href', `https://cdn.jsdelivr.net/npm/polipop/dist/css/polipop.compact.min.css`);
+                    let ppElement = $('<script></script> ')
+                        .attr('id', 'ziti-browzer-pp')
+                        .attr('type', 'text/javascript')
+                        .attr('src', `https://${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.self.host}/polipop.min.js`);
+                    let ppCss1Element = $('<link> ')
+                        .attr('id', 'ziti-browzer-ppcss')
+                        .attr('rel', 'stylesheet')
+                        .attr('href', `https://${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.self.host}/polipop.core.min.css`);
+                    let ppCss2Element = $('<link> ')
+                        .attr('rel', 'stylesheet')
+                        .attr('href', `https://${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.self.host}/polipop.compact.min.css`);
                     let hmElement = $('<script></script> ')
                         .attr('id', 'ziti-browzer-hm')
                         .attr('type', 'text/javascript')
@@ -748,7 +758,10 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
                         .attr('rel', 'stylesheet')
                         .attr('href', `https://${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.self.host}/hystmodal.min.css`);
 
-                    let hkElement = $('<script></script> ').attr('id', 'ziti-browzer-rhk').attr('type', 'text/javascript').attr('src', `https://unpkg.com/hotkeys-js/dist/hotkeys.min.js`).attr('crossorigin', `crossorigin`);
+                    let hkElement = $('<script></script> ')
+                        .attr('id', 'ziti-browzer-rhk')
+                        .attr('type', 'text/javascript')
+                        .attr('src', `https://${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.self.host}/hotkeys.min.js`);
 
                     // Locate the CSP
                     let cspElement = $('meta[http-equiv="content-security-policy"]');
