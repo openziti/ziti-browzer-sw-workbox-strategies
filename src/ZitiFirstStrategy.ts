@@ -1000,6 +1000,11 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
        */
 
       var zitiHeaders = zitiResponse.headers.raw();
+      const contentType = zitiHeaders['content-type'];
+      let isTextHtml = false;
+      if (contentType && contentType[0] && contentType[0].match( regexTextHtml )) {  
+        isTextHtml = true;
+      }
       var headers = new Headers();
       const keys = Object.keys(zitiHeaders);
       for (let i = 0; i < keys.length; i++) {
@@ -1051,25 +1056,51 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
       if ( (zitiResponse.status < 300 || zitiResponse.status > 399) ) {
 
-        var responseBlob = await zitiResponse.blob();
-        var responseBlobStream = responseBlob.stream();               
-        const responseStream = new ReadableStream({
-            start(controller) {
-                function push() {
-                    var chunk = responseBlobStream.read();
-                    if (chunk) {
+        if (isTextHtml) {
+
+          var responseBlob = await zitiResponse.blob();
+          var responseBlobStream = responseBlob.stream();               
+          const responseStream = new ReadableStream({
+              start(controller) {
+                  function push() {
+                      var chunk = responseBlobStream.read();
+                      if (chunk) {
+                          controller.enqueue(chunk);
+                          push();  
+                      } else {
+                          controller.close();
+                          return;
+                      }
+                  };
+                  push();
+              }
+          });
+  
+          response = new Response( responseStream, { "status": zitiResponse.status, "headers":  headers } );
+  
+        } else {
+
+          const responseStream = new ReadableStream({
+              start(controller) {
+                  function push(chunk: any) {
+                      if (chunk) {
                         controller.enqueue(chunk);
-                        push();  
-                    } else {
+                      } else {
                         controller.close();
                         return;
-                    }
-                };
-                push();
-            }
-        });
+                      }
+                  };
+                  zitiResponse.body.on('data', (chunk: any) => {
+                    push(chunk);
+                  });
+                  zitiResponse.body.on('end', () => {
+                    push(null);
+                  });
+              }
+          });
 
-        response = new Response( responseStream, { "status": zitiResponse.status, "headers":  headers } );
+          response = new Response( responseStream, { "status": zitiResponse.status, "headers":  headers } );
+        }
 
       } else {
 
