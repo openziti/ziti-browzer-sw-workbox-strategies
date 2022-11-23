@@ -1,3 +1,12 @@
+## [0.20.2](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.20.1...v0.20.2) (2022-11-23)
+
+
+### Bug Fixes
+
+* adjust event handling for large Blob responses (Jellyfin streaming) ([#121](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/121)) ([6b849a9](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/6b849a96a539759b9be41662bce2b9560ff6aab2))
+
+
+
 ## [0.20.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.20.0...v0.20.1) (2022-11-21)
 
 
