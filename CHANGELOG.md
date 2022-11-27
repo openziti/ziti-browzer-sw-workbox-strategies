@@ -1,3 +1,12 @@
+# [0.21.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.20.2...v0.21.0) (2022-11-27)
+
+
+### Features
+
+* use 'memoization' for some frequently-used expensive (core) funcs ([#122](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/122)) ([5c433b3](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/5c433b31fe2cc3d6ddff54f554327b6dd58ee237))
+
+
+
 ## [0.20.2](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.20.1...v0.20.2) (2022-11-23)
 
 
