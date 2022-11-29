@@ -1,3 +1,12 @@
+## [0.21.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.21.0...v0.21.1) (2022-11-29)
+
+
+### Bug Fixes
+
+* handle array of 'Set-Cookie' headers ([#124](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/124)) ([a95f6d0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/a95f6d0426acb338b6489730b1085054f7466431))
+
+
+
 # [0.21.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.20.2...v0.21.0) (2022-11-27)
 
 
