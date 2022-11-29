@@ -1013,17 +1013,33 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
         this.logger.trace( 'ZitiFirstStrategy: zitiResponse.headers: ', key, val);
 
         if (key.toLowerCase() === 'set-cookie') {
-          headers.append( 'x-ziti-browzer-set-cookie', val );
-          this.logger.trace( 'ZitiFirstStrategy: sending SET_COOKIE cmd');
-          let resp = await this._zitiBrowzerServiceWorkerGlobalScope._sendMessageToClients( 
-            { 
-              type: 'SET_COOKIE',
-              payload: val
-            } 
-          );
-          this.logger.trace( 'ZitiFirstStrategy: SET_COOKIE response: ', resp);
-          let parts = val.split('=');
-          this._zitiBrowzerServiceWorkerGlobalScope._cookieObject[parts[0]] = parts[1];
+          if (Array.isArray(val)) {
+            for (var ndx = 0; ndx < val.length; ndx++) {
+              this.logger.trace( 'ZitiFirstStrategy: sending SET_COOKIE cmd');
+              let resp = await this._zitiBrowzerServiceWorkerGlobalScope._sendMessageToClients( 
+                { 
+                  type: 'SET_COOKIE',
+                  payload: val[ndx]
+                } 
+              );
+              this.logger.trace( 'ZitiFirstStrategy: SET_COOKIE response: ', resp);
+              let parts = val[ndx].split('=');
+              this._zitiBrowzerServiceWorkerGlobalScope._cookieObject[parts[0]] = parts[1];  
+            }
+          }
+          else {
+            headers.append( 'x-ziti-browzer-set-cookie', val );
+            this.logger.trace( 'ZitiFirstStrategy: sending SET_COOKIE cmd');
+            let resp = await this._zitiBrowzerServiceWorkerGlobalScope._sendMessageToClients( 
+              { 
+                type: 'SET_COOKIE',
+                payload: val
+              } 
+            );
+            this.logger.trace( 'ZitiFirstStrategy: SET_COOKIE response: ', resp);
+            let parts = val.split('=');
+            this._zitiBrowzerServiceWorkerGlobalScope._cookieObject[parts[0]] = parts[1];  
+          }
         }
         else if (key.toLowerCase() === 'location') {
           this.logger.trace( `location header transform needed for: ${val}`);
