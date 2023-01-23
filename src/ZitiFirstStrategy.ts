@@ -25,12 +25,14 @@ export interface ZitiFirstOptions extends StrategyOptions {
 type ZitiShouldRouteResult = {
   routeOverZiti?: boolean | false;
   serviceName?: string | '';
+  serviceScheme?: string | '';
   url?: string | '';
 }
 
 var regexZBR      = new RegExp( /ziti-browzer-runtime-[0-9a-f]{8}\.js/, 'gi' );
 var regexZBRLogo  = new RegExp( /ziti-browzer-logo/,    'g' );
 var regexZBRcss   = new RegExp( /ziti-browzer-css/,     'g' );
+var regexZBRCORS  = new RegExp( /ziti-cors-proxy/,      'g' );
 var regexEdgeClt  = new RegExp( /\/edge\/client\/v1/,   'g' );
 var regexZBWASM   = new RegExp( /libcrypto.wasm/,       'g' );
 var regexHystmodal = new RegExp( /hystmodal/,           'g' );
@@ -40,6 +42,8 @@ var regexHotkeys  = new RegExp( /hotkeys/,              'g' );
 var regexSlash    = new RegExp( /^\/$/,                 'g' );
 var regexDotSlash = new RegExp( /^\.\//,                'g' );
 var regexTextHtml = new RegExp( /text\/html/,           'i' );
+var regexVideo    = new RegExp( /video/,                'i' );
+var regexMpeg     = new RegExp( /mpeg/,                 'i' );
 var regexImage    = new RegExp( /image\//,              'i' );
 var regexCSS      = new RegExp( /^.*\.css$/,            'i' );
 var regexJS       = new RegExp( /^.*\.js$/,             'i' );
@@ -300,10 +304,11 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
         result.url = request.url;
         result.routeOverZiti = true;
         result.serviceName = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.service;  
+        result.serviceScheme = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.scheme;
 
       }
       else 
-      if ( (request.url.match( regexZBR )) || (request.url.match( regexZBWASM )) || (request.url.match( regexZBRLogo )) || (request.url.match( regexZBRcss )) ) { // the request seeks z-b-r/wasm/logo/css
+      if ( (request.url.match( regexZBR )) || (request.url.match( regexZBWASM )) || (request.url.match( regexZBRLogo )) || (request.url.match( regexZBRcss )) || (request.url.match( regexZBRCORS ))) { // the request seeks z-b-r/wasm/logo/css/cors-proxy
         this.logger.trace('_shouldRouteOverZiti: z-b-r/wasm/logo, bypassing intercept of [%s]: ', request.url);
       }  
       else {
@@ -321,6 +326,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
         } else {
           result.url = newUrl.toString();
           result.routeOverZiti = true;
+          result.serviceScheme = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.scheme;
         }   
   
       }
@@ -334,7 +340,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       result.url = request.url;
       result.routeOverZiti = true;
       result.serviceName = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.service;
-
+      result.serviceScheme = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.scheme;
     }
 
     else if ( (request.url.match( regexSlash )) || ((request.url.match( regexDotSlash ))) ) { // the request starts with a slash
@@ -354,6 +360,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
         result.url = request.url;
         result.routeOverZiti = true;
+        result.serviceScheme = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.scheme;
   
       }
 
@@ -543,6 +550,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       (request.url.match( regexControllerAPI )) ||    //    "     "      "
       (request.url.match( regexZBR )) ||              // seeking Ziti BrowZer Runtime
       (request.url.match( regexZBRLogo )) ||          // seeking Ziti BrowZer Logo
+      (request.url.match( regexZBRCORS )) ||          // seeking Ziti BrowZer CORS proxy
       (request.url.match( regexZBRcss )) ||           // seeking Ziti BrowZer CSS
       (request.url.match( regexHystmodal )) ||        // seeking Ziti Hystmodal
       (request.url.match( regexPolipop )) ||          // seeking Ziti Polipop
@@ -656,6 +664,13 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     if (contentType && contentType.match( regexTextHtml )) {
       /**
        * Jenkins thing
+       */
+      useCache = false;
+    }
+
+    if ((contentType && contentType.match( regexVideo )) || (contentType && contentType.match( regexMpeg ))) {
+      /**
+       * streaming media server thing
        */
       useCache = false;
     }
@@ -958,7 +973,9 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       zitiRequest.headers.forEach(function (header, key) {
         newHeaders.append( key, header );
       });
-      newHeaders.append( 'referer', request.referrer );
+      if (!isEqual(request.referrer, '')) {
+        newHeaders.append( 'referer', request.referrer );
+      }
 
       // Propagate any Cookie values we have accumulated
       let cookieHeaderValue = '';
@@ -978,6 +995,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       var zitiResponse = await this._zitiContext.httpFetch(
           shouldRoute.url, {
               serviceName:    shouldRoute.serviceName,
+              serviceScheme:  shouldRoute.serviceScheme,
               method:         zitiRequest.method, 
               headers:        newHeaders,
               mode:           zitiRequest.mode,
@@ -1182,13 +1200,13 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     let error;
     let response;
     try {
-      if (useCache) {
-        this.logger.debug(`doing raw internet fetchAndCachePut for: `, request.url);
-        response = await handler.fetchAndCachePut(request);
-      } else {
+      // if (useCache) {
+      //   this.logger.debug(`doing raw internet fetchAndCachePut for: `, request.url);
+      //   response = await handler.fetchAndCachePut(request);
+      // } else {
         this.logger.debug(`doing raw internet fetch for: `, request.url);
         response = await handler.fetch(request);
-      }
+      // }
       this.logger.debug(`Got response: `, response);
     } catch (fetchError) {
       this.logger.error(`Got error: `, fetchError);
