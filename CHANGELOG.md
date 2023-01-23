@@ -1,3 +1,12 @@
+# [0.22.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.21.1...v0.22.0) (2023-01-23)
+
+
+### Features
+
+* phase-1 https service support ([#128](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/128)) ([1de0051](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/1de0051f7594065d58012487379e69e16e411a1e))
+
+
+
 ## [0.21.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.21.0...v0.21.1) (2022-11-29)
 
 
