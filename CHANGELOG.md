@@ -1,3 +1,12 @@
+# [0.23.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.22.0...v0.23.0) (2023-03-30)
+
+
+### Features
+
+* IdP OIDC work moved to ZBR ([#131](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/131)) ([0544fc5](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/0544fc5d5bd86e33d88a312ee3ce32aeaf5fb28d))
+
+
+
 # [0.22.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.21.1...v0.22.0) (2023-01-23)
 
 
