@@ -1,3 +1,12 @@
+# [0.24.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.23.0...v0.24.0) (2023-04-04)
+
+
+### Features
+
+* listen for idpAuthHealthEvent ([#132](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/132)) ([ecf659a](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/ecf659aa88a34956b9c3d7c882111bfbe0e2ef3f))
+
+
+
 # [0.23.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.22.0...v0.23.0) (2023-03-30)
 
 
