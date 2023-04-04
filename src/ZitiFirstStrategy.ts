@@ -167,6 +167,25 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       })();
     });
   }
+
+  idpAuthHealthEventEventHandler(idpAuthHealthEvent: any) {
+
+    this.logger.trace(`idpAuthHealthEventEventHandler() `, idpAuthHealthEvent);
+
+    if (idpAuthHealthEvent.expired) {
+
+      this.logger.trace( `idpAuthHealthEventEventHandler: authToken has expired and will be torn down`);
+
+      setTimeout(function(_zitiBrowzerServiceWorkerGlobalScope: any) {
+        _zitiBrowzerServiceWorkerGlobalScope._accessTokenExpired(); // This will cause a logout with the IdP
+      }, 10, this._zitiBrowzerServiceWorkerGlobalScope);
+
+      setTimeout(function(_zitiBrowzerServiceWorkerGlobalScope: any) {
+        _zitiBrowzerServiceWorkerGlobalScope._unregister();         // Let's try and 'reboot' the ZBR/SW pair
+      }, 500, this._zitiBrowzerServiceWorkerGlobalScope);
+
+    }
+  }
   
   /**
    * Do all work necessary to initialize the ZitiFirstStrategy instance.
@@ -202,11 +221,16 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
           this.logger.trace(`_initialize: ZitiContext created`);
           this._zitiBrowzerServiceWorkerGlobalScope._zitiContext = this._zitiContext;
 
+          // Make SW scope available to idpAuthHealthEventEventHandler
+          this._zitiContext._zitiBrowzerServiceWorkerGlobalScope = this._zitiBrowzerServiceWorkerGlobalScope;
+
           this._zitiContext.setKeyTypeEC();
     
           await this._zitiContext.initialize({
             loadWASM: true   // unlike the ZBR, here in the ZBSW, we always instantiate the internal WebAssembly
           });
+
+          this._zitiContext.on('idpAuthHealthEvent', this.idpAuthHealthEventEventHandler);
     
           this.logger.trace(`_initialize: ZitiContext '${this._uuid}' initialized`);
 
