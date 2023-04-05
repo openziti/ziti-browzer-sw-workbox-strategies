@@ -1,3 +1,12 @@
+## [0.24.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.24.0...v0.24.1) (2023-04-05)
+
+
+### Bug Fixes
+
+* use authQueryElement.typeId ([#133](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/133)) ([b9a840e](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/b9a840e0901bac5e68f5f0fb3ce0b7f6bf9af389))
+
+
+
 # [0.24.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.23.0...v0.24.0) (2023-04-04)
 
 
