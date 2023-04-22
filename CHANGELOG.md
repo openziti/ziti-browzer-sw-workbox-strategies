@@ -1,3 +1,12 @@
+## [0.24.2](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.24.1...v0.24.2) (2023-04-22)
+
+
+### Bug Fixes
+
+* disable _zbrReloadPending check ([#134](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/134)) ([9d6b421](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/9d6b421dde8cc570f3a472735b0f981c2d93388a))
+
+
+
 ## [0.24.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.24.0...v0.24.1) (2023-04-05)
 
 
