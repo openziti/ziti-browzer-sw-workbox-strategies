@@ -567,10 +567,10 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     let skipInject = false;
     let useCache = this._shouldUseCache(request);
 
-    if (request.url.match( regexZBR )) {
-      self._zitiBrowzerServiceWorkerGlobalScope._zbrReloadPending = true;
-      this.logger.trace(`_handle: setting  _zbrReloadPending=true`);
-    }
+    // if (request.url.match( regexZBR )) {
+    //   self._zitiBrowzerServiceWorkerGlobalScope._zbrReloadPending = true;
+    //   this.logger.trace(`_handle: setting  _zbrReloadPending=true`);
+    // }
 
     if (useCache) {
       let cachResponse = await handler.cacheMatch(request);
