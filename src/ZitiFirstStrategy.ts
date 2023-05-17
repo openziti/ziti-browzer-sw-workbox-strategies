@@ -52,6 +52,13 @@ var regexJPG      = new RegExp( /^.*\.jpg$/,            'i' );
 var regexSVG      = new RegExp( /^.*\.svg$/,            'i' );
 var regexControllerAPI: any;
 
+interface PolicyResult {
+  [key: string]: string[];
+}
+interface PolicyBuilderOptions {
+  directives: Readonly<Record<string, string[] | string | boolean>>;
+}
+
 /**
  * An implementation of a Ziti network request strategy.
  *
@@ -106,6 +113,83 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     this.logger.trace(`ZitiFirstStrategy ctor completed`);
   }
 
+  parseCSP(policy: any): PolicyResult {
+    const result: PolicyResult = {};
+    policy.split(";").forEach((directive: any) => {
+      const [directiveKey, ...directiveValue] = directive.trim().split(/\s+/g);
+      if (
+        directiveKey &&
+        !Object.prototype.hasOwnProperty.call(result, directiveKey)
+      ) {
+        result[directiveKey] = directiveValue;
+      }
+    });
+    return result;
+  };
+
+  buildCSP({ directives }: Readonly<PolicyBuilderOptions>): string {
+    const namesSeen = new Set<string>();
+  
+    const result: string[] = [];
+  
+    Object.keys(directives).forEach((originalName) => {
+      const name = originalName.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
+  
+      if (namesSeen.has(name)) {
+        throw new Error(`${originalName} is specified more than once`);
+      }
+      namesSeen.add(name);
+  
+      let value = directives[originalName];
+      if (Array.isArray(value)) {
+        value = value.join(" ");
+      } else if (value === true) {
+        value = "";
+      }
+  
+      if (value) {
+        result.push(`${name} ${value}`);
+      } else if (value !== false) {
+        result.push(name);
+      }
+    });
+  
+    return result.join("; ");
+  };  
+
+  generateNewCSP(val:string|undefined) {
+
+    let origCSP = this.parseCSP(val);
+    this.logger.trace( `generateNewCSP() origCSP: `, origCSP);
+
+    if (origCSP['script-src']) {
+      origCSP['script-src'].push(`${this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.idp.host}`);
+      if (!origCSP['script-src'].includes("'unsafe-eval'")) {
+        origCSP['script-src'].push("'unsafe-eval'");
+      }
+      if (!origCSP['script-src'].includes("'unsafe-inline'")) {
+        origCSP['script-src'].push("'unsafe-inline'");
+      }
+    }
+
+    let directives:any = {}
+    if (!isUndefined(origCSP['child-src']))       { directives.childSrc       = origCSP['child-src'];}
+    if (!isUndefined(origCSP['connect-src']))     { directives.connectdSrc    = origCSP['connect-src'];}
+    if (!isUndefined(origCSP['default-src']))     { directives.defaultSrc     = origCSP['default-src'];}
+    if (!isUndefined(origCSP['font-src']))        { directives.fontSrc        = origCSP['font-src'];}
+    if (!isUndefined(origCSP['frame-ancestors'])) { directives.frameAncestors = origCSP['frame-ancestors'];}
+    if (!isUndefined(origCSP['frame-src']))       { directives.frameSrc       = origCSP['frame-src'];}
+    if (!isUndefined(origCSP['img-src']))         { directives.imgSrc         = origCSP['img-src'];}
+    if (!isUndefined(origCSP['media-src']))       { directives.mediaSrc       = origCSP['media-src'];}
+    if (!isUndefined(origCSP['object-src']))      { directives.objectSrc      = origCSP['object-src'];}
+    if (!isUndefined(origCSP['script-src']))      { directives.scriptSrc      = origCSP['script-src'];}
+    if (!isUndefined(origCSP['style-src']))       { directives.styleSrc       = origCSP['style-src'];}          
+
+    let newCSP = this.buildCSP({ directives });
+    this.logger.trace( `generateNewCSP() newCSP: `, newCSP);
+
+    return newCSP;
+  }
 
   /**
    * Remain in lazy-sleepy loop until z-b-runtime sends us the _zitiConfig
@@ -186,6 +270,15 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
     }
   }
+
+  async noConfigForServiceEventHandler(noConfigForServiceEvent: any) {
+
+    this.logger.trace(`noConfigForServiceEventHandler() `, noConfigForServiceEvent);
+
+    await this._zitiBrowzerServiceWorkerGlobalScope._noConfigForService(noConfigForServiceEvent);
+
+  }
+
   
   /**
    * Do all work necessary to initialize the ZitiFirstStrategy instance.
@@ -231,6 +324,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
           });
 
           this._zitiContext.on('idpAuthHealthEvent', this.idpAuthHealthEventEventHandler);
+          this._zitiContext.on('noConfigForServiceEvent',  this.noConfigForServiceEventHandler);
     
           this.logger.trace(`_initialize: ZitiContext '${this._uuid}' initialized`);
 
@@ -312,7 +406,8 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     // which the app was loaded.
   
     var regex = new RegExp( this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.self.host, 'g' );
-    var targetServiceRegex = new RegExp( this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.service, 'g' );
+    let targetserviceHost = await this._zitiContext.getConfigHostByServiceName (this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.service);
+    var targetServiceRegex = new RegExp( targetserviceHost , 'g' );
   
     if (request.url.match( regex )) { // yes, the request is targeting the Ziti HTTP Agent
 
@@ -813,7 +908,9 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
                       self.logger.trace('streamingHEADReplace: CSP found in html with content: ', cspElement.attr('content'));
                       // then augment it to enable WASM load/xeq
-                      cspElement.attr('content', cspElement.attr('content') + ` cdn.jsdelivr.net unpkg.com ${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.idp.host} 'unsafe-eval' 'unsafe-inline'`);
+                      let cspContent = cspElement.attr('content');
+                      let newCspContent = self.generateNewCSP(cspContent);
+                      cspElement.attr('content', newCspContent);
                       self.logger.trace('streamingHEADReplace: CSP is now enhanced with content: ', cspElement.attr('content'));
 
                       // Inject the PP immediately after the CSP
@@ -955,6 +1052,15 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     }
   }
 
+  /**
+   * 
+   * @param headersObject 
+   */
+   generateCSP( headersObject: any) {
+    for (var pair of headersObject.entries()) {
+      this.logger.trace( 'dumpHeaders: ', pair[0], pair[1]);
+    }
+  }
 
   /**
    * @param {Object} options
@@ -1109,7 +1215,9 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
         }
         
         else if (key.toLowerCase() === 'content-security-policy') {
-          val += ` cdn.jsdelivr.net unpkg.com ${this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.idp.host} 'unsafe-eval' 'unsafe-inline'`;
+
+          val = this.generateNewCSP(val);
+
         }
         
         headers.append( key, val);
