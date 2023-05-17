@@ -1,3 +1,12 @@
+# [0.25.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.24.3...v0.25.0) (2023-05-17)
+
+
+### Features
+
+* new CSP parser/generator ([#135](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/135)) ([e591980](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/e591980c9dadc7d1d7cec46668314b73e6e54454))
+
+
+
 ## [0.24.3](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.24.2...v0.24.3) (2023-04-22)
 
 
