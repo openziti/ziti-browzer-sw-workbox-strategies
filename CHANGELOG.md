@@ -1,3 +1,12 @@
+## [0.26.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.26.0...v0.26.1) (2023-05-19)
+
+
+### Bug Fixes
+
+* temp bypass of idpAuthHealthEvent ([#137](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/137)) ([1812a4e](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/1812a4eb86def27d758106aaf3941fc2ed26619c))
+
+
+
 # [0.26.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.25.0...v0.26.0) (2023-05-17)
 
 
