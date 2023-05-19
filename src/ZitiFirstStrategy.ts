@@ -256,6 +256,8 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
     this.logger.trace(`idpAuthHealthEventEventHandler() `, idpAuthHealthEvent);
 
+    return;//TEMPORARY bypass until Controller fix is released
+
     if (idpAuthHealthEvent.expired) {
 
       this.logger.trace( `idpAuthHealthEventEventHandler: authToken has expired and will be torn down`);
