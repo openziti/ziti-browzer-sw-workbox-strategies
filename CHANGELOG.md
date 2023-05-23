@@ -1,3 +1,12 @@
+# [0.27.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.26.1...v0.27.0) (2023-05-23)
+
+
+### Features
+
+* advanced services support ([#138](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/138)) ([076c032](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/076c032ededac66b320b32062ef657336fe4c760))
+
+
+
 ## [0.26.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.26.0...v0.26.1) (2023-05-19)
 
 
