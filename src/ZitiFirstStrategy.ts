@@ -26,6 +26,7 @@ type ZitiShouldRouteResult = {
   routeOverZiti?: boolean | false;
   serviceName?: string | '';
   serviceScheme?: string | '';
+  serviceConnectAppData?: object | undefined;
   url?: string | '';
 }
 
@@ -409,6 +410,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
   
     var regex = new RegExp( this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.self.host, 'g' );
     let targetserviceHost = await this._zitiContext.getConfigHostByServiceName (this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.service);
+    let connectAppData = await this._zitiContext.getConnectAppDataByServiceName (this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.service);
     var targetServiceRegex = new RegExp( targetserviceHost , 'g' );
   
     if (request.url.match( regex )) { // yes, the request is targeting the Ziti HTTP Agent
@@ -425,7 +427,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
         result.routeOverZiti = true;
         result.serviceName = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.service;  
         result.serviceScheme = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.scheme;
-
+        result.serviceConnectAppData = connectAppData;
       }
       else 
       if ( (request.url.match( regexZBR )) || (request.url.match( regexZBWASM )) || (request.url.match( regexZBRLogo )) || (request.url.match( regexZBRcss )) || (request.url.match( regexZBRCORS ))) { // the request seeks z-b-r/wasm/logo/css/cors-proxy
@@ -447,6 +449,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
           result.url = newUrl.toString();
           result.routeOverZiti = true;
           result.serviceScheme = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.scheme;
+          result.serviceConnectAppData = connectAppData;
         }   
   
       }
@@ -461,6 +464,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       result.routeOverZiti = true;
       result.serviceName = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.service;
       result.serviceScheme = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.scheme;
+      result.serviceConnectAppData = connectAppData;
     }
 
     else if ( (request.url.match( regexSlash )) || ((request.url.match( regexDotSlash ))) ) { // the request starts with a slash
@@ -481,6 +485,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
         result.url = request.url;
         result.routeOverZiti = true;
         result.serviceScheme = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.scheme;
+        result.serviceConnectAppData = connectAppData;
   
       }
 
@@ -1132,6 +1137,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
           shouldRoute.url, {
               serviceName:    shouldRoute.serviceName,
               serviceScheme:  shouldRoute.serviceScheme,
+              serviceConnectAppData:  shouldRoute.serviceConnectAppData,
               method:         zitiRequest.method, 
               headers:        newHeaders,
               mode:           zitiRequest.mode,
