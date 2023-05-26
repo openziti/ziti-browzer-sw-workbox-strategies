@@ -1,3 +1,12 @@
+# [0.28.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.27.0...v0.28.0) (2023-05-26)
+
+
+### Features
+
+* support both 'ws' and 'wss' ER bindings ([#139](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/139)) ([0a96cf7](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/0a96cf7e9e3d70d869d70468cb0aa661fe1aab40))
+
+
+
 # [0.27.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.26.1...v0.27.0) (2023-05-23)
 
 
