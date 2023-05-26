@@ -213,13 +213,9 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
             self.logger.trace(`await_zitiConfig: initiating unregister`);
             // Let's try and 'reboot' the ZBR/SW pair
             await self._zitiBrowzerServiceWorkerGlobalScope._unregister();
-
-            setTimeout(waitFor_zitiConfig, 3000);  // this doesn't do much except cause us to wait for ourselves to be unregistered
-          }
-          else if (ctr == 13) {
             return resolve( -1 );
           } else {
-            setTimeout(waitFor_zitiConfig, 250);  
+            setTimeout(waitFor_zitiConfig, 100);  
           }
         } else {
           self.logger.trace(`await_zitiConfig: config acquired for [${request.url}]`);
@@ -287,7 +283,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
    * Do all work necessary to initialize the ZitiFirstStrategy instance.
    * 
    */
-  async _initialize(request: Request) {
+  async _initialize() {
     
     // Run the init sequence within a critical-section
     await this._initializationMutex.runExclusive(async () => {
@@ -295,11 +291,6 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       if (!this._initialized) {
 
         this.logger.trace(`_initialize: entered`);
-
-        if (isUndefined(this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig) 
-        ) {
-          await this.await_zitiConfig(request);
-        }
 
         if (isUndefined(this._zitiContext)) {
 
@@ -688,19 +679,25 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
     let shouldRoute: ZitiShouldRouteResult = {routeOverZiti: false}
 
-    if (tryZiti) {   
-      if (this._isRootPATH(request) ) {               // seeking root path
-        if (isUndefined(this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig) ) {  // ...but we don't yet have the zitiConfig from ZBR
-          tryZiti = false;                            // ...then we're bootstrapping, so load ZBR from HTTP Agent
-          bootstrappingZBRFromSW = true;
-        }
-      }
-    }
-
     if ( tryZiti ) {
 
+      if (isUndefined(this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig)) {
+        let result: any = await this.await_zitiConfig(request);
+        if (result < 0) {
+          let redirectResponse = new Response('', {  // If ZBR is AWOL, initiate top-level page reboot
+              status: 302,
+              statusText: 'Found',
+              headers: {
+                Location: '/'
+              }
+            }
+          );
+          return redirectResponse;
+        };
+      }
+
       // If possibly going over Ziti, we must first complete the work
-      await this._initialize(request);   //  to ensure WASM is instantiated, 
+      await this._initialize();   //  to ensure WASM is instantiated, 
                                   //   we have a cert, etc
         
       // Now determine if we're going over Ziti or not
