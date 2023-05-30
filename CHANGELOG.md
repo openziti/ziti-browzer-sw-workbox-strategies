@@ -1,3 +1,12 @@
+# [0.29.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.28.0...v0.29.0) (2023-05-30)
+
+
+### Features
+
+* SW bootstrap enhancement ([#140](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/140)) ([a4320f1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/a4320f1b0c01aa9a95ff8bad2c2c6fec37d74188))
+
+
+
 # [0.28.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.27.0...v0.28.0) (2023-05-26)
 
 
