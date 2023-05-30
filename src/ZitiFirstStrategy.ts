@@ -31,6 +31,7 @@ type ZitiShouldRouteResult = {
 }
 
 var regexZBR      = new RegExp( /ziti-browzer-runtime-[0-9a-f]{8}\.js/, 'gi' );
+var regexZBRnaked = new RegExp( /ziti-browzer-runtime\.js/, 'gi' );
 var regexZBRLogo  = new RegExp( /ziti-browzer-logo/,    'g' );
 var regexZBRcss   = new RegExp( /ziti-browzer-css/,     'g' );
 var regexZBRCORS  = new RegExp( /ziti-cors-proxy/,      'g' );
@@ -196,9 +197,11 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
    * Remain in lazy-sleepy loop until z-b-runtime sends us the _zitiConfig
    * 
    */
-  async await_zitiConfig(request: Request) {
+  async await_zitiConfig(request: Request, _handler: StrategyHandler) {
     let self = this;
     let ctr = 0;
+    let waitTime = 100;
+
     return new Promise((resolve: any, _reject: any) => {
       (async function waitFor_zitiConfig() {
         if (isUndefined(self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig)) {
@@ -207,16 +210,19 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
           if (ctr == 5) {  // kick the ZBR, and ask for the config
             self.logger.trace( 'await_zitiConfig: sending ZITI_CONFIG_NEEDED msg to ZBR');  
             self._zitiBrowzerServiceWorkerGlobalScope._sendMessageToClients( { type: 'ZITI_CONFIG_NEEDED'} );
-            setTimeout(waitFor_zitiConfig, 250);  
+            setTimeout(waitFor_zitiConfig, waitTime);  
           }
           else if (ctr == 10) {  // only do the unregister once
             self.logger.trace(`await_zitiConfig: initiating unregister`);
             // Let's try and 'reboot' the ZBR/SW pair
             await self._zitiBrowzerServiceWorkerGlobalScope._unregister();
             return resolve( -1 );
-          } else {
-            setTimeout(waitFor_zitiConfig, 100);  
+          } 
+          
+          else {
+            setTimeout(waitFor_zitiConfig, waitTime);  
           }
+
         } else {
           self.logger.trace(`await_zitiConfig: config acquired for [${request.url}]`);
           return resolve( 0 );
@@ -421,7 +427,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
         result.serviceConnectAppData = connectAppData;
       }
       else 
-      if ( (request.url.match( regexZBR )) || (request.url.match( regexZBWASM )) || (request.url.match( regexZBRLogo )) || (request.url.match( regexZBRcss )) || (request.url.match( regexZBRCORS ))) { // the request seeks z-b-r/wasm/logo/css/cors-proxy
+      if ( (request.url.match( regexZBR )) || (request.url.match( regexZBRnaked )) || (request.url.match( regexZBWASM )) || (request.url.match( regexZBRLogo )) || (request.url.match( regexZBRcss )) || (request.url.match( regexZBRCORS ))) { // the request seeks z-b-r/wasm/logo/css/cors-proxy
         this.logger.trace('_shouldRouteOverZiti: z-b-r/wasm/logo, bypassing intercept of [%s]: ', request.url);
       }  
       else {
@@ -576,6 +582,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       (request.url.match( regexEdgeClt )) ||          // seeking Ziti Controller
       (request.url.match( regexControllerAPI )) ||    //    "     "      "
       (request.url.match( regexZBR )) ||              // seeking Ziti BrowZer Runtime
+      (request.url.match( regexZBRnaked )) ||         // seeking Ziti BrowZer Runtime
       (request.url.match( regexZBRLogo )) ||          // seeking Ziti BrowZer Logo
       (request.url.match( regexZBRCORS )) ||          // seeking Ziti BrowZer CORS proxy
       (request.url.match( regexZBRcss )) ||           // seeking Ziti BrowZer CSS
@@ -587,6 +594,16 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       tryZiti = false;
     } else {
       tryZiti = true;
+    }
+
+    if (this._isRootPATH(request)) {
+      const url = new URL(request.url)    
+      const urlSearchParams = new URLSearchParams(url.search);
+      const codeParm = urlSearchParams.get('code');
+      const stateParm = urlSearchParams.get('state');
+      if (codeParm && stateParm) {
+        tryZiti = false;
+      }
     }
 
     /**
@@ -640,7 +657,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     if (tryZiti && (!this._isRootPATH(request)) && (!request.url.match( regexZBR ))) {       // if NOT in the process of bootstrapping from HTTP Agent
       if (isUndefined(this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig) ) {  // ...and we don't yet have the zitiConfig from ZBR
         if (!request.url.match( regexEdgeClt )) {                                 // ...and NOT hitting the controller
-          let result: any = await this.await_zitiConfig(request);                      // ...then wait for ZBR to send zitiConfig to us
+          let result: any = await this.await_zitiConfig(request, handler);                      // ...then wait for ZBR to send zitiConfig to us
           if (result < 0) {
             let redirectResponse = new Response('', {                             // If ZBR is AWOL, initiate top-level page reboot
                 status: 302,
@@ -675,14 +692,25 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     const promises: Promise<Response | undefined>[] = [];
     let timeoutId: number | undefined;
     let bootstrappingZBRFromSW: boolean | false;
+    let bootstrappingZBRFromSWConfigNeeded: boolean | false;
     let response: Response | undefined;
 
     let shouldRoute: ZitiShouldRouteResult = {routeOverZiti: false}
 
+    if (tryZiti) {   
+      if (this._isRootPATH(request) ) {               // seeking root path
+        bootstrappingZBRFromSW = true;
+        if (isUndefined(this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig) ) {  // ...but we don't yet have the zitiConfig from ZBR
+          tryZiti = false;                            // ...then we're bootstrapping, so load ZBR from HTTP Agent
+          bootstrappingZBRFromSWConfigNeeded = true;
+        }
+      }
+    }
+
     if ( tryZiti ) {
 
       if (isUndefined(this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig)) {
-        let result: any = await this.await_zitiConfig(request);
+        let result: any = await this.await_zitiConfig(request, handler);
         if (result < 0) {
           let redirectResponse = new Response('', {  // If ZBR is AWOL, initiate top-level page reboot
               status: 302,
@@ -824,18 +852,23 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
                   // Parse the HTML
                   const $ = cheerio.load(chunk);
 
-                  let fromAgentEl = $('script[id="from-ziti-http-agent"]');
+                  let fromEl = $('script[id="from-ziti-http-agent"]');
 
-                  if (fromAgentEl.length > 0) {
+                  if (fromEl.length > 0) {
 
                     fromHttpAgent = true;
 
                     if (bootstrappingZBRFromSW) {
+
                       self.logger.trace('detectFromHttpAgent: bootstrappingZBRFromSW [%o]', bootstrappingZBRFromSW);
 
-                      let bootstrappingZBRFromSWElement = $('<script></script> ').attr('id', 'ziti-browzer-sw-bootstrap').attr('name', `ziti-browzer-sw-bootstrap`);
+                      // swap the id to indicate we are bootstrapping from the SW
+                      fromEl.attr('id', `from-ziti-browzer-sw`);  
 
-                      fromAgentEl.before(bootstrappingZBRFromSWElement);
+                      // also let the ZBR know if we need it to send us the config or not
+                      if (bootstrappingZBRFromSWConfigNeeded) {
+                        fromEl.attr('class', `ziti-browzer-sw-config-needed`);
+                      }
 
                     }
 
@@ -854,7 +887,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
                   controller.enqueue(buffer);
                 }
               }
-            })
+            });
           }
         
           function streamingHEADReplace() {
@@ -966,7 +999,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
                   controller.enqueue(buffer);
                 }
               }
-            })
+            });
           }
           
           const bodyStream = response.body
