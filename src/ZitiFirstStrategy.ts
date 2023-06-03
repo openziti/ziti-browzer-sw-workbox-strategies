@@ -331,7 +331,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
           this._zitiContext.on('idpAuthHealthEvent', this.idpAuthHealthEventEventHandler);
           this._zitiContext.on('noConfigForServiceEvent',  this.noConfigForServiceEventHandler);
-          this._zitiContext.on(ZITI_CONSTANTS.ZITI_EVENT_XGRESS_TX, this.xgressEventHandler);
+          this._zitiContext.on(ZITI_CONSTANTS.ZITI_EVENT_XGRESS, this.xgressEventHandler);
     
           this.logger.trace(`_initialize: ZitiContext '${this._uuid}' initialized`);
 
