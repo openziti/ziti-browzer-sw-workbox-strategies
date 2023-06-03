@@ -1,3 +1,12 @@
+# [0.30.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.29.0...v0.30.0) (2023-06-03)
+
+
+### Features
+
+* xgressEvent ([#141](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/141)) ([46ad444](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/46ad444e159bf889ffdfaddb00c989dca4536219))
+
+
+
 # [0.29.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.28.0...v0.29.0) (2023-05-30)
 
 
