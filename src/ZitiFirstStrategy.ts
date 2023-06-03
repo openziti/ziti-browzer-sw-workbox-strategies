@@ -8,7 +8,10 @@ import { isUndefined, isEqual } from 'lodash-es';
 import * as cheerio from 'cheerio';
 
 
-import { ZitiBrowzerCore } from '@openziti/ziti-browzer-core';
+import { 
+  ZitiBrowzerCore,
+  ZITI_CONSTANTS
+} from '@openziti/ziti-browzer-core';
 
 import pjson from '../package.json';
 import { buildInfo } from './buildInfo'
@@ -259,8 +262,6 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
     this.logger.trace(`idpAuthHealthEventEventHandler() `, idpAuthHealthEvent);
 
-    return;//TEMPORARY bypass until Controller fix is released
-
     if (idpAuthHealthEvent.expired) {
 
       this.logger.trace( `idpAuthHealthEventEventHandler: authToken has expired and will be torn down`);
@@ -284,6 +285,11 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
   }
 
+  async xgressEventHandler(xgressEvent: any) {
+
+    this._zitiBrowzerServiceWorkerGlobalScope._xgressEvent(xgressEvent);
+
+  }
   
   /**
    * Do all work necessary to initialize the ZitiFirstStrategy instance.
@@ -325,6 +331,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
           this._zitiContext.on('idpAuthHealthEvent', this.idpAuthHealthEventEventHandler);
           this._zitiContext.on('noConfigForServiceEvent',  this.noConfigForServiceEventHandler);
+          this._zitiContext.on(ZITI_CONSTANTS.ZITI_EVENT_XGRESS, this.xgressEventHandler);
     
           this.logger.trace(`_initialize: ZitiContext '${this._uuid}' initialized`);
 
