@@ -1,3 +1,12 @@
+## [0.30.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.30.0...v0.30.1) (2023-06-12)
+
+
+### Bug Fixes
+
+* handle spaces in Service name ([#142](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/142)) ([2150141](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/215014154e72bafedccdd511c994ed7383a078b9))
+
+
+
 # [0.30.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.29.0...v0.30.0) (2023-06-03)
 
 
