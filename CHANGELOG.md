@@ -1,3 +1,12 @@
+## [0.30.2](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.30.1...v0.30.2) (2023-06-21)
+
+
+### Bug Fixes
+
+* eliminate typo in CSP re-generator ([#143](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/143)) ([c94aff2](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/c94aff29d40a1eb2c9d89a65c0032f673aa088e6))
+
+
+
 ## [0.30.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.30.0...v0.30.1) (2023-06-12)
 
 
