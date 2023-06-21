@@ -179,7 +179,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
     let directives:any = {}
     if (!isUndefined(origCSP['child-src']))       { directives.childSrc       = origCSP['child-src'];}
-    if (!isUndefined(origCSP['connect-src']))     { directives.connectdSrc    = origCSP['connect-src'];}
+    if (!isUndefined(origCSP['connect-src']))     { directives.connectSrc     = origCSP['connect-src'];}
     if (!isUndefined(origCSP['default-src']))     { directives.defaultSrc     = origCSP['default-src'];}
     if (!isUndefined(origCSP['font-src']))        { directives.fontSrc        = origCSP['font-src'];}
     if (!isUndefined(origCSP['frame-ancestors'])) { directives.frameAncestors = origCSP['frame-ancestors'];}
@@ -326,7 +326,8 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
           this._zitiContext.setKeyTypeEC();
     
           await this._zitiContext.initialize({
-            loadWASM: true   // unlike the ZBR, here in the ZBSW, we always instantiate the internal WebAssembly
+            loadWASM: true,   // unlike the ZBR, here in the ZBSW, we always instantiate the internal WebAssembly
+            target:   this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target
           });
 
           this._zitiContext.on('idpAuthHealthEvent', this.idpAuthHealthEventEventHandler);
@@ -342,8 +343,6 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
           this.logger.trace(`_initialize: terminated`);
 
         }
-
-        await this._zitiContext.listControllerVersion();
   
         let result = await this._zitiContext.enroll(); // this acquires an ephemeral Cert
 
