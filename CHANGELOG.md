@@ -1,3 +1,12 @@
+## [0.30.3](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.30.2...v0.30.3) (2023-07-09)
+
+
+### Bug Fixes
+
+* correct CSP connect-src handling ([#144](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/144)) ([bb21e8b](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/bb21e8bfd089247cc293eec0569d5ff64a15ba4e))
+
+
+
 ## [0.30.2](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.30.1...v0.30.2) (2023-06-21)
 
 
