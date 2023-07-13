@@ -312,75 +312,92 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     // Run the init sequence within a critical-section
     await this._initializationMutex.runExclusive(async () => {
       
-      if (!this._initialized) {
+      return new Promise( async (resolve, _) => {
 
-        this.logger.trace(`_initialize: entered`);
+        if (!this._initialized) {
 
-        if (isUndefined(this._zitiContext)) {
+          this.logger.trace(`_initialize: entered`);
 
-          this._zitiContext = this._core.createZitiContext({
-            logger:         this.logger,
-            controllerApi:  this._controllerApi,
-            sdkType:        pjson.name,
-            sdkVersion:     pjson.version,
-            sdkBranch:      buildInfo.sdkBranch,
-            sdkRevision:    buildInfo.sdkRevision,
-            token_type:     this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.token_type,
-            access_token:   this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.access_token,
-            httpAgentTargetService: this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.service,
-          });
-          this.logger.trace(`_initialize: ZitiContext created`);
-          this._zitiBrowzerServiceWorkerGlobalScope._zitiContext = this._zitiContext;
+          if (isUndefined(this._zitiContext)) {
 
-          // Make SW scope available to idpAuthHealthEventEventHandler
-          this._zitiContext._zitiBrowzerServiceWorkerGlobalScope = this._zitiBrowzerServiceWorkerGlobalScope;
+            this._zitiContext = this._core.createZitiContext({
+              logger:         this.logger,
+              controllerApi:  this._controllerApi,
+              sdkType:        pjson.name,
+              sdkVersion:     pjson.version,
+              sdkBranch:      buildInfo.sdkBranch,
+              sdkRevision:    buildInfo.sdkRevision,
+              token_type:     this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.token_type,
+              access_token:   this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.access_token,
+              httpAgentTargetService: this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.service,
+            });
+            this.logger.trace(`_initialize: ZitiContext created`);
+            this._zitiBrowzerServiceWorkerGlobalScope._zitiContext = this._zitiContext;
 
-          this._zitiContext.setKeyTypeEC();
+            // Make SW scope available to idpAuthHealthEventEventHandler
+            this._zitiContext._zitiBrowzerServiceWorkerGlobalScope = this._zitiBrowzerServiceWorkerGlobalScope;
+
+            this._zitiContext.setKeyTypeEC();
+      
+            await this._zitiContext.initialize({
+              loadWASM: true,   // unlike the ZBR, here in the ZBSW, we always instantiate the internal WebAssembly
+              target:   this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target
+            });
+
+            this._zitiContext.listControllerVersion();
+
+            this._zitiContext.on('idpAuthHealthEvent', this.idpAuthHealthEventEventHandler);
+            this._zitiContext.on('noConfigForServiceEvent',  this.noConfigForServiceEventHandler);
+            this._zitiContext.on(ZITI_CONSTANTS.ZITI_EVENT_XGRESS, this.xgressEventHandler);
+      
+            this.logger.trace(`_initialize: ZitiContext '${this._uuid}' initialized`);
+
+          } else {
+
+            this.logger.trace(`_initialize: initiating unregister`);
+            await this._zitiBrowzerServiceWorkerGlobalScope._unregister(); // Let's try and 'reboot' the ZBR/SW pair
+            this.logger.trace(`_initialize: terminated`);
+
+          }
     
-          await this._zitiContext.initialize({
-            loadWASM: true,   // unlike the ZBR, here in the ZBSW, we always instantiate the internal WebAssembly
-            target:   this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target
-          });
+          setTimeout(async function(self: any, resolve: any) {
 
-          this._zitiContext.on('idpAuthHealthEvent', this.idpAuthHealthEventEventHandler);
-          this._zitiContext.on('noConfigForServiceEvent',  this.noConfigForServiceEventHandler);
-          this._zitiContext.on(ZITI_CONSTANTS.ZITI_EVENT_XGRESS, this.xgressEventHandler);
-    
-          this.logger.trace(`_initialize: ZitiContext '${this._uuid}' initialized`);
+            let result = await self._zitiContext.enroll(); // this acquires an ephemeral Cert
 
-        } else {
-
-          this.logger.trace(`_initialize: initiating unregister`);
-          await this._zitiBrowzerServiceWorkerGlobalScope._unregister(); // Let's try and 'reboot' the ZBR/SW pair
-          this.logger.trace(`_initialize: terminated`);
-
-        }
+            if (!result) {
+              
+              self.logger.trace(`_initialize: ephemeral Cert acquisition failed`);
   
-        let result = await this._zitiContext.enroll(); // this acquires an ephemeral Cert
+              // If we couldn't acquire a cert, it most likely means that the JWT from the IdP needs a refresh
+  
+              self.logger.trace(`_initialize: initiating unregister`);
+              
+              await self._zitiBrowzerServiceWorkerGlobalScope._unregister(); // Let's try and 'reboot' the ZBR/SW pair
+  
+              self.logger.trace(`_initialize: terminated`);
+  
+            } else {
+              
+              self.logger.trace(`_initialize: ephemeral Cert acquisition succeeded`);
+  
+              self._rootPaths.push(self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.path);
+  
+              self._initialized = true;
+        
+              self.logger.trace(`_initialize: complete`);
+            }
 
-        if (!result) {
-          
-          this.logger.trace(`_initialize: ephemeral Cert acquisition failed`);
-
-          // If we couldn't acquire a cert, it most likely means that the JWT from the IdP needs a refresh
-
-          this.logger.trace(`_initialize: initiating unregister`);
-          
-          await this._zitiBrowzerServiceWorkerGlobalScope._unregister(); // Let's try and 'reboot' the ZBR/SW pair
-
-          this.logger.trace(`_initialize: terminated`);
-
-        } else {
-          
-          this.logger.trace(`_initialize: ephemeral Cert acquisition succeeded`);
-
-          this._rootPaths.push(this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.path);
-
-          this._initialized = true;
+            return resolve(null);
+  
+          }, 500, this, resolve);
     
-          this.logger.trace(`_initialize: complete`);
+        } else {
+
+          return resolve(null);
+
         }
-      }
+
+      });
 
     })
     .catch(( err: any ) => {
