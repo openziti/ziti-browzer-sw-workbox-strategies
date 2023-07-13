@@ -1,3 +1,12 @@
+## [0.30.4](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.30.3...v0.30.4) (2023-07-13)
+
+
+### Bug Fixes
+
+* do a GET before a POST at startup (use listControllerVersion) ([#145](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/145)) ([c155409](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/c155409a69337aa945001cdf0e17aeea9cc9bffb))
+
+
+
 ## [0.30.3](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.30.2...v0.30.3) (2023-07-09)
 
 
