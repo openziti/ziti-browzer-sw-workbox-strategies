@@ -1,3 +1,12 @@
+# [0.31.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.30.4...v0.31.0) (2023-07-19)
+
+
+### Features
+
+* emit troubleshooting alerts ([#146](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/146)) ([03d45cd](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/03d45cd9ced91648e9653030bba87e4e21f12f90))
+
+
+
 ## [0.30.4](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.30.3...v0.30.4) (2023-07-13)
 
 
