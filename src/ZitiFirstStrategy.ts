@@ -297,6 +297,30 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
   }
 
+  async sessionCreationErrorEventHandler(sessionCreationErrorEvent: any) {
+
+    this.logger.trace(`sessionCreationErrorEventHandler() `, sessionCreationErrorEvent);
+
+    await this._zitiBrowzerServiceWorkerGlobalScope._sessionCreationError(sessionCreationErrorEvent);
+
+  }
+
+  async noServiceEventHandler(noServiceEvent: any) {
+
+    this.logger.trace(`noServiceEventHandler() `, noServiceEvent);
+
+    await this._zitiBrowzerServiceWorkerGlobalScope._noService(noServiceEvent);
+
+  }
+
+  async invalidAuthEventHandler(invalidAuthEvent: any) {
+
+    this.logger.trace(`invalidAuthEventHandler() `, invalidAuthEvent);
+
+    await this._zitiBrowzerServiceWorkerGlobalScope._invalidAuth(invalidAuthEvent);
+
+  }
+
   async xgressEventHandler(xgressEvent: any) {
 
     this._zitiBrowzerServiceWorkerGlobalScope._xgressEvent(xgressEvent);
@@ -348,6 +372,9 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
             this._zitiContext.on('idpAuthHealthEvent', this.idpAuthHealthEventEventHandler);
             this._zitiContext.on('noConfigForServiceEvent',  this.noConfigForServiceEventHandler);
+            this._zitiContext.on('sessionCreationErrorEvent',  this.sessionCreationErrorEventHandler);
+            this._zitiContext.on('noServiceEvent',  this.noServiceEventHandler);
+            this._zitiContext.on('invalidAuthEvent',  this.invalidAuthEventHandler);
             this._zitiContext.on(ZITI_CONSTANTS.ZITI_EVENT_XGRESS, this.xgressEventHandler);
       
             this.logger.trace(`_initialize: ZitiContext '${this._uuid}' initialized`);
@@ -436,6 +463,8 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
     result.routeOverZiti = false;  // default is to route over raw internet
 
+    try {
+
     // We want to intercept fetch requests that target the Ziti HTTP Agent... that is...
     // ...we want to intercept any request from the web app that targets the server from 
     // which the app was loaded.
@@ -521,7 +550,10 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
   
       }
 
-    }  
+    }
+    } catch (e) {
+      this.logger.error( e );
+    }
 
     this.logger.trace(`_shouldRouteOverZiti result[%o]`, result);
 
