@@ -863,7 +863,18 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     });
 
     if (!response) {
-      throw new WorkboxError('no-response', {url: request.url});
+      this.logger.error(`no-response when trying to reach URL [${request.url}]`);
+
+      await this._zitiBrowzerServiceWorkerGlobalScope._requestFailedWithNoResponse({
+        url: request.url
+      });
+
+      let errResponse = new Response('', {
+          status: 500,
+          statusText: 'ServerError',
+        }
+      );
+      return errResponse;
     }
 
     const location = response.headers.get('Location');
