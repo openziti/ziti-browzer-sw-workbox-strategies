@@ -1,3 +1,12 @@
+# [0.32.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.31.0...v0.32.0) (2023-07-24)
+
+
+### Features
+
+* cert expired alert ([#147](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/147)) ([0c80bd7](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/0c80bd705e5f1a050be7a190f90a2962ef525223))
+
+
+
 # [0.31.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.30.4...v0.31.0) (2023-07-19)
 
 
