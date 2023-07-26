@@ -1,3 +1,12 @@
+# [0.33.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.32.0...v0.33.0) (2023-07-26)
+
+
+### Features
+
+* bootstrapper config rename ([#148](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/148)) ([2a6a3aa](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/2a6a3aa9f20fd484b205a5fa8b47af0dfdb6b113))
+
+
+
 # [0.32.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.31.0...v0.32.0) (2023-07-24)
 
 
