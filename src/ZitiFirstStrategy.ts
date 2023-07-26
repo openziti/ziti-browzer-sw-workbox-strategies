@@ -353,7 +353,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
               sdkRevision:    buildInfo.sdkRevision,
               token_type:     this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.token_type,
               access_token:   this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.access_token,
-              httpAgentTargetService: this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.service,
+              bootstrapperTargetService: this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.service,
             });
             this.logger.trace(`_initialize: ZitiContext created`);
             this._zitiBrowzerServiceWorkerGlobalScope._zitiContext = this._zitiContext;
@@ -365,7 +365,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       
             await this._zitiContext.initialize({
               loadWASM: true,   // unlike the ZBR, here in the ZBSW, we always instantiate the internal WebAssembly
-              target:   this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target
+              target:   this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target
             });
 
             this._zitiContext.listControllerVersion();
@@ -407,7 +407,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
               
               self.logger.trace(`_initialize: ephemeral Cert acquisition succeeded`);
   
-              self._rootPaths.push(self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.path);
+              self._rootPaths.push(self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.path);
   
               self._initialized = true;
         
@@ -469,9 +469,9 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     // ...we want to intercept any request from the web app that targets the server from 
     // which the app was loaded.
   
-    var regex = new RegExp( this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.self.host, 'g' );
-    let targetserviceHost = await this._zitiContext.getConfigHostByServiceName (this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.service);
-    let connectAppData = await this._zitiContext.getConnectAppDataByServiceName (this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.service);
+    var regex = new RegExp( this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host, 'g' );
+    let targetserviceHost = await this._zitiContext.getConfigHostByServiceName (this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.service);
+    let connectAppData = await this._zitiContext.getConnectAppDataByServiceName (this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.service);
     var targetServiceRegex = new RegExp( targetserviceHost , 'g' );
   
     if (request.url.match( regex )) { // yes, the request is targeting the Ziti HTTP Agent
@@ -486,8 +486,8 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
         result.url = request.url;
         result.routeOverZiti = true;
-        result.serviceName = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.service;  
-        result.serviceScheme = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.scheme;
+        result.serviceName = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.service;  
+        result.serviceScheme = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.scheme;
         result.serviceConnectAppData = connectAppData;
       }
       else 
@@ -496,8 +496,8 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       }  
       else {
 
-        newUrl.hostname = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.service;
-        newUrl.port = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.port;
+        newUrl.hostname = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.service;
+        newUrl.port = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.port;
         this.logger.trace( '_shouldRouteOverZiti: transformed URL: ', newUrl.toString());
     
         result.serviceName = await this._zitiContext.shouldRouteOverZiti( newUrl );
@@ -509,7 +509,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
         } else {
           result.url = newUrl.toString();
           result.routeOverZiti = true;
-          result.serviceScheme = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.scheme;
+          result.serviceScheme = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.scheme;
           result.serviceConnectAppData = connectAppData;
         }   
   
@@ -523,8 +523,8 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
       result.url = request.url;
       result.routeOverZiti = true;
-      result.serviceName = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.service;
-      result.serviceScheme = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.scheme;
+      result.serviceName = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.service;
+      result.serviceScheme = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.scheme;
       result.serviceConnectAppData = connectAppData;
     }
 
@@ -545,7 +545,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
         result.url = request.url;
         result.routeOverZiti = true;
-        result.serviceScheme = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.target.scheme;
+        result.serviceScheme = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.scheme;
         result.serviceConnectAppData = connectAppData;
   
       }
@@ -990,31 +990,31 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
                     self.logger.trace('streamingHEADReplace: HTML before modifications is: ', $.html());
 
-                    let zbrElement = $('<script></script> ').attr('id', 'from-ziti-browzer-sw').attr('type', 'text/javascript').attr('src', `${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.self.scheme}://${zbrLocation}`); //.attr('defer', `defer`);
+                    let zbrElement = $('<script></script> ').attr('id', 'from-ziti-browzer-sw').attr('type', 'text/javascript').attr('src', `${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.scheme}://${zbrLocation}`); //.attr('defer', `defer`);
                     let ppElement = $('<script></script> ')
                         .attr('id', 'ziti-browzer-pp')
                         .attr('type', 'text/javascript')
-                        .attr('src', `${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.self.scheme}://${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.self.host}/polipop.min.js`);
+                        .attr('src', `${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.scheme}://${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host}/polipop.min.js`);
                     let ppCss1Element = $('<link> ')
                         .attr('id', 'ziti-browzer-ppcss')
                         .attr('rel', 'stylesheet')
-                        .attr('href', `${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.self.scheme}://${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.self.host}/polipop.core.min.css`);
+                        .attr('href', `${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.scheme}://${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host}/polipop.core.min.css`);
                     let ppCss2Element = $('<link> ')
                         .attr('rel', 'stylesheet')
-                        .attr('href', `${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.self.scheme}://${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.self.host}/polipop.compact.min.css`);
+                        .attr('href', `${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.scheme}://${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host}/polipop.compact.min.css`);
                     let hmElement = $('<script></script> ')
                         .attr('id', 'ziti-browzer-hm')
                         .attr('type', 'text/javascript')
-                        .attr('src', `${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.self.scheme}://${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.self.host}/hystmodal.min.js`);
+                        .attr('src', `${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.scheme}://${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host}/hystmodal.min.js`);
                     let hmCss1Element = $('<link> ')
                         .attr('id', 'ziti-browzer-hmcss')
                         .attr('rel', 'stylesheet')
-                        .attr('href', `${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.self.scheme}://${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.self.host}/hystmodal.min.css`);
+                        .attr('href', `${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.scheme}://${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host}/hystmodal.min.css`);
 
                     let hkElement = $('<script></script> ')
                         .attr('id', 'ziti-browzer-rhk')
                         .attr('type', 'text/javascript')
-                        .attr('src', `${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.self.scheme}://${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.self.host}/hotkeys.min.js`);
+                        .attr('src', `${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.scheme}://${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host}/hotkeys.min.js`);
 
                     // Locate the CSP
                     let cspElement = $('meta[http-equiv="content-security-policy"]');
@@ -1336,10 +1336,10 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
             }
           }
           let newLocationUrl = new URL( 
-            `${this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.self.scheme}://` + 
-            this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.self.host + 
+            `${this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.scheme}://` + 
+            this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host + 
             ':' + 
-            this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.httpAgent.self.port + 
+            this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.port + 
             pathname 
           );
           val = newLocationUrl.toString();
