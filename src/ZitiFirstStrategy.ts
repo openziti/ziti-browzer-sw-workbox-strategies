@@ -321,6 +321,14 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
   }
 
+  async channelConnectFailEventHandler(channelConnectFailEvent: any) {
+
+    this.logger.trace(`channelConnectFailEventHandler() `, channelConnectFailEvent);
+
+    await this._zitiBrowzerServiceWorkerGlobalScope._channelConnectFail(channelConnectFailEvent);
+
+  }
+
   async xgressEventHandler(xgressEvent: any) {
 
     this._zitiBrowzerServiceWorkerGlobalScope._xgressEvent(xgressEvent);
@@ -375,6 +383,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
             this._zitiContext.on('sessionCreationErrorEvent',  this.sessionCreationErrorEventHandler);
             this._zitiContext.on('noServiceEvent',  this.noServiceEventHandler);
             this._zitiContext.on('invalidAuthEvent',  this.invalidAuthEventHandler);
+            this._zitiContext.on('channelConnectFailEvent',  this.channelConnectFailEventHandler);
             this._zitiContext.on(ZITI_CONSTANTS.ZITI_EVENT_XGRESS, this.xgressEventHandler);
       
             this.logger.trace(`_initialize: ZitiContext '${this._uuid}' initialized`);
