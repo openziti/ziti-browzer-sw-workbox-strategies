@@ -1,3 +1,12 @@
+## [0.33.2](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.33.1...v0.33.2) (2023-08-02)
+
+
+### Bug Fixes
+
+* skip 'inject check' when not going over Ziti ([#150](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/150)) ([4be9522](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/4be9522c22157890fabbfb42d59de0c28fb2e211))
+
+
+
 ## [0.33.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.33.0...v0.33.1) (2023-08-02)
 
 
