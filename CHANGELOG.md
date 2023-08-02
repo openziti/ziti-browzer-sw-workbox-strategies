@@ -1,3 +1,12 @@
+# [0.34.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.33.2...v0.34.0) (2023-08-02)
+
+
+### Features
+
+* alert on channelConnectFailEvent ([#151](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/151)) ([41cd843](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/41cd843a8c3ee17432a930d8e8db9f895b942baa))
+
+
+
 ## [0.33.2](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.33.1...v0.33.2) (2023-08-02)
 
 
