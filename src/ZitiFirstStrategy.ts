@@ -908,7 +908,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       useCache = false;
     }
 
-    if (!skipInject) {
+    if (shouldRoute.routeOverZiti && !skipInject) {
       
       var ignore = false;
           
