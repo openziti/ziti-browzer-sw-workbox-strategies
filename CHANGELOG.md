@@ -1,3 +1,12 @@
+## [0.33.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.33.0...v0.33.1) (2023-08-02)
+
+
+### Bug Fixes
+
+* async SET_COOKIE msging ([#149](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/149)) ([63eb57e](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/63eb57ec62535a1352d3deb7d4c5e3bfa91fb311))
+
+
+
 # [0.33.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.32.0...v0.33.0) (2023-07-26)
 
 
