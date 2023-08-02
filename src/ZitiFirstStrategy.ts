@@ -1289,13 +1289,12 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
           if (Array.isArray(val)) {
             for (var ndx = 0; ndx < val.length; ndx++) {
               this.logger.trace( 'ZitiFirstStrategy: sending SET_COOKIE cmd');
-              let resp = await this._zitiBrowzerServiceWorkerGlobalScope._sendMessageToClients( 
+              this._zitiBrowzerServiceWorkerGlobalScope._sendMessageToClients( 
                 { 
                   type: 'SET_COOKIE',
                   payload: val[ndx]
                 } 
               );
-              this.logger.trace( 'ZitiFirstStrategy: SET_COOKIE response: ', resp);
               let parts = val[ndx].split('=');
               this._zitiBrowzerServiceWorkerGlobalScope._cookieObject[parts[0]] = parts[1];  
             }
