@@ -270,13 +270,13 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     });
   }
 
-  idpAuthHealthEventEventHandler(idpAuthHealthEvent: any) {
+  idpAuthHealthEventHandler(idpAuthHealthEvent: any) {
 
-    this.logger.trace(`idpAuthHealthEventEventHandler() `, idpAuthHealthEvent);
+    this.logger.trace(`idpAuthHealthEventHandler() `, idpAuthHealthEvent);
 
     if (idpAuthHealthEvent.expired) {
 
-      this.logger.trace( `idpAuthHealthEventEventHandler: authToken has expired and will be torn down`);
+      this.logger.trace( `idpAuthHealthEventHandler: authToken has expired and will be torn down`);
 
       setTimeout(function(_zitiBrowzerServiceWorkerGlobalScope: any) {
         _zitiBrowzerServiceWorkerGlobalScope._accessTokenExpired(); // This will cause a logout with the IdP
@@ -318,6 +318,14 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     this.logger.trace(`invalidAuthEventHandler() `, invalidAuthEvent);
 
     await this._zitiBrowzerServiceWorkerGlobalScope._invalidAuth(invalidAuthEvent);
+
+  }
+
+  async noWSSRoutersEventHandler(noWSSRoutersEvent: any) {
+
+    this.logger.trace(`noWSSRoutersEventHandler() `, noWSSRoutersEvent);
+
+    await this._zitiBrowzerServiceWorkerGlobalScope._noWSSRouters(noWSSRoutersEvent);
 
   }
 
@@ -366,7 +374,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
             this.logger.trace(`_initialize: ZitiContext created`);
             this._zitiBrowzerServiceWorkerGlobalScope._zitiContext = this._zitiContext;
 
-            // Make SW scope available to idpAuthHealthEventEventHandler
+            // Make SW scope available to idpAuthHealthEventHandler
             this._zitiContext._zitiBrowzerServiceWorkerGlobalScope = this._zitiBrowzerServiceWorkerGlobalScope;
 
             this._zitiContext.setKeyTypeEC();
@@ -378,13 +386,14 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
             this._zitiContext.listControllerVersion();
 
-            this._zitiContext.on('idpAuthHealthEvent', this.idpAuthHealthEventEventHandler);
-            this._zitiContext.on('noConfigForServiceEvent',  this.noConfigForServiceEventHandler);
-            this._zitiContext.on('sessionCreationErrorEvent',  this.sessionCreationErrorEventHandler);
-            this._zitiContext.on('noServiceEvent',  this.noServiceEventHandler);
-            this._zitiContext.on('invalidAuthEvent',  this.invalidAuthEventHandler);
-            this._zitiContext.on('channelConnectFailEvent',  this.channelConnectFailEventHandler);
-            this._zitiContext.on(ZITI_CONSTANTS.ZITI_EVENT_XGRESS, this.xgressEventHandler);
+            this._zitiContext.on(ZITI_CONSTANTS.ZITI_EVENT_IDP_AUTH_HEALTH,        this.idpAuthHealthEventHandler);
+            this._zitiContext.on(ZITI_CONSTANTS.ZITI_EVENT_NO_CONFIG_FOR_SERVICE,  this.noConfigForServiceEventHandler);
+            this._zitiContext.on(ZITI_CONSTANTS.ZITI_EVENT_NO_SERVICE,             this.noServiceEventHandler);
+            this._zitiContext.on(ZITI_CONSTANTS.ZITI_EVENT_SESSION_CREATION_ERROR, this.sessionCreationErrorEventHandler);
+            this._zitiContext.on(ZITI_CONSTANTS.ZITI_EVENT_INVALID_AUTH,           this.invalidAuthEventHandler);
+            this._zitiContext.on(ZITI_CONSTANTS.ZITI_EVENT_CHANNEL_CONNECT_FAIL,   this.channelConnectFailEventHandler);
+            this._zitiContext.on(ZITI_CONSTANTS.ZITI_EVENT_NO_WSS_ROUTERS,         this.noWSSRoutersEventHandler);
+            this._zitiContext.on(ZITI_CONSTANTS.ZITI_EVENT_XGRESS,                 this.xgressEventHandler);
       
             this.logger.trace(`_initialize: ZitiContext '${this._uuid}' initialized`);
 
