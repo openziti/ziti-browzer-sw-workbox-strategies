@@ -1,3 +1,12 @@
+## [0.35.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.35.0...v0.35.1) (2023-08-08)
+
+
+### Bug Fixes
+
+* remove utf-8-validate dep ([#153](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/153)) ([62aa33f](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/62aa33f3fd087874f5c2f527ff717bbd39f68c62))
+
+
+
 # [0.35.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.34.0...v0.35.0) (2023-08-08)
 
 
