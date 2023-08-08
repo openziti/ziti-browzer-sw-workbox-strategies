@@ -1,3 +1,12 @@
+# [0.35.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.34.0...v0.35.0) (2023-08-08)
+
+
+### Features
+
+* ZITI_EVENT_NO_WSS_ROUTERS ([#152](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/152)) ([27beebb](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/27beebb4053eb6cf3a3dc96993898d7dff2ef58f))
+
+
+
 # [0.34.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.33.2...v0.34.0) (2023-08-02)
 
 
