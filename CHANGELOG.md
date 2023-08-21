@@ -1,3 +1,12 @@
+## [0.35.2](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.35.1...v0.35.2) (2023-08-21)
+
+
+### Bug Fixes
+
+* adjust servicePath ([#154](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/154)) ([dcf71c6](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/dcf71c68e41620902b4b8a74fad146bd550571aa))
+
+
+
 ## [0.35.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.35.0...v0.35.1) (2023-08-08)
 
 
