@@ -1260,10 +1260,17 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
           
       var blob = await this.getRequestBody( zitiRequest );
 
+      let referrerUrlPathname = '/';
+      if (request.referrer) {
+        let referrerUrl = new URL(request.referrer);
+        referrerUrlPathname = referrerUrl.pathname;
+      }
+
       var zitiResponse = await this._zitiContext.httpFetch(
           shouldRoute.url, {
               serviceName:    shouldRoute.serviceName,
               serviceScheme:  shouldRoute.serviceScheme,
+              servicePath:    this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.path,
               serviceConnectAppData:  shouldRoute.serviceConnectAppData,
               method:         zitiRequest.method, 
               headers:        newHeaders,
@@ -1314,7 +1321,8 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
                 } 
               );
               let parts = val[ndx].split('=');
-              this._zitiBrowzerServiceWorkerGlobalScope._cookieObject[parts[0]] = parts[1];  
+              const after_ = val[ndx].slice(val[ndx].indexOf('=') + 1);
+              this._zitiBrowzerServiceWorkerGlobalScope._cookieObject[parts[0]] = after_;  
             }
           }
           else {
@@ -1346,8 +1354,8 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
               }
             }
             let locationUrl = isValidUrl( val );
-            if (isUndefined(locationUrl)) {
-              pathname = `/${val}`;
+            if (isUndefined(locationUrl)) { // i.e. it's a relative path (no slashes)
+              pathname = `${referrerUrlPathname}${val}`;
             } else {
               pathname = locationUrl.pathname;
             }
