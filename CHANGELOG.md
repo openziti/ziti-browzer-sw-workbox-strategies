@@ -1,3 +1,12 @@
+# [0.36.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.35.2...v0.36.0) (2023-08-31)
+
+
+### Features
+
+* Rancher support ([#155](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/155)) ([cf657d0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/cf657d0af093529f6ef02bfd97fa3d86c906a5fc))
+
+
+
 ## [0.35.2](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.35.1...v0.35.2) (2023-08-21)
 
 
