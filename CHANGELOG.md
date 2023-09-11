@@ -1,3 +1,12 @@
+## [0.36.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.36.0...v0.36.1) (2023-09-11)
+
+
+### Bug Fixes
+
+* don't drop METHOD when building ClientRequest ([#156](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/156)) ([d4fe87c](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/d4fe87ca35b8785d87789974882d991aba7bea14))
+
+
+
 # [0.36.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.35.2...v0.36.0) (2023-08-31)
 
 
