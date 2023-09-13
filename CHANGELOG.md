@@ -1,3 +1,12 @@
+## [0.36.2](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.36.1...v0.36.2) (2023-09-13)
+
+
+### Bug Fixes
+
+* drop unnecessary/skewed 'origin' header ([#157](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/157)) ([92a3797](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/92a37970235ef485a47af43aa4cda1500eecf7da))
+
+
+
 ## [0.36.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.36.0...v0.36.1) (2023-09-11)
 
 
