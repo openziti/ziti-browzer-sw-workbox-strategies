@@ -1239,7 +1239,9 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       var newHeaders = new Headers();
 
       zitiRequest.headers.forEach(function (header, key) {
-        newHeaders.append( key, header );
+        if (!isEqual(key, 'origin')) {
+          newHeaders.append( key, header );
+        }
       });
       if (!isEqual(request.referrer, '')) {
         newHeaders.append( 'referer', request.referrer );
