@@ -1,3 +1,12 @@
+## [0.36.3](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.36.2...v0.36.3) (2023-09-14)
+
+
+### Bug Fixes
+
+* correct problem with intercepted WebSocket msg handling ([#158](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/158)) ([4ccb761](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/4ccb7619a8c01fb0719c3069e4e8c50429e77434))
+
+
+
 ## [0.36.2](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.36.1...v0.36.2) (2023-09-13)
 
 
