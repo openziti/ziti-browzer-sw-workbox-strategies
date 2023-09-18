@@ -174,9 +174,9 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       if (!origCSP['script-src'].includes("'unsafe-eval'")) {
         origCSP['script-src'].push("'unsafe-eval'");
       }
-      if (!origCSP['script-src'].includes("'unsafe-inline'")) {
-        origCSP['script-src'].push("'unsafe-inline'");
-      }
+      // if (!origCSP['script-src'].includes("'unsafe-inline'")) {
+      //   origCSP['script-src'].push("'unsafe-inline'");
+      // }
     }
 
     if (origCSP['connect-src']) {
@@ -200,6 +200,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     if (!isUndefined(origCSP['object-src']))      { directives.objectSrc      = origCSP['object-src'];}
     if (!isUndefined(origCSP['script-src']))      { directives.scriptSrc      = origCSP['script-src'];}
     if (!isUndefined(origCSP['style-src']))       { directives.styleSrc       = origCSP['style-src'];}          
+    if (!isUndefined(origCSP['worker-src']))      { directives.workerSrc      = origCSP['worker-src'];}          
 
     let newCSP = this.buildCSP({ directives });
     let newCSParray = this.parseCSP(newCSP);
