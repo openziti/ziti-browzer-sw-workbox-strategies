@@ -1,3 +1,12 @@
+## [0.36.4](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.36.3...v0.36.4) (2023-09-18)
+
+
+### Bug Fixes
+
+* add 'worker-src' CSP handling ([#159](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/159)) ([8f03c39](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/8f03c39bfeeaee39201b32c33ce6b06d98a3a118))
+
+
+
 ## [0.36.3](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.36.2...v0.36.3) (2023-09-14)
 
 
