@@ -44,6 +44,7 @@ var regexHystmodal = new RegExp( /hystmodal/,           'g' );
 var regexPolipop  = new RegExp( /polipop/,              'g' );
 var regexHotkeys  = new RegExp( /hotkeys/,              'g' );
 var regexOAUTHTOKEN = new RegExp( /\/oauth\/token/,     'g' );
+var regexFavicon  = new RegExp( /\/favicon\.ico/,       'g' );
 
 var regexSlash    = new RegExp( /^\/$/,                 'g' );
 var regexDotSlash = new RegExp( /^\.\//,                'g' );
@@ -659,7 +660,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
     let tryZiti: boolean | false;
 
-    this.logger.trace(`_handle entered for: `, request.url, this._zitiBrowzerServiceWorkerGlobalScope._uuid, this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig);
+    this.logger.trace(`_handle entered for: `, request.url);
     
     // If hitting the Controller, or seeking z-b-runtime|WASM, then
     // we never go over Ziti, and we let the browser route the request 
@@ -676,6 +677,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       (request.url.match( regexPolipop )) ||          // seeking Ziti Polipop
       (request.url.match( regexHotkeys )) ||          // seeking Ziti Hotkeys
       (request.url.match( regexOAUTHTOKEN )) ||       // seeking IdP token 
+      (request.url.match( regexFavicon )) ||          // seeking favicon
       (request.url.match( regexZBWASM ))              // seeking Ziti BrowZer WASM
     ) {
       tryZiti = false;
