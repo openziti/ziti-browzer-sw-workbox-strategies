@@ -1,3 +1,12 @@
+# [0.37.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.36.4...v0.37.0) (2023-10-23)
+
+
+### Features
+
+* JSPI ([#160](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/160)) ([fab5ca5](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/fab5ca50cf10f4eb20db196409d510dc2f856c48))
+
+
+
 ## [0.36.4](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.36.3...v0.36.4) (2023-09-18)
 
 
