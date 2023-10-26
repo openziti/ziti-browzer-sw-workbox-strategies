@@ -87,6 +87,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
   private _initializationMutex: any;
   private _uuid: any;
   private _rootPaths: any;
+  private _targetServiceHost: string;
 
   /**
    * @param {Object} [options]
@@ -105,6 +106,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     this._logLevel = options.logLevel || 'Silent';
     this._controllerApi = options.controllerApi || '<controllerApi-not-configured>';
     this._initialized = false;
+    this._targetServiceHost = '';
 
     var controllerAPIURL = new URL( this._controllerApi );
     regexControllerAPI = new RegExp( controllerAPIURL.host, 'g' );
@@ -815,7 +817,8 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
       // If going over Ziti, we must first complete the work to ensure WASM is instantiated, we have a cert, etc
       await this.await_zitiConfig('null', handler); // wait for ZBR to send zitiConfig to us
-      await this._initialize();                        
+      await this._initialize();
+      this._targetServiceHost = await this._zitiContext.getConfigHostByServiceName (this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.service);
         
       // Now determine if we're going over Ziti or not
       shouldRoute = await this._shouldRouteOverZiti(request);
@@ -937,9 +940,9 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
         if (response.body) {
 
-          let fromHttpAgent = false;
+          let fromBootstrapper = false;
 
-          function detectFromHttpAgent() {
+          function detectFromBootstrapper() {
   
             let buffer = '';
                       
@@ -956,11 +959,11 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
                   if (fromEl.length > 0) {
 
-                    fromHttpAgent = true;
+                    fromBootstrapper = true;
 
                     if (bootstrappingZBRFromSW) {
 
-                      self.logger.trace('detectFromHttpAgent: bootstrappingZBRFromSW [%o]', bootstrappingZBRFromSW);
+                      self.logger.trace('detectFromBootstrapper: bootstrappingZBRFromSW [%o]', bootstrappingZBRFromSW);
 
                       // swap the id to indicate we are bootstrapping from the SW
                       fromEl.attr('id', `from-ziti-browzer-sw`);  
@@ -983,13 +986,29 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
               },
               flush(controller) {
                 if (buffer) {
-                  self.logger.trace('detectFromHttpAgent: result [%o]', fromHttpAgent);
+                  self.logger.trace('detectFromBootstrapper: result [%o]', fromBootstrapper);
                   controller.enqueue(buffer);
                 }
               }
             });
           }
-        
+
+          function streamingSchemeReplace($:any, elementType:string, attrType:string) {
+            $(elementType).each((_:any, e:any) => {
+              let attr = $(e).attr(attrType);
+              if (attr) {
+                try {
+                  let url = new URL(attr);
+                  if (isEqual(url.host, self._targetServiceHost)) {
+                    attr = attr.replace('http:', 'https:');
+                    $(e).attr(attrType, attr);
+                  }
+                } catch (e) {}
+              }
+            });
+
+          }
+
           function streamingHEADReplace() {
   
             let buffer = '';
@@ -1002,13 +1021,28 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
                 try {
 
 
-                  if (!fromHttpAgent) {
+                  if (!fromBootstrapper) {
 
                     let zbrLocation = self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.runtime.src;
 
                     // Parse the HTML
                     const $ = cheerio.load(chunk);
 
+                    // Ensure any links in the HTML that point to the target service are using the correct scheme
+                    streamingSchemeReplace($, 'link',   'href');
+                    streamingSchemeReplace($, 'a',      'href');
+                    streamingSchemeReplace($, 'area',   'href');
+                    streamingSchemeReplace($, 'base',   'href');
+                    streamingSchemeReplace($, 'img',    'src');
+                    streamingSchemeReplace($, 'audio',  'src');
+                    streamingSchemeReplace($, 'embed',  'src');
+                    streamingSchemeReplace($, 'iframe', 'src');
+                    streamingSchemeReplace($, 'input',  'src');
+                    streamingSchemeReplace($, 'script', 'src');
+                    streamingSchemeReplace($, 'source', 'src');
+                    streamingSchemeReplace($, 'track',  'src');
+                    streamingSchemeReplace($, 'video',  'src');
+                  
                     self.logger.trace('streamingHEADReplace: HTML before modifications is: ', $.html());
 
                     let zbrElement = $('<script></script> ').attr('id', 'from-ziti-browzer-sw').attr('type', 'text/javascript').attr('src', `${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.scheme}://${zbrLocation}`); //.attr('defer', `defer`);
@@ -1104,7 +1138,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
           
           const bodyStream = response.body
             .pipeThrough(new TextDecoderStream())
-            .pipeThrough(detectFromHttpAgent())
+            .pipeThrough(detectFromBootstrapper())
             .pipeThrough(streamingHEADReplace())
             .pipeThrough(new TextEncoderStream())
             ;
