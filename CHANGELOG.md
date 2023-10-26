@@ -1,3 +1,12 @@
+# [0.38.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.37.0...v0.38.0) (2023-10-26)
+
+
+### Features
+
+* monitorix support ([#161](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/161)) ([494fe19](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/494fe192230e59a4c64a922d612511b1f795e021))
+
+
+
 # [0.37.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.36.4...v0.37.0) (2023-10-23)
 
 
