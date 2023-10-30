@@ -385,6 +385,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       
             await this._zitiContext.initialize({
               loadWASM: true,   // unlike the ZBR, here in the ZBSW, we always instantiate the internal WebAssembly
+              jspi:     this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.jspi,
               target:   this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target
             });
 
@@ -485,6 +486,10 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
     result.routeOverZiti = false;  // default is to route over raw internet
 
+    let url = new URL(request.url);
+    let targetHost = url.host;
+    this.logger.trace(`_shouldRouteOverZiti targetHost is: ${targetHost}`);
+
     try {
 
     // We want to intercept fetch requests that target the Ziti HTTP Agent... that is...
@@ -496,7 +501,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     let connectAppData = await this._zitiContext.getConnectAppDataByServiceName (this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.service);
     var targetServiceRegex = new RegExp( targetserviceHost , 'g' );
   
-    if (request.url.match( regex )) { // yes, the request is targeting the Ziti HTTP Agent
+    if (isEqual(targetHost, this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host)) { // yes, the request is targeting the Ziti HTTP Agent
 
       // let isExpired = await this._zitiContext.isCertExpired();
   
