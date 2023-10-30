@@ -1,3 +1,12 @@
+# [0.39.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.38.0...v0.39.0) (2023-10-30)
+
+
+### Features
+
+* Dual-mode: JSPI or NO_JSPI ([#162](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/162)) ([6680c27](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/6680c27313f1fd9581ecae25b0cdbd3f798174d8))
+
+
+
 # [0.38.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.37.0...v0.38.0) (2023-10-26)
 
 
