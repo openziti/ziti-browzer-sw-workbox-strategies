@@ -1,3 +1,12 @@
+## [0.39.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.39.0...v0.39.1) (2023-11-01)
+
+
+### Bug Fixes
+
+* handle duplicate Set-Cookie headers from Icinga ([#163](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/163)) ([c15d360](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/c15d36044e1e010af0c72e291aa2e8158b40e934))
+
+
+
 # [0.39.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.38.0...v0.39.0) (2023-10-30)
 
 
