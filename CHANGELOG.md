@@ -1,3 +1,12 @@
+## [0.39.2](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.39.1...v0.39.2) (2023-11-03)
+
+
+### Bug Fixes
+
+* ensure UA header is present (keep Observium happy) ([#164](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/164)) ([4feb38d](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/4feb38d99e64aee83ea4122113936395d69ca9ff))
+
+
+
 ## [0.39.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.39.0...v0.39.1) (2023-11-01)
 
 
