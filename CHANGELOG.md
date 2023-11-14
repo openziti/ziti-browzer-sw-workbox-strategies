@@ -1,3 +1,12 @@
+# [0.40.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.39.2...v0.40.0) (2023-11-14)
+
+
+### Features
+
+* MSFT RDS/RDP ([#165](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/165)) ([0f532e8](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/0f532e8bb6d5329e4ce8d8c8885ae40bd155aa3d))
+
+
+
 ## [0.39.2](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.39.1...v0.39.2) (2023-11-03)
 
 
