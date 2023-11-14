@@ -492,7 +492,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
     try {
 
-    // We want to intercept fetch requests that target the Ziti HTTP Agent... that is...
+    // We want to intercept fetch requests that target the Ziti BrowZer Bootstrapper... that is...
     // ...we want to intercept any request from the web app that targets the server from 
     // which the app was loaded.
   
@@ -501,7 +501,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     let connectAppData = await this._zitiContext.getConnectAppDataByServiceName (this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.service);
     var targetServiceRegex = new RegExp( targetserviceHost , 'g' );
   
-    if (isEqual(targetHost, this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host)) { // yes, the request is targeting the Ziti HTTP Agent
+    if (isEqual(targetHost, this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host)) { // yes, the request is targeting the Ziti BrowZer Bootstrapper
 
       // let isExpired = await this._zitiContext.isCertExpired();
   
@@ -525,6 +525,14 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
         newUrl.hostname = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.service;
         newUrl.port = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.port;
+
+        var pathnameArray = newUrl.pathname.split('/');
+        var targetpathnameArray = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.path.split('/');
+
+        if (!isEqual(pathnameArray[1], targetpathnameArray[1])) {
+          newUrl.pathname = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.path + newUrl.pathname;
+          newUrl.pathname = newUrl.pathname.replace('//','/');
+        }
         this.logger.trace( '_shouldRouteOverZiti: transformed URL: ', newUrl.toString());
     
         result.serviceName = await this._zitiContext.shouldRouteOverZiti( newUrl );
@@ -635,8 +643,13 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       this.logger.trace(`_shouldUseCache: handling request for ROOT path; NOT using cache`);
       return false;
     }
+    if ( url.search !== '' ) {                        // Do not cache requests with search parms
+      this.logger.trace(`_shouldUseCache: handling request with search parms; NOT using cache`);
+      return false;
+    }
     
     // Cache everything else
+    this.logger.trace(`_shouldUseCache: we WILL cache response for ${request.url}`);
     return true;
   }
 
@@ -668,10 +681,12 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     let tryZiti: boolean | false;
 
     this.logger.trace(`_handle entered for: `, request.url);
+
+    const requestURL = new URL(request.url);
     
     // If hitting the Controller, or seeking z-b-runtime|WASM, then
     // we never go over Ziti, and we let the browser route the request 
-    // to the Controller or HTTP Agent.  
+    // to the Controller or browZer Bootstrapper.  
     if ( 
       (request.url.match( regexEdgeClt )) ||          // seeking Ziti Controller
       (request.url.match( regexControllerAPI )) ||    //    "     "      "
@@ -719,18 +734,18 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
         let extension = newUrl.pathname.split(/[#?]/)[0]?.split('.')?.pop()?.trim();
         this.logger.trace(`newUrl.pathname is ${newUrl.pathname}, extension is ${extension}`);
         // if (!this._zitiBrowzerServiceWorkerGlobalScope._zbrReloadPending) {
-        if (extension && extension.includes('/')) {
-          this._zitiBrowzerServiceWorkerGlobalScope._zbrPingTimestamp = (Date.now() - 1000);
-          let redirectResponse = new Response('', {
-              status: 302,
-              statusText: 'Found',
-              headers: {
-                Location: '/'
-              }
-            }
-          );
-          return redirectResponse;
-        }
+        // if (extension && extension.includes('/')) {
+        //   this._zitiBrowzerServiceWorkerGlobalScope._zbrPingTimestamp = (Date.now() - 1000);
+        //   let redirectResponse = new Response('', {
+        //       status: 302,
+        //       statusText: 'Found',
+        //       headers: {
+        //         Location: '/'
+        //       }
+        //     }
+        //   );
+        //   return redirectResponse;
+        // }
       }
     }
 
@@ -937,6 +952,34 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       useCache = false;
     }
 
+    function streamingAttrReplace($:any, elementType:string, attrType:string) {
+      $(elementType).each( async (_:any, e:any) => {
+        let attr = $(e).attr(attrType);
+        if (attr) {
+          try {
+            let url = new URL(attr);
+            if (isEqual(url.host, self._targetServiceHost)) {
+              attr = attr.replace('http:', 'https:');
+              attr = attr.replace(self._targetServiceHost, self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host);
+              $(e).attr(attrType, attr);
+            }
+          } catch (e) {
+            let newUrl = new URL( `${requestURL.origin}` );
+
+            if (!attr.startsWith('/')) {
+              newUrl.pathname = `${requestURL.pathname}/${attr}`;
+            } else {
+              newUrl.pathname = `${requestURL.pathname}${attr}`;
+            }
+            newUrl.pathname = newUrl.pathname.replace('//','/');
+            attr = newUrl.toString();
+            self.logger.trace(`streamingAttrReplace: transformed attr[${attr}] `);
+            $(e).attr(attrType, attr);
+          }
+        }
+      });
+    }
+
     if (shouldRoute.routeOverZiti && !skipInject) {
       
       var ignore = false;
@@ -998,22 +1041,6 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
             });
           }
 
-          function streamingSchemeReplace($:any, elementType:string, attrType:string) {
-            $(elementType).each((_:any, e:any) => {
-              let attr = $(e).attr(attrType);
-              if (attr) {
-                try {
-                  let url = new URL(attr);
-                  if (isEqual(url.host, self._targetServiceHost)) {
-                    attr = attr.replace('http:', 'https:');
-                    $(e).attr(attrType, attr);
-                  }
-                } catch (e) {}
-              }
-            });
-
-          }
-
           function streamingHEADReplace() {
   
             let buffer = '';
@@ -1034,19 +1061,19 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
                     const $ = cheerio.load(chunk);
 
                     // Ensure any links in the HTML that point to the target service are using the correct scheme
-                    streamingSchemeReplace($, 'link',   'href');
-                    streamingSchemeReplace($, 'a',      'href');
-                    streamingSchemeReplace($, 'area',   'href');
-                    streamingSchemeReplace($, 'base',   'href');
-                    streamingSchemeReplace($, 'img',    'src');
-                    streamingSchemeReplace($, 'audio',  'src');
-                    streamingSchemeReplace($, 'embed',  'src');
-                    streamingSchemeReplace($, 'iframe', 'src');
-                    streamingSchemeReplace($, 'input',  'src');
-                    streamingSchemeReplace($, 'script', 'src');
-                    streamingSchemeReplace($, 'source', 'src');
-                    streamingSchemeReplace($, 'track',  'src');
-                    streamingSchemeReplace($, 'video',  'src');
+                    streamingAttrReplace($, 'link',   'href');
+                    streamingAttrReplace($, 'a',      'href');
+                    streamingAttrReplace($, 'area',   'href');
+                    streamingAttrReplace($, 'base',   'href');
+                    streamingAttrReplace($, 'img',    'src');
+                    streamingAttrReplace($, 'audio',  'src');
+                    streamingAttrReplace($, 'embed',  'src');
+                    streamingAttrReplace($, 'iframe', 'src');
+                    streamingAttrReplace($, 'input',  'src');
+                    streamingAttrReplace($, 'script', 'src');
+                    streamingAttrReplace($, 'source', 'src');
+                    streamingAttrReplace($, 'track',  'src');
+                    streamingAttrReplace($, 'video',  'src');
                   
                     self.logger.trace('streamingHEADReplace: HTML before modifications is: ', $.html());
 
@@ -1159,6 +1186,66 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
           response = newResponse;
         }
       }
+    }
+    else {
+      if (shouldRoute.routeOverZiti && (contentType && contentType.match( regexTextXml ))) {
+        if (response.body) {
+
+          function streamingXMLReplace() {
+  
+            let buffer = '';
+                      
+            return new TransformStream({
+
+              transform(chunk, _controller) {
+
+                try {
+
+                    // Parse the XML
+                    const $ = cheerio.load(chunk, {
+                      xmlMode: true,
+                    })
+                                  
+                    self.logger.trace('streamingXMLReplace: XML before modifications is: ', $.html());
+
+                    streamingAttrReplace($, 'RDWAPage', 'baseurl');
+
+                    buffer += $.html();
+                  
+                }
+                catch (e) {
+                  self.logger.error(e);
+                }
+
+              },
+              flush(controller) {
+                if (buffer) {
+                  buffer = buffer.replace(self._targetServiceHost, self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host);
+                  self.logger.trace('streamingXMLReplace: XML after modifications is: ', buffer);
+                  controller.enqueue(buffer);
+                }
+              }
+            });
+          }
+
+          const bodyStream = response.body
+            .pipeThrough(new TextDecoderStream())
+            .pipeThrough(streamingXMLReplace())
+            .pipeThrough(new TextEncoderStream())
+            ;
+
+        const newHeaders = new Headers(response.headers);
+        
+        const newResponse = new Response(bodyStream, {
+          status: response.status,
+          statusText: response.statusText,
+          headers: newHeaders
+        });
+      
+        response = newResponse;
+
+        }
+      }  
     }
 
     if (useCache) {
@@ -1401,7 +1488,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
             if (isUndefined(locationUrl)) { // i.e. it's a relative path (no slashes)
               pathname = `${referrerUrlPathname}${val}`;
             } else {
-              pathname = locationUrl.pathname;
+              pathname = locationUrl.pathname + locationUrl.search;
             }
           }
           let newLocationUrl = new URL( 
