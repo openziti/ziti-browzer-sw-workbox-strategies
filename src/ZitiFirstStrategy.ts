@@ -500,8 +500,10 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     let targetserviceHost = await this._zitiContext.getConfigHostByServiceName (this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.service);
     let connectAppData = await this._zitiContext.getConnectAppDataByServiceName (this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.service);
     var targetServiceRegex = new RegExp( targetserviceHost , 'g' );
+    var browzerLoadBalancerRegex = new RegExp( this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.loadbalancer.host , 'g' );
   
-    if (isEqual(targetHost, this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host)) { // yes, the request is targeting the Ziti BrowZer Bootstrapper
+    if (isEqual(targetHost, this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host) // yes, the request is targeting the Ziti BrowZer Bootstrapper
+      || (this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.loadbalancer.host && request.url.match( browzerLoadBalancerRegex )) ) { // yes, the request is targeting the Ziti BrowZer LoadBalancer
 
       // let isExpired = await this._zitiContext.isCertExpired();
   
@@ -1041,6 +1043,18 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
             });
           }
 
+          function _obtainBootStrapperURL() {
+            let url;
+        
+            if (self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.loadbalancer.host) {
+              url = `https://${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.loadbalancer.host}:${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.loadbalancer.port}`;
+            } else {
+              url = `${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.scheme}://${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host}:${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.port}`;
+            }
+            return url;
+          }
+        
+
           function streamingHEADReplace() {
   
             let buffer = '';
@@ -1077,31 +1091,31 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
                   
                     self.logger.trace('streamingHEADReplace: HTML before modifications is: ', $.html());
 
-                    let zbrElement = $('<script></script> ').attr('id', 'from-ziti-browzer-sw').attr('type', 'text/javascript').attr('src', `${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.scheme}://${zbrLocation}`); //.attr('defer', `defer`);
+                    let zbrElement = $('<script></script> ').attr('id', 'from-ziti-browzer-sw').attr('type', 'text/javascript').attr('src', `${_obtainBootStrapperURL()}/${zbrLocation}`); //.attr('defer', `defer`);
                     let ppElement = $('<script></script> ')
                         .attr('id', 'ziti-browzer-pp')
                         .attr('type', 'text/javascript')
-                        .attr('src', `${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.scheme}://${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host}/polipop.min.js`);
+                        .attr('src', `${_obtainBootStrapperURL()}/polipop.min.js`);
                     let ppCss1Element = $('<link> ')
                         .attr('id', 'ziti-browzer-ppcss')
                         .attr('rel', 'stylesheet')
-                        .attr('href', `${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.scheme}://${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host}/polipop.core.min.css`);
+                        .attr('href', `${_obtainBootStrapperURL()}/polipop.core.min.css`);
                     let ppCss2Element = $('<link> ')
                         .attr('rel', 'stylesheet')
-                        .attr('href', `${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.scheme}://${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host}/polipop.compact.min.css`);
+                        .attr('href', `${_obtainBootStrapperURL()}/polipop.compact.min.css`);
                     let hmElement = $('<script></script> ')
                         .attr('id', 'ziti-browzer-hm')
                         .attr('type', 'text/javascript')
-                        .attr('src', `${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.scheme}://${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host}/hystmodal.min.js`);
+                        .attr('src', `${_obtainBootStrapperURL()}/hystmodal.min.js`);
                     let hmCss1Element = $('<link> ')
                         .attr('id', 'ziti-browzer-hmcss')
                         .attr('rel', 'stylesheet')
-                        .attr('href', `${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.scheme}://${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host}/hystmodal.min.css`);
+                        .attr('href', `${_obtainBootStrapperURL()}/hystmodal.min.css`);
 
                     let hkElement = $('<script></script> ')
                         .attr('id', 'ziti-browzer-rhk')
                         .attr('type', 'text/javascript')
-                        .attr('src', `${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.scheme}://${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host}/hotkeys.min.js`);
+                        .attr('src', `${_obtainBootStrapperURL()}/hotkeys.min.js`);
 
                     // Locate the CSP
                     let cspElement = $('meta[http-equiv="content-security-policy"]');
