@@ -1,3 +1,12 @@
+# [0.41.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.40.1...v0.41.0) (2023-11-20)
+
+
+### Features
+
+* Load Balancer support ([#167](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/167)) ([f803889](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/f8038891ffb4275ab6ce48c970c8f60aa930ff6c))
+
+
+
 ## [0.40.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.40.0...v0.40.1) (2023-11-19)
 
 
