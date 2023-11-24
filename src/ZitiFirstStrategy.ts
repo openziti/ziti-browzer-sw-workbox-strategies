@@ -487,7 +487,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     result.routeOverZiti = false;  // default is to route over raw internet
 
     let url = new URL(request.url);
-    let targetHost = url.host;
+    let targetHost = url.hostname;
     this.logger.trace(`_shouldRouteOverZiti targetHost is: ${targetHost}`);
 
     try {
