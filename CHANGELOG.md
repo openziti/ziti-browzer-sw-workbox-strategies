@@ -1,3 +1,12 @@
+## [0.41.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.41.0...v0.41.1) (2023-11-24)
+
+
+### Bug Fixes
+
+* handle port on bootstrapper URL ([#168](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/168)) ([0c27c5d](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/0c27c5de8d2cdcee52a10b9599e50f52dcf7b7d0))
+
+
+
 # [0.41.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.40.1...v0.41.0) (2023-11-20)
 
 
