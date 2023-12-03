@@ -1,3 +1,12 @@
+# [0.42.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.41.1...v0.42.0) (2023-12-03)
+
+
+### Features
+
+* TLS handshake timeout event ([#169](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/169)) ([b5c9b3d](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/b5c9b3dcba32e09034305c57cdecb07a44e75117))
+
+
+
 ## [0.41.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.41.0...v0.41.1) (2023-11-24)
 
 
