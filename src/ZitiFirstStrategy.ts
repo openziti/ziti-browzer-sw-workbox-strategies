@@ -346,6 +346,12 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     this._zitiBrowzerServiceWorkerGlobalScope._xgressEvent(xgressEvent);
 
   }
+
+  async nestedTLSHandshakeTimeoutEventHandler(nestedTLSHandshakeTimeoutEvent: any) {
+
+    this._zitiBrowzerServiceWorkerGlobalScope._nestedTLSHandshakeTimeout(nestedTLSHandshakeTimeoutEvent);
+
+  }
   
   /**
    * Do all work necessary to initialize the ZitiFirstStrategy instance.
@@ -399,6 +405,8 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
             this._zitiContext.on(ZITI_CONSTANTS.ZITI_EVENT_CHANNEL_CONNECT_FAIL,   this.channelConnectFailEventHandler);
             this._zitiContext.on(ZITI_CONSTANTS.ZITI_EVENT_NO_WSS_ROUTERS,         this.noWSSRoutersEventHandler);
             this._zitiContext.on(ZITI_CONSTANTS.ZITI_EVENT_XGRESS,                 this.xgressEventHandler);
+            this._zitiContext.on(ZITI_CONSTANTS.ZITI_EVENT_NESTED_TLS_HANDSHAKE_TIMEOUT,  this.nestedTLSHandshakeTimeoutEventHandler);
+
       
             this.logger.trace(`_initialize: ZitiContext '${this._uuid}' initialized`);
 
@@ -498,7 +506,10 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
   
     var regex = new RegExp( this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host, 'g' );
     let targetserviceHost = await this._zitiContext.getConfigHostByServiceName (this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.service);
-    let connectAppData = await this._zitiContext.getConnectAppDataByServiceName (this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.service);
+    let connectAppData = await this._zitiContext.getConnectAppDataByServiceName (
+      this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.service,
+      this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.scheme
+      );
     var targetServiceRegex = new RegExp( targetserviceHost , 'g' );
     var browzerLoadBalancerRegex = new RegExp( this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.loadbalancer.host , 'g' );
   
