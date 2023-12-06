@@ -1,3 +1,12 @@
+## [0.43.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.43.0...v0.43.1) (2023-12-06)
+
+
+### Bug Fixes
+
+* loadBalancer url calc ([#171](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/171)) ([cd45a91](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/cd45a91a40367ebc280e766eef9675b6c076d4dd))
+
+
+
 # [0.43.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.42.0...v0.43.0) (2023-12-06)
 
 
