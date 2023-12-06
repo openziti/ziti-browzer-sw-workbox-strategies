@@ -1,3 +1,12 @@
+# [0.43.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.42.0...v0.43.0) (2023-12-06)
+
+
+### Features
+
+* Support multiple wssER's in same network ([#170](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/170)) ([376a624](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/376a624fafdd4db55b870ee080079009763b8c65))
+
+
+
 # [0.42.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.41.1...v0.42.0) (2023-12-03)
 
 
