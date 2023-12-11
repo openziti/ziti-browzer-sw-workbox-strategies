@@ -1,3 +1,12 @@
+# [0.44.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.43.1...v0.44.0) (2023-12-11)
+
+
+### Features
+
+* support Keycloak ([#172](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/172)) ([1ecc155](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/1ecc155fe76f39825a99620e2a26dda889e2dafa))
+
+
+
 ## [0.43.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.43.0...v0.43.1) (2023-12-06)
 
 
