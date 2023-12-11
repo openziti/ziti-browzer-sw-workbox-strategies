@@ -33,7 +33,7 @@ type ZitiShouldRouteResult = {
   url?: string | '';
 }
 
-var regexZBR      = new RegExp( /ziti-browzer-runtime-[0-9a-f]{8}\.js/, 'gi' );
+var regexZBR      = new RegExp( /ziti-browzer-runtime-\w{8}\.js/, 'g' );
 var regexZBRnaked = new RegExp( /ziti-browzer-runtime\.js/, 'gi' );
 var regexZBRLogo  = new RegExp( /ziti-browzer-logo/,    'g' );
 var regexZBRcss   = new RegExp( /ziti-browzer-css/,     'g' );
@@ -45,6 +45,7 @@ var regexPolipop  = new RegExp( /polipop/,              'g' );
 var regexHotkeys  = new RegExp( /hotkeys/,              'g' );
 var regexOAUTHTOKEN = new RegExp( /\/oauth\/token/,     'g' );
 var regexFavicon  = new RegExp( /\/favicon\.ico/,       'g' );
+var regexJSDelivr = new RegExp( /jsdelivr.net/,         'g' );
 
 var regexSlash    = new RegExp( /^\/$/,                 'g' );
 var regexDotSlash = new RegExp( /^\.\//,                'g' );
@@ -713,7 +714,8 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       (request.url.match( regexHotkeys )) ||          // seeking Ziti Hotkeys
       (request.url.match( regexOAUTHTOKEN )) ||       // seeking IdP token 
       (request.url.match( regexFavicon )) ||          // seeking favicon
-      (request.url.match( regexZBWASM ))              // seeking Ziti BrowZer WASM
+      (request.url.match( regexZBWASM ))  ||          // seeking Ziti BrowZer WASM
+      (request.url.match( regexJSDelivr ))            // seeking CDN content
     ) {
       tryZiti = false;
     } else {
@@ -1128,6 +1130,15 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
                         .attr('type', 'text/javascript')
                         .attr('src', `${_obtainBootStrapperURL()}/hotkeys.min.js`);
 
+                    let kcElement = $('<meta name="author" content="OpenZiti BrowZer" />')
+                   
+                    if (isEqual(self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.idp.type, 'keycloak')) {
+                      kcElement = $('<script></script> ')
+                        .attr('id', 'ziti-browzer-kc')
+                        .attr('type', 'text/javascript')
+                        .attr('src', `https://cdn.jsdelivr.net/npm/keycloak-js@23.0.1/dist/keycloak.min.js`);
+                    }
+  
                     // Locate the CSP
                     let cspElement = $('meta[http-equiv="content-security-policy"]');
 
@@ -1141,6 +1152,10 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
                       cspElement.attr('content', newCspContent);
                       self.logger.trace('streamingHEADReplace: CSP is now enhanced with content: ', cspElement.attr('content'));
 
+                      if (isEqual(self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.idp.type, 'keycloak')) {
+                        cspElement.after(kcElement);
+                      }
+  
                       // Inject the PP immediately after the CSP
                       cspElement.after(ppCss1Element);
                       cspElement.after(ppCss2Element);
@@ -1169,6 +1184,10 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
                       headElement.prepend(ppElement);
                       headElement.prepend(ppCss2Element);
                       headElement.prepend(ppCss1Element);
+
+                      if (isEqual(self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.idp.type, 'keycloak')) {
+                        headElement.prepend(kcElement);
+                      }
 
                       buffer += $.html();
                     }
