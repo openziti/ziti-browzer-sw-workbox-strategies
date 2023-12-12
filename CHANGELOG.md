@@ -1,3 +1,12 @@
+## [0.44.2](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.44.1...v0.44.2) (2023-12-12)
+
+
+### Bug Fixes
+
+* inject Keycloak early ([#174](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/174)) ([c6dfd61](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/c6dfd6126ff3b358b1f510ce55d721425ad0c0d5))
+
+
+
 ## [0.44.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.44.0...v0.44.1) (2023-12-12)
 
 
