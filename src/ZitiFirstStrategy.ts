@@ -61,6 +61,8 @@ var regexJPG      = new RegExp( /^.*\.jpg$/,            'i' );
 var regexSVG      = new RegExp( /^.*\.svg$/,            'i' );
 var regexControllerAPI: any;
 
+const keycloakJs = `https://cdn.jsdelivr.net/npm/keycloak-js@23.0.1/dist/keycloak.min.js`;
+
 interface PolicyResult {
   [key: string]: string[];
 }
@@ -174,7 +176,10 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     this.logger.trace( `generateNewCSP() origCSP: `, origCSP);
 
     if (origCSP['script-src']) {
-      origCSP['script-src'].push(`${this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.idp.host}`);
+      origCSP['script-src'].push(`${this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.idp.host}`.replace('https://',''));
+      if (isEqual(this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.idp.type, 'keycloak')) {
+        origCSP['script-src'].push(`${keycloakJs}`);
+      }      
       if (!origCSP['script-src'].includes("'unsafe-eval'")) {
         origCSP['script-src'].push("'unsafe-eval'");
       }
@@ -1136,7 +1141,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
                       kcElement = $('<script></script> ')
                         .attr('id', 'ziti-browzer-kc')
                         .attr('type', 'text/javascript')
-                        .attr('src', `https://cdn.jsdelivr.net/npm/keycloak-js@23.0.1/dist/keycloak.min.js`);
+                        .attr('src', `${keycloakJs}`);
                     }
   
                     // Locate the CSP
