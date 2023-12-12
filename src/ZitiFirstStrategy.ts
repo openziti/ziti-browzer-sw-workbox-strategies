@@ -1156,10 +1156,6 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
                       let newCspContent = self.generateNewCSP(cspContent);
                       cspElement.attr('content', newCspContent);
                       self.logger.trace('streamingHEADReplace: CSP is now enhanced with content: ', cspElement.attr('content'));
-
-                      if (isEqual(self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.idp.type, 'keycloak')) {
-                        cspElement.after(kcElement);
-                      }
   
                       // Inject the PP immediately after the CSP
                       cspElement.after(ppCss1Element);
@@ -1168,6 +1164,11 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
                       cspElement.after(hkElement);
                       cspElement.after(hmElement);
                       cspElement.after(hmCss1Element);
+
+                      if (isEqual(self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.idp.type, 'keycloak')) {
+                        cspElement.after(kcElement);
+                      }
+
                       let ppEl = $('link[id="ziti-browzer-ppcss"]');
                       // Inject the ZBR immediately after the PP
                       ppEl.after(zbrElement);
