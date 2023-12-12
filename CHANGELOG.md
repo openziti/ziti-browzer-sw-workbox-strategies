@@ -1,3 +1,12 @@
+## [0.44.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.44.0...v0.44.1) (2023-12-12)
+
+
+### Bug Fixes
+
+* CSP for Keycloak ([#173](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/173)) ([460d2fd](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/460d2fde30652eb6e4f4a9c9d06d8e20ea57887c))
+
+
+
 # [0.44.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.43.1...v0.44.0) (2023-12-11)
 
 
