@@ -195,6 +195,20 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       if (!origCSP['connect-src'].includes("data:")) {
         origCSP['connect-src'].push("data:");
       }
+    } else {
+      origCSP['connect-src'] = [];
+      let url = new URL(this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.controller.api);
+      origCSP['connect-src'].push(`${url.hostname}`);
+      origCSP['connect-src'].push(`${this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host}`);
+    }
+
+    if (origCSP['img-src']) {
+      origCSP['img-src'].push(`data:`);
+      origCSP['img-src'].push(`${this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host}`);
+    } else {
+      origCSP['img-src'] = [];
+      origCSP['img-src'].push(`data:`);
+      origCSP['img-src'].push(`${this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host}`);
     }
 
     let directives:any = {}
