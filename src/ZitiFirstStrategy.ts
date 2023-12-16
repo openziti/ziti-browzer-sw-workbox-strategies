@@ -191,14 +191,14 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     if (origCSP['connect-src']) {
       origCSP['connect-src'].push(`${this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.idp.host}`);
       let url = new URL(this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.controller.api);
-      origCSP['connect-src'].push(`${url.origin}`);
+      origCSP['connect-src'].push(`${url.host}`);
       if (!origCSP['connect-src'].includes("data:")) {
         origCSP['connect-src'].push("data:");
       }
     } else {
       origCSP['connect-src'] = [];
       let url = new URL(this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.controller.api);
-      origCSP['connect-src'].push(`${url.hostname}`);
+      origCSP['connect-src'].push(`${url.host}`);
       origCSP['connect-src'].push(`${this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host}`);
     }
 
@@ -1023,6 +1023,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
         if (response.body) {
 
           let fromBootstrapper = false;
+          let fullDocument = true;
 
           function detectFromBootstrapper() {
   
@@ -1031,6 +1032,8 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
             return new TransformStream({
 
               transform(chunk, _controller) {
+
+                fullDocument = chunk.toLowerCase().includes("<html");
 
                 try {
 
@@ -1098,8 +1101,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
                 try {
 
-
-                  if (!fromBootstrapper) {
+                  if (fullDocument && !fromBootstrapper) {
 
                     let zbrLocation = self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.runtime.src;
 
