@@ -1,3 +1,12 @@
+# [0.45.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.44.3...v0.45.0) (2023-12-16)
+
+
+### Features
+
+* add gzip, and Angular HTML-frag support ([#176](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/176)) ([36e64c9](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/36e64c9ecb2dc236ec767412c4665d3e9b6b3c0a))
+
+
+
 ## [0.44.3](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.44.2...v0.44.3) (2023-12-13)
 
 
