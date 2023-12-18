@@ -190,25 +190,30 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
     if (origCSP['connect-src']) {
       origCSP['connect-src'].push(`${this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.idp.host}`);
-      let url = new URL(this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.controller.api);
-      origCSP['connect-src'].push(`${url.host}`);
+      origCSP['connect-src'].push(`https://*.netfoundry.io`);
+      origCSP['connect-src'].push(`https://*.cloudziti.io`);
+      origCSP['connect-src'].push(`wss://*.netfoundry.io:*`);
       if (!origCSP['connect-src'].includes("data:")) {
         origCSP['connect-src'].push("data:");
       }
     } else {
       origCSP['connect-src'] = [];
-      let url = new URL(this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.controller.api);
-      origCSP['connect-src'].push(`${url.host}`);
+      origCSP['connect-src'].push(`${this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.idp.host}`);
+      origCSP['connect-src'].push(`https://*.netfoundry.io`);
+      origCSP['connect-src'].push(`https://*.cloudziti.io`);
+      origCSP['connect-src'].push(`wss://*.netfoundry.io:*`);
       origCSP['connect-src'].push(`${this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host}`);
     }
 
     if (origCSP['img-src']) {
       origCSP['img-src'].push(`data:`);
       origCSP['img-src'].push(`${this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host}`);
+      origCSP['img-src'].push(`*`);
     } else {
       origCSP['img-src'] = [];
       origCSP['img-src'].push(`data:`);
       origCSP['img-src'].push(`${this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host}`);
+      origCSP['img-src'].push(`*`);
     }
 
     let directives:any = {}
