@@ -1,3 +1,12 @@
+## [0.45.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.45.0...v0.45.1) (2023-12-18)
+
+
+### Bug Fixes
+
+* img fetch/render broken due to CSP misalignment ([#177](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/177)) ([eb3857a](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/eb3857a291d3a11194a204e0aeb174afe13b4bfe))
+
+
+
 # [0.45.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.44.3...v0.45.0) (2023-12-16)
 
 
