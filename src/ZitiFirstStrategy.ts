@@ -61,7 +61,8 @@ var regexJPG      = new RegExp( /^.*\.jpg$/,            'i' );
 var regexSVG      = new RegExp( /^.*\.svg$/,            'i' );
 var regexControllerAPI: any;
 
-const keycloakJs = `https://cdn.jsdelivr.net/npm/keycloak-js@23.0.1/dist/keycloak.min.js`;
+const keycloakJs  = `https://cdn.jsdelivr.net/npm/keycloak-js@23.0.1/dist/keycloak.min.js`;
+const erudaJs     = `https://cdn.jsdelivr.net/npm/eruda@3.0.1/eruda.min.js`;
 
 interface PolicyResult {
   [key: string]: string[];
@@ -175,42 +176,36 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     let origCSP = this.parseCSP(val);
     this.logger.trace( `generateNewCSP() origCSP: `, origCSP);
 
+    if (origCSP['default-src']) {
+      origCSP['default-src'].push(`https://*.netfoundry.io:*`);
+      origCSP['default-src'].push(`https://*.cloudziti.io`);
+      origCSP['default-src'].push(`wss://*.netfoundry.io:*`);
+      origCSP['default-src'].push("data:");
+      origCSP['default-src'].push("https://opencollective.com");
+    }
+
     if (origCSP['script-src']) {
       origCSP['script-src'].push(`${this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.idp.host}`.replace('https://',''));
       if (isEqual(this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.idp.type, 'keycloak')) {
         origCSP['script-src'].push(`${keycloakJs}`);
       }      
+      origCSP['script-src'].push(`${erudaJs}`);
       if (!origCSP['script-src'].includes("'unsafe-eval'")) {
         origCSP['script-src'].push("'unsafe-eval'");
       }
-      // if (!origCSP['script-src'].includes("'unsafe-inline'")) {
-      //   origCSP['script-src'].push("'unsafe-inline'");
-      // }
     }
 
     if (origCSP['connect-src']) {
       origCSP['connect-src'].push(`${this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.idp.host}`);
-      origCSP['connect-src'].push(`https://*.netfoundry.io`);
+      origCSP['connect-src'].push(`https://*.netfoundry.io:*`);
       origCSP['connect-src'].push(`https://*.cloudziti.io`);
       origCSP['connect-src'].push(`wss://*.netfoundry.io:*`);
       if (!origCSP['connect-src'].includes("data:")) {
         origCSP['connect-src'].push("data:");
       }
-    } else {
-      origCSP['connect-src'] = [];
-      origCSP['connect-src'].push(`${this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.idp.host}`);
-      origCSP['connect-src'].push(`https://*.netfoundry.io`);
-      origCSP['connect-src'].push(`https://*.cloudziti.io`);
-      origCSP['connect-src'].push(`wss://*.netfoundry.io:*`);
-      origCSP['connect-src'].push(`${this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host}`);
     }
 
     if (origCSP['img-src']) {
-      origCSP['img-src'].push(`data:`);
-      origCSP['img-src'].push(`${this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host}`);
-      origCSP['img-src'].push(`*`);
-    } else {
-      origCSP['img-src'] = [];
       origCSP['img-src'].push(`data:`);
       origCSP['img-src'].push(`${this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host}`);
       origCSP['img-src'].push(`*`);
@@ -1164,6 +1159,11 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
                         .attr('type', 'text/javascript')
                         .attr('src', `${keycloakJs}`);
                     }
+
+                    let erudaElement = $('<script></script> ')
+                      .attr('id', 'ziti-browzer-eruda')
+                      .attr('type', 'text/javascript')
+                      .attr('src', `${erudaJs}`);
   
                     // Locate the CSP
                     let cspElement = $('meta[http-equiv="content-security-policy"]');
@@ -1190,6 +1190,8 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
                         cspElement.after(kcElement);
                       }
 
+                      cspElement.after(erudaElement);
+
                       let ppEl = $('link[id="ziti-browzer-ppcss"]');
                       // Inject the ZBR immediately after the PP
                       ppEl.after(zbrElement);
@@ -1215,6 +1217,8 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
                       if (isEqual(self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.idp.type, 'keycloak')) {
                         headElement.prepend(kcElement);
                       }
+
+                      headElement.prepend(erudaElement);
 
                       buffer += $.html();
                     }
