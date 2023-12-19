@@ -1,3 +1,12 @@
+# [0.46.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.45.1...v0.46.0) (2023-12-19)
+
+
+### Features
+
+* eruda ([#178](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/178)) ([4dc7961](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/4dc79614faeebb865a8d771093de8e2157a32f85))
+
+
+
 ## [0.45.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.45.0...v0.45.1) (2023-12-18)
 
 
