@@ -1,3 +1,12 @@
+## [0.47.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.47.0...v0.47.1) (2024-01-05)
+
+
+### Bug Fixes
+
+* typo ([#180](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/180)) ([af48390](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/af483907f28d55f59da7efb9cb1d11b67a53ec46))
+
+
+
 # [0.47.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.46.0...v0.47.0) (2024-01-05)
 
 
