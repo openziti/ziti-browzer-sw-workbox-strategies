@@ -1,3 +1,12 @@
+# [0.47.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.46.0...v0.47.0) (2024-01-05)
+
+
+### Features
+
+* introduce 'eruda' url query parm ([#179](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/179)) ([868b628](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/868b6282f18e01c977c559ea1eb74ba56a0bdb7f))
+
+
+
 # [0.46.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.45.1...v0.46.0) (2023-12-19)
 
 
