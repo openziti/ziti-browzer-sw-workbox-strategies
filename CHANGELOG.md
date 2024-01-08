@@ -1,3 +1,12 @@
+## [0.47.2](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.47.1...v0.47.2) (2024-01-08)
+
+
+### Bug Fixes
+
+* 'socket hang up' errors (again) ([#181](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/181)) ([854d817](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/854d8175850953fa97a9d479b0fcb0002b871767))
+
+
+
 ## [0.47.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.47.0...v0.47.1) (2024-01-05)
 
 
