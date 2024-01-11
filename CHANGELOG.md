@@ -1,3 +1,12 @@
+## [0.47.3](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.47.2...v0.47.3) (2024-01-11)
+
+
+### Bug Fixes
+
+* multi-MB writes fail under nestedTLS ([#182](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/182)) ([90d16a5](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/90d16a58945af4c91565b19b872310cae2de25ce))
+
+
+
 ## [0.47.2](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.47.1...v0.47.2) (2024-01-08)
 
 
