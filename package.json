@@ -83,7 +83,7 @@
     ]
   },
   "dependencies": {
-    "@openziti/ziti-browzer-core": "^0.35.3",
+    "@openziti/ziti-browzer-core": "^0.35.4",
     "async-mutex": "^0.3.2",
     "cheerio": "^1.0.0-rc.12",
     "jwt-decode": "^3.1.2",
