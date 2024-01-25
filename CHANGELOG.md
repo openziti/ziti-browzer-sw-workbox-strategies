@@ -1,3 +1,12 @@
+# [0.48.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.47.3...v0.48.0) (2024-01-25)
+
+
+### Features
+
+* agent pool ([#183](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/183)) ([3b2ba95](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/3b2ba95bd46e21394dc877b37a7eee598689933e))
+
+
+
 ## [0.47.3](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.47.2...v0.47.3) (2024-01-11)
 
 
