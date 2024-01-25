@@ -1509,6 +1509,10 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
        * 2) pipe the HTTP response body 
        */
 
+      if (isUndefined(zitiResponse.headers.raw)) {
+       return zitiResponse;
+      }
+
       var zitiHeaders = zitiResponse.headers.raw();
       const contentType = zitiHeaders['content-type'];
       let isTextHtml = false;
