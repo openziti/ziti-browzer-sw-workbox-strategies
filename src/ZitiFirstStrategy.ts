@@ -52,6 +52,7 @@ var regexSlash    = new RegExp( /^\/$/,                 'g' );
 var regexDotSlash = new RegExp( /^\.\//,                'g' );
 var regexTextHtml = new RegExp( /text\/html/,           'i' );
 var regexTextXml  = new RegExp( /text\/xml/,            'i' );
+var regexAppJSON  = new RegExp( /application\/json/,    'i' );
 var regexVideo    = new RegExp( /video/,                'i' );
 var regexMpeg     = new RegExp( /mpeg/,                 'i' );
 var regexImage    = new RegExp( /image\//,              'i' );
@@ -982,6 +983,10 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       useCache = false;
     }
 
+    if (contentType && contentType.match( regexAppJSON )) {
+      useCache = false;
+    }
+
     if ((contentType && contentType.match( regexVideo )) || (contentType && contentType.match( regexMpeg ))) {
       /**
        * streaming media server thing
@@ -1577,18 +1582,24 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
             if (isUndefined(locationUrl)) { // i.e. it's a relative path (no slashes)
               pathname = `${referrerUrlPathname}${val}`;
             } else {
-              pathname = locationUrl.pathname + locationUrl.search;
+              if (isEqual(locationUrl.hostname, this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host)) {
+                pathname = locationUrl.pathname + locationUrl.search;
+              }
             }
           }
-          let newLocationUrl = new URL( 
-            `${this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.scheme}://` + 
-            this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host + 
-            ':' + 
-            this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.port + 
-            pathname 
-          );
-          val = newLocationUrl.toString();
-          this.logger.trace( `location header transformed to: ${val}`);
+          if (!isUndefined(pathname)) { 
+            let newLocationUrl = new URL( 
+              `${this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.scheme}://` + 
+              this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host + 
+              ':' + 
+              this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.port + 
+              pathname 
+            );
+            val = newLocationUrl.toString();
+            this.logger.trace( `location header transformed to: ${val}`);
+          } else {
+            this.logger.trace( `location header transform bypassed for: ${val}`);
+          }
         }
         
         else if (key.toLowerCase() === 'content-security-policy') {
