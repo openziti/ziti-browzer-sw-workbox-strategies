@@ -1,3 +1,12 @@
+## [0.48.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.48.0...v0.48.1) (2024-01-31)
+
+
+### Bug Fixes
+
+* do not cache JSON content ([#184](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/184)) ([3dd7de8](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/3dd7de81c69722154b1b886e728dc0901faa2325))
+
+
+
 # [0.48.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.47.3...v0.48.0) (2024-01-25)
 
 
