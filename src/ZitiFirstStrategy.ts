@@ -518,111 +518,102 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     
     this.logger.trace(`_shouldRouteOverZiti starting`);
 
-    result.routeOverZiti = false;  // default is to route over raw internet
-
     let url = new URL(request.url);
+    result.url = url.toString();
     let targetHost = url.hostname;
-    this.logger.trace(`_shouldRouteOverZiti targetHost is: ${targetHost}`);
+    let targetPort = url.port;
+    if (isEqual(targetHost, this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host) && isEqual(targetPort,'')) {
+      targetPort = '443';
+    }
+    let targetPath = url.pathname;
+    this.logger.trace(`_shouldRouteOverZiti targetHost:port path is: ${targetHost}:${targetPort} ${targetPath}`);
 
     try {
 
-    // We want to intercept fetch requests that target the Ziti BrowZer Bootstrapper... that is...
-    // ...we want to intercept any request from the web app that targets the server from 
-    // which the app was loaded.
-  
-    var regex = new RegExp( this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host, 'g' );
-    let targetserviceHost = await this._zitiContext.getConfigHostByServiceName (this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.service);
-    let connectAppData = await this._zitiContext.getConnectAppDataByServiceName (
-      this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.service,
-      this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.scheme
-      );
-    var targetServiceRegex = new RegExp( targetserviceHost , 'g' );
-    var browzerLoadBalancerRegex = new RegExp( this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.loadbalancer.host , 'g' );
-  
-    if (isEqual(targetHost, this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host) // yes, the request is targeting the Ziti BrowZer Bootstrapper
-      || (this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.loadbalancer.host && request.url.match( browzerLoadBalancerRegex )) ) { // yes, the request is targeting the Ziti BrowZer LoadBalancer
-
-      // let isExpired = await this._zitiContext.isCertExpired();
-  
-      var newUrl = new URL( request.url );
-
-      if ( newUrl.pathname === '/' ) {
-
-        result.url = request.url;
-        result.routeOverZiti = true;
-        result.serviceName = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.service;  
-        result.serviceScheme = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.scheme;
-        result.serviceConnectAppData = connectAppData;
-      }
-      else 
-      if ( (request.url.match( regexZBR )) || (request.url.match( regexZBRnaked )) || (request.url.match( regexZBWASM )) || (request.url.match( regexZBRLogo )) || (request.url.match( regexZBRcss )) || (request.url.match( regexZBRCORS ))) { // the request seeks z-b-r/wasm/logo/css/cors-proxy
-        this.logger.trace(`_shouldRouteOverZiti: z-b-r/wasm/logo, bypassing intercept of [${request.url}]`);
-      }  
-      else {
-
-        newUrl.hostname = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.service;
-        newUrl.port = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.port;
-
-        var pathnameArray = newUrl.pathname.split('/');
-        var targetpathnameArray = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.path.split('/');
-
-        if (!isEqual(pathnameArray[1], targetpathnameArray[1])) {
-          newUrl.pathname = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.path + newUrl.pathname;
-          newUrl.pathname = newUrl.pathname.replace('//','/');
-        }
-        this.logger.trace( '_shouldRouteOverZiti: transformed URL: ', newUrl.toString());
+      // We want to intercept fetch requests that target the Ziti BrowZer Bootstrapper... that is...
+      // ...we want to intercept any request from the web app that targets the server from 
+      // which the app was loaded.
     
-        result.serviceName = await this._zitiContext.shouldRouteOverZiti( newUrl );
-        this.logger.trace(`_shouldRouteOverZiti result.serviceName[${result.serviceName}]`);
-  
-        if (isUndefined(result.serviceName) || isEqual(result.serviceName, '')) { // If we have no config associated with the hostname:port, do not intercept
-          this.logger.warn(`_shouldRouteOverZiti: no associated Ziti config, bypassing intercept of [${request.url}]`);
-          setTimeout(this._sendServiceUnavailable, 250, this._zitiBrowzerServiceWorkerGlobalScope, newUrl);
-        } else {
-          result.url = newUrl.toString();
+      let targetserviceHost = await this._zitiContext.getConfigHostByServiceName (this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.service);
+      let connectAppData = await this._zitiContext.getConnectAppDataByServiceName (this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.service, this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.scheme);
+      var targetServiceRegex = new RegExp( targetserviceHost , 'g' );
+      var browzerLoadBalancerRegex = new RegExp( this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.loadbalancer.host , 'g' );
+    
+      if (
+        (isEqual(targetHost, this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host) && (isEqual(targetPort, `443`))) // yes, the request is targeting the Ziti BrowZer Bootstrapper
+        || (this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.loadbalancer.host && request.url.match( browzerLoadBalancerRegex )) ) {   // yes, the request is targeting the Ziti BrowZer LoadBalancer
+    
+        var newUrl = new URL( request.url );
+
+        if ( isEqual(targetPath, '/')) {
+
           result.routeOverZiti = true;
+
+          result.serviceName = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.service;  
           result.serviceScheme = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.scheme;
           result.serviceConnectAppData = connectAppData;
-        }   
-  
-      }
+        }
+        else if ( (request.url.match( regexZBR )) || (request.url.match( regexZBRnaked )) || (request.url.match( regexZBWASM )) || (request.url.match( regexZBRLogo )) || (request.url.match( regexZBRcss )) || (request.url.match( regexZBRCORS ))) { // the request seeks z-b-r/wasm/logo/css/cors-proxy
+          this.logger.trace(`_shouldRouteOverZiti: z-b-r/wasm/logo, bypassing intercept of [${request.url}]`);
+          result.routeOverZiti = false;
+        }  
+        else {
+
+          newUrl.hostname = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.service;
+          newUrl.port = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.port;
+
+          var pathnameArray = newUrl.pathname.split('/');
+          var targetpathnameArray = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.path.split('/');
+
+          if (!isEqual(pathnameArray[1], targetpathnameArray[1])) {
+            newUrl.pathname = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.path + newUrl.pathname;
+            newUrl.pathname = newUrl.pathname.replace('//','/');
+          }
+          this.logger.trace( '_shouldRouteOverZiti: transformed URL: ', newUrl.toString());
+      
+          result.serviceName = await this._zitiContext.shouldRouteOverZiti( newUrl );
+          this.logger.trace(`_shouldRouteOverZiti result.serviceName[${result.serviceName}]`);
     
-    } 
-    else if ( (request.url.match( regexZBR )) || ((request.url.match( regexZBWASM ))) ) { // the request seeks z-b-r/wasm
-      this.logger.trace(`_shouldRouteOverZiti: z-b-r/wasm, bypassing intercept of [${request.url}]`);
-    }
-    else if (request.url.match( targetServiceRegex )) { // yes, the request is targeting the 'dark' web app
+          if (isUndefined(result.serviceName) || isEqual(result.serviceName, '')) { // If we have no config associated with the hostname:port, do not intercept
+            this.logger.warn(`_shouldRouteOverZiti: no associated Ziti config, bypassing intercept of [${request.url}]`);
+            setTimeout(this._sendServiceUnavailable, 250, this._zitiBrowzerServiceWorkerGlobalScope, newUrl);
+          } else {
+            result.routeOverZiti = true;
 
-      result.url = request.url;
-      result.routeOverZiti = true;
-      result.serviceName = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.service;
-      result.serviceScheme = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.scheme;
-      result.serviceConnectAppData = connectAppData;
-    }
-
-    else if ( (request.url.match( regexSlash )) || ((request.url.match( regexDotSlash ))) ) { // the request starts with a slash
-
-      this.logger.error(`_shouldRouteOverZiti implement me `);
-
-    } else {  // the request is targeting the raw internet
-
-      result.serviceName = await this._zitiContext.shouldRouteOverZiti( request.url );
-      this.logger.trace(`_shouldRouteOverZiti result.serviceName[${result.serviceName}]`);
-
-      if (isUndefined(result.serviceName) || isEqual(result.serviceName, '')) { // If we have no config associated with the hostname:port
-
-        this.logger.warn(`_shouldRouteOverZiti: no associated config, bypassing intercept of [${request.url}]`);
-  
-      } else {
-
-        result.url = request.url;
-        result.routeOverZiti = true;
-        result.serviceScheme = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.scheme;
-        result.serviceConnectAppData = connectAppData;
-  
+            result.url = newUrl.toString();
+            result.serviceScheme = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.scheme;
+            result.serviceConnectAppData = connectAppData;
+          }   
+    
+        }
+      
       }
 
-    }
+      // If no routing determination has been made yet
+      if (isUndefined(result.routeOverZiti)) {
+
+        result.serviceName = await this._zitiContext.shouldRouteOverZiti( url );
+        this.logger.trace(`_shouldRouteOverZiti result.serviceName[${result.serviceName}]`);
+
+        if (isUndefined(result.serviceName) || isEqual(result.serviceName, '')) { // If we have no config associated with the hostname:port, do not intercept
+
+          this.logger.warn(`_shouldRouteOverZiti: no associated Ziti config, bypassing intercept of [${request.url}]`);
+          result.routeOverZiti = false;
+
+        } else {
+
+          result.routeOverZiti = true;
+
+          result.url = url.toString();
+          result.serviceScheme = url.protocol;
+
+          let connectAppData = await this._zitiContext.getConnectAppDataByServiceName (result.serviceName, url.protocol);
+
+          result.serviceConnectAppData = connectAppData;
+        }
+
+      }
+
     } catch (e) {
       this.logger.error( e );
     }
