@@ -1,3 +1,12 @@
+## [0.49.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.49.0...v0.49.1) (2024-02-05)
+
+
+### Bug Fixes
+
+* introduce ZitiDummyWebSocketWrapper ([#186](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/186)) ([a4b0b17](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/a4b0b178b223280d2632934d0251aea3dfac08da))
+
+
+
 # [0.49.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.48.1...v0.49.0) (2024-02-05)
 
 
