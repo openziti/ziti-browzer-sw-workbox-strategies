@@ -1,3 +1,12 @@
+# [0.50.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.49.1...v0.50.0) (2024-02-10)
+
+
+### Features
+
+* OIDC refactor ([#187](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/187)) ([bde75ec](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/bde75ec7e8f394fe883ec1769c5af05f0df2e018))
+
+
+
 ## [0.49.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.49.0...v0.49.1) (2024-02-05)
 
 
