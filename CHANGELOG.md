@@ -1,3 +1,12 @@
+## [0.50.3](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.50.2...v0.50.3) (2024-02-22)
+
+
+### Bug Fixes
+
+* ECS tweak ([#189](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/189)) ([b5b041b](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/b5b041bac1388cdf768ef38b6ceb5f63292c509d))
+
+
+
 ## [0.50.2](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.50.1...v0.50.2) (2024-02-21)
 
 
