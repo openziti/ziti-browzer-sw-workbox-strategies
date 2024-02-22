@@ -1082,7 +1082,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
             let url;
         
             if (self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.loadbalancer.host) {
-              url = `https://${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.self.host}:${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.loadbalancer.port}`;
+              url = `https://${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host}:${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.loadbalancer.port}`;
             } else {
               url = `${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.scheme}://${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host}:${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.port}`;
             }
