@@ -1579,14 +1579,23 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
               }
             }
           }
-          if (!isUndefined(pathname)) { 
-            let newLocationUrl = new URL( 
-              `${this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.scheme}://` + 
-              this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host + 
-              ':' + 
-              this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.port + 
-              pathname 
-            );
+          if (!isUndefined(pathname)) {
+            let newLocationUrl;
+            if (this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.loadbalancer.host) {
+              newLocationUrl = new URL(
+                `https://` + this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host + ':' +
+                this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.loadbalancer.port +
+                pathname
+              );
+            } else {
+              newLocationUrl = new URL( 
+                `${this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.scheme}://` +
+                this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host +
+                ':' +
+                this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.port +
+                pathname
+              );
+            }
             val = newLocationUrl.toString();
             this.logger.trace( `location header transformed to: ${val}`);
           } else {
