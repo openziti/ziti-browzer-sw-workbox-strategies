@@ -1,3 +1,12 @@
+## [0.50.5](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.50.4...v0.50.5) (2024-02-28)
+
+
+### Bug Fixes
+
+* relative path redirect tweak ([#191](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/191)) ([c7ffcae](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/c7ffcae6ecacf201a6a958296eafb1a33a4d8385))
+
+
+
 ## [0.50.4](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.50.3...v0.50.4) (2024-02-28)
 
 
