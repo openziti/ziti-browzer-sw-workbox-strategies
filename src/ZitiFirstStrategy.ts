@@ -1576,6 +1576,11 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
             } else {
               if (isEqual(locationUrl.hostname, this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host)) {
                 pathname = locationUrl.pathname + locationUrl.search;
+              } else {
+                let serviceConnectAppData = await this._zitiBrowzerServiceWorkerGlobalScope._zitiContext.getConnectAppDataByServiceName(this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.service, 'https');
+                if (isEqual(locationUrl.hostname, serviceConnectAppData.dst_hostname)) {
+                  pathname = locationUrl.pathname + locationUrl.search;
+                }
               }
             }
           }
