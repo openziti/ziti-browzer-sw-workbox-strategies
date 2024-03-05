@@ -1,3 +1,12 @@
+# [0.51.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.50.5...v0.51.0) (2024-03-05)
+
+
+### Features
+
+* add inflate-deflate support ([#192](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/192)) ([693e8c1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/693e8c147aa61766ba9122637816bacac2d8b010))
+
+
+
 ## [0.50.5](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.50.4...v0.50.5) (2024-02-28)
 
 
