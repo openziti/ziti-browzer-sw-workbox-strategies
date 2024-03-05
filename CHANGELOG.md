@@ -1,3 +1,12 @@
+# [0.52.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.51.0...v0.52.0) (2024-03-05)
+
+
+### Features
+
+* improve intercept.v1 config protocol parsing ([#193](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/193)) ([40cdfe5](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/40cdfe5259bc6a377ae8d74c3a27b61a420edc34))
+
+
+
 # [0.51.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.50.5...v0.51.0) (2024-03-05)
 
 
