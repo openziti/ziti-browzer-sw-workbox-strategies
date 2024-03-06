@@ -1590,6 +1590,9 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
                 if (isEqual(locationUrl.hostname, serviceConnectAppData.dst_hostname)) {
                   pathname = locationUrl.pathname + locationUrl.search;
                 }
+                else if (isEqual(locationUrl.hostname, serviceConnectAppData.dst_ip)) {
+                  pathname = locationUrl.pathname + locationUrl.search;
+                }
               }
             }
           }
