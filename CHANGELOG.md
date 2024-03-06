@@ -1,3 +1,12 @@
+## [0.52.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.52.0...v0.52.1) (2024-03-06)
+
+
+### Bug Fixes
+
+* match redirects with serviceConnectAppData.dst_ip ([#194](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/194)) ([e95f074](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/e95f0742c7c94a8ad6e4f195ef8513583a2cf88e))
+
+
+
 # [0.52.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.51.0...v0.52.0) (2024-03-05)
 
 
