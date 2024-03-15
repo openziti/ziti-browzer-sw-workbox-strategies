@@ -550,7 +550,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       var browzerLoadBalancerRegex = new RegExp( this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.loadbalancer.host , 'g' );
     
       if (
-        (isEqual(targetHost, this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host) && (isEqual(targetPort, `443`))) // yes, the request is targeting the Ziti BrowZer Bootstrapper
+        (isEqual(targetHost, this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host) && (isEqual(targetPort, this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.port))) // yes, the request is targeting the Ziti BrowZer Bootstrapper
         || (this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.loadbalancer.host && request.url.match( browzerLoadBalancerRegex )) ) {   // yes, the request is targeting the Ziti BrowZer LoadBalancer
     
         var newUrl = new URL( request.url );
@@ -571,6 +571,10 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
           newUrl.hostname = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.service;
           newUrl.port = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.port;
+
+          if (isEqual(newUrl.port, this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.port)) {
+            newUrl.port = '';
+          }
 
           var pathnameArray = newUrl.pathname.split('/');
           var targetpathnameArray = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.path.split('/');
