@@ -1,3 +1,12 @@
+## [0.52.3](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.52.2...v0.52.3) (2024-03-17)
+
+
+### Bug Fixes
+
+* non-default lb+bootstrapper port handling ([#196](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/196)) ([cb6819a](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/cb6819a518cf2761f203fb593bd2755e358af9de))
+
+
+
 ## [0.52.2](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.52.1...v0.52.2) (2024-03-15)
 
 
