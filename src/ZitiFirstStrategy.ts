@@ -572,7 +572,10 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
           newUrl.hostname = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.service;
           newUrl.port = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.port;
 
-          if (isEqual(newUrl.port, this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.port)) {
+          if (
+            isEqual(newUrl.port, this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.port) ||
+            isEqual(newUrl.port, this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.loadbalancer.port)
+          ) {
             newUrl.port = '';
           }
 
