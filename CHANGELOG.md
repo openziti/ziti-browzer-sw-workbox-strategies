@@ -1,3 +1,12 @@
+## [0.52.6](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.52.5...v0.52.6) (2024-03-21)
+
+
+### Bug Fixes
+
+* avoid using null appdata ([#199](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/199)) ([d3ec6bf](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/d3ec6bfa6b49b095802ffab508b546154c606926))
+
+
+
 ## [0.52.5](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.52.4...v0.52.5) (2024-03-18)
 
 
