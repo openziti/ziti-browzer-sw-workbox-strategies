@@ -1481,15 +1481,18 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       // Propagate any Cookie values we have accumulated
       let cookieHeaderValue = '';
       for (const cookie in this._zitiBrowzerServiceWorkerGlobalScope._cookieObject) {
-          if (cookie !== '') {
+        if (cookie !== '' && !isEqual(cookie, '__ziti-browzer-config')) { // don't send the ZBR config cookie
               if (this._zitiBrowzerServiceWorkerGlobalScope._cookieObject.hasOwnProperty(cookie)) {
-                  cookieHeaderValue += cookie + '=' + this._zitiBrowzerServiceWorkerGlobalScope._cookieObject[cookie] + '; ';
-              }
+                  cookieHeaderValue += cookie + '=' + this._zitiBrowzerServiceWorkerGlobalScope._cookieObject[cookie];
+                  // this.logger.debug(`cookieHeaderValue: [${cookieHeaderValue}]`);
+                  newHeaders.append( 'Cookie', cookieHeaderValue );
+                  cookieHeaderValue = '';
+                }
           }
       }
-      if (cookieHeaderValue !== '') {
-          newHeaders.append( 'Cookie', cookieHeaderValue );
-      }
+      // if (cookieHeaderValue !== '') {
+      //     newHeaders.append( 'Cookie', cookieHeaderValue );
+      // }
           
       var blob = await this.getRequestBody( zitiRequest );
 
