@@ -1,3 +1,12 @@
+# [0.53.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.52.6...v0.53.0) (2024-03-31)
+
+
+### Features
+
+* Blueframe support ([#200](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/200)) ([555f820](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/555f8204f8e23a39ae19fea131febaa6dbf9bbe1))
+
+
+
 ## [0.52.6](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.52.5...v0.52.6) (2024-03-21)
 
 
