@@ -1171,6 +1171,11 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
                         .attr('type', 'text/javascript')
                         .attr('src', `${_obtainBootStrapperURL()}/hotkeys.min.js`);
 
+                    let otElement = $('<meta></meta> ')
+                        .attr('id', 'ziti-browzer-origin-trial')
+                        .attr('http-equiv', 'origin-trial')
+                        .attr('content', `${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.runtime.originTrialToken}`);
+
                     let kcElement = $('<meta name="author" content="OpenZiti BrowZer" />')
                    
                     if (isEqual(self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.idp.type, 'keycloak')) {
@@ -1208,6 +1213,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
                       cspElement.after(hkElement);
                       cspElement.after(hmElement);
                       cspElement.after(hmCss1Element);
+                      cspElement.after(otElement);
 
                       if (isEqual(self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.idp.type, 'keycloak')) {
                         cspElement.after(kcElement);
@@ -1217,9 +1223,9 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
                         cspElement.after(erudaElement);
                       }
 
-                      let ppEl = $('link[id="ziti-browzer-ppcss"]');
-                      // Inject the ZBR immediately after the PP
-                      ppEl.after(zbrElement);
+                      let otEl = $('meta[id="ziti-browzer-origin-trial"]');
+                      // Inject the ZBR immediately after the origin trial meta
+                      otEl.after(zbrElement);
 
                       buffer += $.html();
                     }
@@ -1238,6 +1244,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
                       headElement.prepend(ppElement);
                       headElement.prepend(ppCss2Element);
                       headElement.prepend(ppCss1Element);
+                      headElement.prepend(otElement);
 
                       if (isEqual(self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.idp.type, 'keycloak')) {
                         headElement.prepend(kcElement);
