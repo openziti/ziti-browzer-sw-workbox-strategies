@@ -1,3 +1,12 @@
+# [0.54.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.53.0...v0.54.0) (2024-04-19)
+
+
+### Features
+
+* Origin Trial support ([#201](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/201)) ([ed0de9b](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/ed0de9b579c39349196da4fc4c70bec37185307e))
+
+
+
 # [0.53.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.52.6...v0.53.0) (2024-03-31)
 
 
