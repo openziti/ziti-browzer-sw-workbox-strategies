@@ -342,6 +342,8 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
     await this._zitiBrowzerServiceWorkerGlobalScope._sessionCreationError(sessionCreationErrorEvent);
 
+    this._zitiBrowzerServiceWorkerGlobalScope._unregisterNoReload();
+
   }
 
   async noServiceEventHandler(noServiceEvent: any) {
@@ -349,6 +351,8 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     this.logger.trace(`noServiceEventHandler() `, noServiceEvent);
 
     await this._zitiBrowzerServiceWorkerGlobalScope._noService(noServiceEvent);
+
+    this._zitiBrowzerServiceWorkerGlobalScope._unregisterNoReload();
 
   }
 
