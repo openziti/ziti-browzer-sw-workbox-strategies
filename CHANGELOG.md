@@ -1,3 +1,12 @@
+## [0.54.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.54.0...v0.54.1) (2024-04-22)
+
+
+### Bug Fixes
+
+* Service revocation detect/react enhancements ([#202](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/202)) ([d7c6b8a](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/d7c6b8aa23844c9b4483d6b51493807be1b7f57e))
+
+
+
 # [0.54.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.53.0...v0.54.0) (2024-04-19)
 
 
