@@ -44,6 +44,7 @@ var regexEdgeClt  = new RegExp( /\/edge\/client\/v1/,   'g' );
 var regexZBWASM   = new RegExp( /libcrypto.*.wasm/,     'g' );
 var regexHystmodal = new RegExp( /hystmodal/,           'g' );
 var regexPolipop  = new RegExp( /polipop/,              'g' );
+var regexCannySetup = new RegExp( /canny-setup/,        'g' );
 var regexHotkeys  = new RegExp( /hotkeys/,              'g' );
 var regexOAUTHTOKEN = new RegExp( /\/oauth\/token/,     'g' );
 var regexFavicon  = new RegExp( /\/favicon\.ico/,       'g' );
@@ -191,6 +192,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
     if (origCSP['script-src']) {
       origCSP['script-src'].push(`${this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.idp.host}`.replace('https://',''));
+      origCSP['script-src'].push(`canny.io`);
       if (isEqual(this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.idp.type, 'keycloak')) {
         origCSP['script-src'].push(`${keycloakJs}`);
       }
@@ -750,6 +752,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       (request.url.match( regexZBRcss )) ||           // seeking Ziti BrowZer CSS
       (request.url.match( regexHystmodal )) ||        // seeking Ziti Hystmodal
       (request.url.match( regexPolipop )) ||          // seeking Ziti Polipop
+      (request.url.match( regexCannySetup )) ||       // seeking Canny setup
       (request.url.match( regexHotkeys )) ||          // seeking Ziti Hotkeys
       (request.url.match( regexOAUTHTOKEN )) ||       // seeking IdP token 
       (request.url.match( regexFavicon )) ||          // seeking favicon
@@ -1150,6 +1153,12 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
                     self.logger.trace(`streamingHEADReplace: HTML before modifications is: ${$.html()}`);
 
                     let zbrElement = $('<script></script> ').attr('id', 'from-ziti-browzer-sw').attr('type', 'text/javascript').attr('src', `${_obtainBootStrapperURL()}/${zbrLocation}`); //.attr('defer', `defer`);
+
+                    let cannyElement = $('<script></script> ')
+                        .attr('id', 'ziti-browzer-canny-setup')
+                        .attr('type', 'text/javascript')
+                        .attr('src', `${_obtainBootStrapperURL()}/canny-setup.js`);
+
                     let ppElement = $('<script></script> ')
                         .attr('id', 'ziti-browzer-pp')
                         .attr('type', 'text/javascript')
@@ -1230,6 +1239,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
                       let otEl = $('meta[id="ziti-browzer-origin-trial"]');
                       // Inject the ZBR immediately after the origin trial meta
                       otEl.after(zbrElement);
+                      otEl.after(cannyElement);
 
                       buffer += $.html();
                     }
@@ -1239,6 +1249,8 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
                       // Locate the HEAD
                       let headElement = $('head');
+
+                      headElement.prepend(cannyElement);
 
                       // Inject the Ziti browZer Runtime at the front of <head> element so we are prepared to intercept as soon as possible over on the browser
                       headElement.prepend(zbrElement);
