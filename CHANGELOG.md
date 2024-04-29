@@ -1,3 +1,12 @@
+# [0.55.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.54.1...v0.55.0) (2024-04-29)
+
+
+### Features
+
+* New Settings Dlg (with 'Changelog' and 'Feedback' widgets) ([#203](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/203)) ([934a985](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/934a985df0f2cfd549fbb45543188b6d5eae29ec))
+
+
+
 ## [0.54.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.54.0...v0.54.1) (2024-04-22)
 
 
