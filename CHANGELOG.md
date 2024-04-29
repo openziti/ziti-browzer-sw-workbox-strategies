@@ -1,3 +1,12 @@
+# [0.56.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.55.0...v0.56.0) (2024-04-29)
+
+
+### Features
+
+* adjust CI/runtime to use hash-bundle name for browZer CSS ([#204](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/204)) ([d812303](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/d812303b504cf54390d6adbb11192e86f25fdba4))
+
+
+
 # [0.55.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.54.1...v0.55.0) (2024-04-29)
 
 
