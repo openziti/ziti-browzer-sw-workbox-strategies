@@ -38,7 +38,7 @@ type ZitiShouldRouteResult = {
 var regexZBR      = new RegExp( /ziti-browzer-runtime-\w{8}\.js/, 'g' );
 var regexZBRnaked = new RegExp( /ziti-browzer-runtime\.js/, 'gi' );
 var regexZBRLogo  = new RegExp( /ziti-browzer-logo/,    'g' );
-var regexZBRcss   = new RegExp( /ziti-browzer-css/,     'g' );
+var regexZBRcss   = new RegExp( /ziti-browzer-css-\w{8}\.css/,     'g' );
 var regexZBRCORS  = new RegExp( /ziti-cors-proxy/,      'g' );
 var regexEdgeClt  = new RegExp( /\/edge\/client\/v1/,   'g' );
 var regexZBWASM   = new RegExp( /libcrypto.*.wasm/,     'g' );
@@ -574,7 +574,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
           result.serviceConnectAppData = connectAppData;
         }
         else if ( (request.url.match( regexZBR )) || (request.url.match( regexZBRnaked )) || (request.url.match( regexZBWASM )) || (request.url.match( regexZBRLogo )) || (request.url.match( regexZBRcss )) || (request.url.match( regexZBRCORS ))) { // the request seeks z-b-r/wasm/logo/css/cors-proxy
-          this.logger.trace(`_shouldRouteOverZiti: z-b-r/wasm/logo, bypassing intercept of [${request.url}]`);
+          this.logger.trace(`_shouldRouteOverZiti: z-b-r/css/wasm/logo, bypassing intercept of [${request.url}]`);
           result.routeOverZiti = false;
         }  
         else {
