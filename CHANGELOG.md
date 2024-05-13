@@ -1,3 +1,12 @@
+## [0.56.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.56.0...v0.56.1) (2024-05-13)
+
+
+### Bug Fixes
+
+* correct a cookie handling issue (Wazuh) ([#205](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/205)) ([d57c760](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/d57c760b6dc8f2d131a817ffa6e4ad76d548867b))
+
+
+
 # [0.56.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.55.0...v0.56.0) (2024-04-29)
 
 
