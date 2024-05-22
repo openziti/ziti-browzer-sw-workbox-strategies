@@ -1,3 +1,12 @@
+## [0.56.2](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.56.1...v0.56.2) (2024-05-22)
+
+
+### Bug Fixes
+
+* Properly handle cookie values that are b64 (end with '=') ([#206](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/206)) ([ae1b144](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/ae1b144060278c2465758bd8aaa39fe87fdced19))
+
+
+
 ## [0.56.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.56.0...v0.56.1) (2024-05-13)
 
 
