@@ -1,3 +1,21 @@
+## [0.56.4](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.56.3...v0.56.4) (2024-06-14)
+
+
+### Bug Fixes
+
+* upgrade workbox-core from 6.5.3 to 6.6.0 ([#208](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/208)) ([1733f79](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/1733f798bfc99ca0d5658798f4e359f1fe58656d))
+
+
+
+## [0.56.3](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.56.2...v0.56.3) (2024-06-14)
+
+
+### Bug Fixes
+
+* upgrade async-mutex from 0.3.2 to 0.5.0 ([#207](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/207)) ([c74095e](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/c74095ea62d48b68503461e2f7875ad4280af4cf))
+
+
+
 ## [0.56.2](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.56.1...v0.56.2) (2024-05-22)
 
 
