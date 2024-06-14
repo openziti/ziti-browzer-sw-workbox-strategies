@@ -91,6 +91,6 @@
     "uuid": "^8.3.2",
     "workbox-core": "^6.5.3",
     "workbox-expiration": "^6.5.3",
-    "workbox-strategies": "^6.5.3"
+    "workbox-strategies": "^6.6.0"
   }
 }
