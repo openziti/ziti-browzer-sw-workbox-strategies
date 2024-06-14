@@ -1,6 +1,6 @@
 {
   "name": "@openziti/ziti-browzer-sw-workbox-strategies",
-  "version": "0.56.2",
+  "version": "0.56.5",
   "description": "Custom Workbox Strategies used as part of the OpenZiti browZer stack",
   "main": "src/index.js",
   "scripts": {
@@ -84,13 +84,13 @@
   },
   "dependencies": {
     "@openziti/ziti-browzer-core": "^0.40.3",
-    "async-mutex": "^0.3.2",
+    "async-mutex": "^0.5.0",
     "cheerio": "^1.0.0-rc.12",
     "jwt-decode": "^3.1.2",
     "lodash-es": "^4.17.21",
     "uuid": "^8.3.2",
-    "workbox-core": "^6.5.3",
-    "workbox-expiration": "^6.5.3",
-    "workbox-strategies": "^6.6.0"
+    "workbox-strategies": "^6.6.0",
+    "workbox-expiration": "^6.6.0",
+    "workbox-core": "^6.6.0"
   }
 }
