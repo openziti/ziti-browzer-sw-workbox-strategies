@@ -1,3 +1,12 @@
+## [0.56.4](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.56.3...v0.56.4) (2024-06-14)
+
+
+### Bug Fixes
+
+* upgrade workbox-core from 6.5.3 to 6.6.0 ([#208](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/208)) ([1733f79](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/1733f798bfc99ca0d5658798f4e359f1fe58656d))
+
+
+
 ## [0.56.3](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.56.2...v0.56.3) (2024-06-14)
 
 
