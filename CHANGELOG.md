@@ -1,3 +1,12 @@
+## [0.56.7](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.56.6...v0.56.7) (2024-06-28)
+
+
+### Bug Fixes
+
+* send chunked WebSocket frames in a single write (prevent RSV2/3 errs) ([#211](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/211)) ([f2ea508](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/f2ea508f6ac328554b4d7e18d2cb094c027be31d))
+
+
+
 ## [0.56.6](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.56.5...v0.56.6) (2024-06-14)
 
 
