@@ -1,3 +1,12 @@
+## [0.56.8](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.56.7...v0.56.8) (2024-07-02)
+
+
+### Bug Fixes
+
+* properly handle WebSocket msgs sent with opcode 2 (binary) ([#212](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/212)) ([29d7881](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/29d788199c2a6ae5e1d7cc8f101b3e917ecbe8dc))
+
+
+
 ## [0.56.7](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.56.6...v0.56.7) (2024-06-28)
 
 
