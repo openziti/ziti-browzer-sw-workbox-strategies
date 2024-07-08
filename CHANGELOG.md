@@ -1,3 +1,12 @@
+## [0.56.9](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.56.8...v0.56.9) (2024-07-08)
+
+
+### Bug Fixes
+
+* remove obsolete hotkey/modal ([#213](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/213)) ([21ff77f](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/21ff77f9c9e35698ae34870b14c3a19f4e88ac06))
+
+
+
 ## [0.56.8](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.56.7...v0.56.8) (2024-07-02)
 
 

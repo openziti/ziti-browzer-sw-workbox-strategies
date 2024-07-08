@@ -1,6 +1,6 @@
 {
   "name": "@openziti/ziti-browzer-sw-workbox-strategies",
-  "version": "0.56.8",
+  "version": "0.56.9",
   "description": "Custom Workbox Strategies used as part of the OpenZiti browZer stack",
   "main": "src/index.js",
   "scripts": {
