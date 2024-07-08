@@ -42,10 +42,8 @@ var regexZBRcss   = new RegExp( /ziti-browzer-css-\w{8}\.css/,     'g' );
 var regexZBRCORS  = new RegExp( /ziti-cors-proxy/,      'g' );
 var regexEdgeClt  = new RegExp( /\/edge\/client\/v1/,   'g' );
 var regexZBWASM   = new RegExp( /libcrypto.*.wasm/,     'g' );
-var regexHystmodal = new RegExp( /hystmodal/,           'g' );
 var regexPolipop  = new RegExp( /polipop/,              'g' );
 var regexCannySetup = new RegExp( /canny-setup/,        'g' );
-var regexHotkeys  = new RegExp( /hotkeys/,              'g' );
 var regexOAUTHTOKEN = new RegExp( /\/oauth\/token/,     'g' );
 var regexFavicon  = new RegExp( /\/favicon\.ico/,       'g' );
 var regexJSDelivr = new RegExp( /jsdelivr.net/,         'g' );
@@ -750,10 +748,8 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       (request.url.match( regexZBRLogo )) ||          // seeking Ziti BrowZer Logo
       (request.url.match( regexZBRCORS )) ||          // seeking Ziti BrowZer CORS proxy
       (request.url.match( regexZBRcss )) ||           // seeking Ziti BrowZer CSS
-      (request.url.match( regexHystmodal )) ||        // seeking Ziti Hystmodal
       (request.url.match( regexPolipop )) ||          // seeking Ziti Polipop
       (request.url.match( regexCannySetup )) ||       // seeking Canny setup
-      (request.url.match( regexHotkeys )) ||          // seeking Ziti Hotkeys
       (request.url.match( regexOAUTHTOKEN )) ||       // seeking IdP token 
       (request.url.match( regexFavicon )) ||          // seeking favicon
       (request.url.match( regexZBWASM ))  ||          // seeking Ziti BrowZer WASM
@@ -1170,19 +1166,6 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
                     let ppCss2Element = $('<link> ')
                         .attr('rel', 'stylesheet')
                         .attr('href', `${_obtainBootStrapperURL()}/polipop.compact.min.css`);
-                    let hmElement = $('<script></script> ')
-                        .attr('id', 'ziti-browzer-hm')
-                        .attr('type', 'text/javascript')
-                        .attr('src', `${_obtainBootStrapperURL()}/hystmodal.min.js`);
-                    let hmCss1Element = $('<link> ')
-                        .attr('id', 'ziti-browzer-hmcss')
-                        .attr('rel', 'stylesheet')
-                        .attr('href', `${_obtainBootStrapperURL()}/hystmodal.min.css`);
-
-                    let hkElement = $('<script></script> ')
-                        .attr('id', 'ziti-browzer-rhk')
-                        .attr('type', 'text/javascript')
-                        .attr('src', `${_obtainBootStrapperURL()}/hotkeys.min.js`);
 
                     let otElement = $('<meta></meta> ')
                         .attr('id', 'ziti-browzer-origin-trial')
@@ -1223,9 +1206,6 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
                       cspElement.after(ppCss1Element);
                       cspElement.after(ppCss2Element);
                       cspElement.after(ppElement);
-                      cspElement.after(hkElement);
-                      cspElement.after(hmElement);
-                      cspElement.after(hmCss1Element);
                       cspElement.after(otElement);
 
                       if (isEqual(self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.idp.type, 'keycloak')) {
@@ -1254,9 +1234,6 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
                       // Inject the Ziti browZer Runtime at the front of <head> element so we are prepared to intercept as soon as possible over on the browser
                       headElement.prepend(zbrElement);
-                      headElement.prepend(hmCss1Element);
-                      headElement.prepend(hmElement);
-                      headElement.prepend(hkElement);
                       headElement.prepend(ppElement);
                       headElement.prepend(ppCss2Element);
                       headElement.prepend(ppCss1Element);
