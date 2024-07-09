@@ -1,3 +1,12 @@
+# [0.57.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.56.9...v0.57.0) (2024-07-09)
+
+
+### Features
+
+* emit error page if wssER connections fail ([#214](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/214)) ([099b869](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/099b86984397b36a4c7df4aef08af65c63d6c940))
+
+
+
 ## [0.56.9](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.56.8...v0.56.9) (2024-07-08)
 
 
