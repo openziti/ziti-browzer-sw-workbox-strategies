@@ -336,6 +336,14 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
   }
 
+  async WSSEnabledEdgeRouterConnectionErrorEventHandler(wssERConnectionErrorEvent: any) {
+
+    this.logger.trace(`WSSEnabledEdgeRouterConnectionErrorEventHandler() `, wssERConnectionErrorEvent);
+
+    await this._zitiBrowzerServiceWorkerGlobalScope._wssERConnectionError(wssERConnectionErrorEvent);
+
+  }
+
   async sessionCreationErrorEventHandler(sessionCreationErrorEvent: any) {
 
     this.logger.trace(`sessionCreationErrorEventHandler() `, sessionCreationErrorEvent);
@@ -446,6 +454,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
             this._zitiContext.on(ZITI_CONSTANTS.ZITI_EVENT_XGRESS,                 this.xgressEventHandler);
             this._zitiContext.on(ZITI_CONSTANTS.ZITI_EVENT_NESTED_TLS_HANDSHAKE_TIMEOUT,  this.nestedTLSHandshakeTimeoutEventHandler);
             this._zitiContext.on(ZITI_CONSTANTS.ZITI_EVENT_NO_CONFIG_PROTOCOL_FOR_SERVICE,  this.noConfigProtocolForServiceEventHandler);
+            this._zitiContext.on(ZITI_CONSTANTS.ZITI_EVENT_WSS_ROUTER_CONNECTION_ERROR,  this.WSSEnabledEdgeRouterConnectionErrorEventHandler);
 
       
             this.logger.trace(`_initialize: ZitiContext '${this._uuid}' initialized`);
