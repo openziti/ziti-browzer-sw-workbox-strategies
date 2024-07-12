@@ -1190,14 +1190,6 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
                         .attr('src', `${keycloakJs}`);
                     }
 
-                    let erudaElement = $('<script></script> ')
-                    if (self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.eruda) {
-                      erudaElement = $('<script></script> ')
-                        .attr('id', 'ziti-browzer-eruda')
-                        .attr('type', 'text/javascript')
-                        .attr('src', `${erudaJs}`);
-                    }
-  
                     // Locate the CSP
                     let cspElement = $('meta[http-equiv="content-security-policy"]');
 
@@ -1219,10 +1211,6 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
                       if (isEqual(self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.idp.type, 'keycloak')) {
                         cspElement.after(kcElement);
-                      }
-
-                      if (self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.eruda) {
-                        cspElement.after(erudaElement);
                       }
 
                       let otEl = $('meta[id="ziti-browzer-origin-trial"]');
@@ -1250,10 +1238,6 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
                       if (isEqual(self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.idp.type, 'keycloak')) {
                         headElement.prepend(kcElement);
-                      }
-
-                      if (self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.eruda) {
-                        headElement.prepend(erudaElement);
                       }
 
                       buffer += $.html();
