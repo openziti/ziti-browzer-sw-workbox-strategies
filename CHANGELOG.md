@@ -1,3 +1,12 @@
+# [0.58.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.57.0...v0.58.0) (2024-07-12)
+
+
+### Features
+
+* new throughput chart in browZer tools ([#215](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/215)) ([8e45448](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/8e454487a7156342aadedf9392271a3554903ab7))
+
+
+
 # [0.57.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.56.9...v0.57.0) (2024-07-09)
 
 
