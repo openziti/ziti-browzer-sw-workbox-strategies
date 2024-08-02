@@ -1,3 +1,12 @@
+# [0.59.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.58.0...v0.59.0) (2024-08-02)
+
+
+### Features
+
+* Render Error page if Controller certs are expired ([#216](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/216)) ([53c4613](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/53c461375b447146d1ebe06ad5e92eb7e93fcca1))
+
+
+
 # [0.58.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.57.0...v0.58.0) (2024-07-12)
 
 
