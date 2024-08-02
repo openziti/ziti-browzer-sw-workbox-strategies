@@ -344,6 +344,14 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
   }
 
+  async ControllerConnectionErrorEventHandler(controllerConnectionErrorEvent: any) {
+
+    this.logger.trace(`ControllerConnectionErrorEventHandler() `, controllerConnectionErrorEvent);
+
+    await this._zitiBrowzerServiceWorkerGlobalScope._controllerConnectionError(controllerConnectionErrorEvent);
+
+  }
+
   async sessionCreationErrorEventHandler(sessionCreationErrorEvent: any) {
 
     this.logger.trace(`sessionCreationErrorEventHandler() `, sessionCreationErrorEvent);
@@ -455,6 +463,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
             this._zitiContext.on(ZITI_CONSTANTS.ZITI_EVENT_NESTED_TLS_HANDSHAKE_TIMEOUT,  this.nestedTLSHandshakeTimeoutEventHandler);
             this._zitiContext.on(ZITI_CONSTANTS.ZITI_EVENT_NO_CONFIG_PROTOCOL_FOR_SERVICE,  this.noConfigProtocolForServiceEventHandler);
             this._zitiContext.on(ZITI_CONSTANTS.ZITI_EVENT_WSS_ROUTER_CONNECTION_ERROR,  this.WSSEnabledEdgeRouterConnectionErrorEventHandler);
+            this._zitiContext.on(ZITI_CONSTANTS.ZITI_EVENT_CONTROLLER_CONNECTION_ERROR,  this.ControllerConnectionErrorEventHandler);
 
       
             this.logger.trace(`_initialize: ZitiContext '${this._uuid}' initialized`);
