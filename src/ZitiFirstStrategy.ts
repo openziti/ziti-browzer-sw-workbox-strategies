@@ -180,6 +180,11 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     let origCSP = this.parseCSP(val);
     this.logger.trace( `generateNewCSP() origCSP: `, origCSP);
 
+    let idpURL = new URL(this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.idp.host);
+    let idpHost = idpURL.host;
+    let controllerURL = new URL(this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.controller.api);
+    let controllerHost = controllerURL.host;
+
     if (origCSP['default-src']) {
       origCSP['default-src'].push(`https://*.netfoundry.io:*`);
       origCSP['default-src'].push(`https://*.cloudziti.io`);
@@ -203,10 +208,13 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     }
 
     if (origCSP['connect-src']) {
-      origCSP['connect-src'].push(`${this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.idp.host}`);
+      origCSP['connect-src'].push(`${idpHost}`);
+      origCSP['connect-src'].push(`${this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host}`);
+      origCSP['connect-src'].push(`${controllerHost}`);
       origCSP['connect-src'].push(`https://*.netfoundry.io:*`);
       origCSP['connect-src'].push(`https://*.cloudziti.io`);
       origCSP['connect-src'].push(`wss://*.netfoundry.io:*`);
+      origCSP['connect-src'].push(`wss://localhost:*`);
       if (!origCSP['connect-src'].includes("data:")) {
         origCSP['connect-src'].push("data:");
       }
