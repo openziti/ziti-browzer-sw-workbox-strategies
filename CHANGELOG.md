@@ -1,3 +1,12 @@
+## [0.59.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.59.0...v0.59.1) (2024-08-06)
+
+
+### Bug Fixes
+
+* add controller to 'CSP connect-src' if present ([#217](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/217)) ([6eb75e0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/6eb75e09d005b90f666b06c9ef397b0b2abe9c94))
+
+
+
 # [0.59.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.58.0...v0.59.0) (2024-08-02)
 
 
