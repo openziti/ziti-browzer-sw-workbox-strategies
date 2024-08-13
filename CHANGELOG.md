@@ -1,3 +1,12 @@
+# [0.60.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.59.1...v0.60.0) (2024-08-13)
+
+
+### Features
+
+* [@import](https://github.com/import) URLs not being adjusted during Response streaming ([#218](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/218)) ([cd5281a](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/cd5281a7712a8bcc4799fb28eeb6936655c65a20))
+
+
+
 ## [0.59.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.59.0...v0.59.1) (2024-08-06)
 
 
