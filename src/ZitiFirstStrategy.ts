@@ -48,10 +48,12 @@ var regexOAUTHTOKEN = new RegExp( /\/oauth\/token/,     'g' );
 var regexFavicon  = new RegExp( /\/favicon\.ico/,       'g' );
 var regexJSDelivr = new RegExp( /jsdelivr.net/,         'g' );
 
+var regexAtImport = new RegExp( /\@import/,             'gi' );
 var regexSlash    = new RegExp( /^\/$/,                 'g' );
 var regexDotSlash = new RegExp( /^\.\//,                'g' );
 var regexTextHtml = new RegExp( /text\/html/,           'i' );
 var regexTextXml  = new RegExp( /text\/xml/,            'i' );
+var regexAppJS    = new RegExp( /application\/javascript/, 'i' );
 var regexAppJSON  = new RegExp( /application\/json/,    'i' );
 var regexVideo    = new RegExp( /video/,                'i' );
 var regexMpeg     = new RegExp( /mpeg/,                 'i' );
@@ -1063,6 +1065,23 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       });
     }
 
+    function streamingImportReplace($:any, elementType:string) {
+      $(elementType).each( async (_:any, e:any) => {
+        let text = $(e).text();
+        if (text.match( regexAtImport ) ) {
+          let importUrl = text.slice(text.indexOf('@') + 7);
+          importUrl = importUrl.replaceAll('"', '');
+          importUrl = importUrl.replace(';', '');
+          let url = new URL(importUrl);
+          if (isEqual(url.host, self._targetServiceHost)) {
+            text = text.replace('http:', 'https:');
+            text = text.replace(self._targetServiceHost, self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host);
+            $(e).text(text);
+          }
+        }
+      });
+    }
+
     if (shouldRoute.routeOverZiti && !skipInject) {
       
       var ignore = false;
@@ -1087,7 +1106,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
                 try {
 
                   // Parse the HTML
-                  const $ = cheerio.load(chunk);
+                  const $ = cheerio.load(chunk, null, false);
 
                   let fromEl = $('script[id="from-ziti-http-agent"]');
 
@@ -1171,7 +1190,10 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
                     streamingAttrReplace($, 'source', 'src');
                     streamingAttrReplace($, 'track',  'src');
                     streamingAttrReplace($, 'video',  'src');
-                  
+
+                    // Ensure any @import's in the HTML that point to the target service are using the correct scheme
+                    streamingImportReplace($, 'style');
+
                     self.logger.trace(`streamingHEADReplace: HTML before modifications is: ${$.html()}`);
 
                     let zbrElement = $('<script></script> ').attr('id', 'from-ziti-browzer-sw').attr('type', 'text/javascript').attr('src', `${_obtainBootStrapperURL()}/${zbrLocation}`); //.attr('defer', `defer`);
