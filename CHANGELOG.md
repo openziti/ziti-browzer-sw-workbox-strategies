@@ -1,3 +1,12 @@
+# [0.61.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.60.0...v0.61.0) (2024-08-21)
+
+
+### Features
+
+* HomeAssistant support: URL intercept tweak ([#219](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/219)) ([75fbf20](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/75fbf208b204c25278e7568ff94325df96708866))
+
+
+
 # [0.60.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.59.1...v0.60.0) (2024-08-13)
 
 
