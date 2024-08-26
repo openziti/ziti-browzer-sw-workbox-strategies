@@ -1,3 +1,12 @@
+# [0.62.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.61.0...v0.62.0) (2024-08-26)
+
+
+### Features
+
+* Cert chain parsing support ([#220](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/220)) ([fe46469](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/fe46469b6295336ebc735a8cf0fd5e2f88b5c303))
+
+
+
 # [0.61.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.60.0...v0.61.0) (2024-08-21)
 
 
