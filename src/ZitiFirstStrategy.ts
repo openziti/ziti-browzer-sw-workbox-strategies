@@ -1680,7 +1680,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       }
       headers.append( 'x-ziti-browzer-sw-workbox-strategies-version', pjson.version );
 
-      if ( (zitiResponse.status < 300 || zitiResponse.status > 399) ) {
+      if ( (!isEqual(zitiResponse.status, 204)) && (zitiResponse.status < 300 || zitiResponse.status > 399) ) {
 
         if (isTextHtml) {
 
