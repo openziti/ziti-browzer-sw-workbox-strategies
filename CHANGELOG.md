@@ -1,3 +1,12 @@
+# [0.63.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.62.0...v0.63.0) (2024-08-27)
+
+
+### Features
+
+* Do not attempt to wrap/stream the Body of a 204 Response ([#221](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/221)) ([549bcf3](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/549bcf388942b7ece256ffdcbb453a637ead234e))
+
+
+
 # [0.62.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.61.0...v0.62.0) (2024-08-26)
 
 
