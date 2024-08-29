@@ -1514,6 +1514,8 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
         newHeaders.append( 'referer', request.referrer );
       }
 
+      newHeaders.append( 'Remote-User', await this._zitiContext.getAccessTokenEmail() );
+
       // Propagate any Cookie values we have accumulated
       let cookieHeaderValue = '';
       for (const cookie in this._zitiBrowzerServiceWorkerGlobalScope._cookieObject) {
