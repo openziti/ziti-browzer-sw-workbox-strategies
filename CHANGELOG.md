@@ -1,3 +1,12 @@
+# [0.64.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.63.0...v0.64.0) (2024-08-29)
+
+
+### Features
+
+* Use Cert chain when in HA networks ([#222](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/222)) ([b4c941c](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/b4c941c44ec0a214bdbfced96f49865f32b1fe14))
+
+
+
 # [0.63.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.62.0...v0.63.0) (2024-08-27)
 
 
