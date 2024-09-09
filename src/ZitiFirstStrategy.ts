@@ -460,7 +460,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
               target:   this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target
             });
 
-            this._zitiContext.listControllerVersion();
+            await this._zitiContext.listControllerVersion();
 
             this._zitiContext.on(ZITI_CONSTANTS.ZITI_EVENT_IDP_AUTH_HEALTH,        this.idpAuthHealthEventHandler);
             this._zitiContext.on(ZITI_CONSTANTS.ZITI_EVENT_NO_CONFIG_FOR_SERVICE,  this.noConfigForServiceEventHandler);
