@@ -1,3 +1,12 @@
+# [0.65.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.64.0...v0.65.0) (2024-09-09)
+
+
+### Features
+
+* HA network detection, and authentication ([#224](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/224)) ([d32bd52](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/d32bd52d3e2c19ecbc912bf84812ea6983787e02))
+
+
+
 # [0.64.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.63.0...v0.64.0) (2024-08-29)
 
 
