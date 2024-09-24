@@ -794,7 +794,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       const codeParm = urlSearchParams.get('code');
       const stateParm = urlSearchParams.get('state');
       if (codeParm && stateParm) {    // possible IdP-related URL
-        if (requestURL.hostname === this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host) {  // ..but if hitting the protected web app itself
+        if (this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig && requestURL.hostname === this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host) {  // ..but if hitting the protected web app itself
           tryZiti = true;                                                              // ..then let it go over Ziti
         } else {
           tryZiti = false;                                                             // ..otherwise, route over raw internet since it's IdP-related
