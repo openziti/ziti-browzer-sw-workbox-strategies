@@ -1,3 +1,12 @@
+# [0.66.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.65.0...v0.66.0) (2024-09-24)
+
+
+### Features
+
+* bump to @openziti/libcrypto-js 0.24.0 ([#225](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/225)) ([beb7dba](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/beb7dba66f55308d2c5afd71e004edafb958f8aa))
+
+
+
 # [0.65.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.64.0...v0.65.0) (2024-09-09)
 
 
