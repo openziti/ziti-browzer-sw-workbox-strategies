@@ -1097,59 +1097,6 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
           let fromBootstrapper = false;
           let fullDocument = true;
 
-          function detectFromBootstrapper() {
-  
-            let buffer = '';
-                      
-            return new TransformStream({
-
-              transform(chunk, _controller) {
-
-                fullDocument = chunk.toLowerCase().includes("<html");
-
-                try {
-
-                  // Parse the HTML
-                  const $ = cheerio.load(chunk, null, false);
-
-                  let fromEl = $('script[id="from-ziti-http-agent"]');
-
-                  if (fromEl.length > 0) {
-
-                    fromBootstrapper = true;
-
-                    if (bootstrappingZBRFromSW) {
-
-                      self.logger.trace(`detectFromBootstrapper: bootstrappingZBRFromSW [${bootstrappingZBRFromSW}]`);
-
-                      // swap the id to indicate we are bootstrapping from the SW
-                      fromEl.attr('id', `from-ziti-browzer-sw`);  
-
-                      // also let the ZBR know if we need it to send us the config or not
-                      if (bootstrappingZBRFromSWConfigNeeded) {
-                        fromEl.attr('class', `ziti-browzer-sw-config-needed`);
-                      }
-
-                    }
-
-                  }
-
-                  buffer += $.html();
-                }
-                catch (e) {
-                  self.logger.error(e);
-                }
-
-              },
-              flush(controller) {
-                if (buffer) {
-                  self.logger.trace(`detectFromBootstrapper: result [${fromBootstrapper}]`);
-                  controller.enqueue(buffer);
-                }
-              }
-            });
-          }
-
           function _obtainBootStrapperURL() {
             let url;
         
@@ -1178,7 +1125,11 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
                     let zbrLocation = self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.runtime.src;
 
                     // Parse the HTML
-                    const $ = cheerio.load(chunk);
+                    const $ = cheerio.load(chunk, 
+                      { 
+                        decodeEntities: false   // ensure we don't evaporate Angular-specific attributes like ng-app, ng-model, etc.
+                      }
+                    );
 
                     // Ensure any links in the HTML that point to the target service are using the correct scheme
                     streamingAttrReplace($, 'link',   'href');
@@ -1308,7 +1259,6 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
           
           const bodyStream = response.body
             .pipeThrough(new TextDecoderStream())
-            .pipeThrough(detectFromBootstrapper())
             .pipeThrough(streamingHEADReplace())
             .pipeThrough(new TextEncoderStream())
             ;
