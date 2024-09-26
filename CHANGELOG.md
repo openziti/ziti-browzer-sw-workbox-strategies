@@ -1,3 +1,12 @@
+# [0.67.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.66.0...v0.67.0) (2024-09-26)
+
+
+### Features
+
+* don't evaporate Angular-specific attributes during HTML streaming ([#226](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/226)) ([569251b](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/569251bbe77cc6026fea59ac503d7c4d61113658))
+
+
+
 # [0.66.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.65.0...v0.66.0) (2024-09-24)
 
 
