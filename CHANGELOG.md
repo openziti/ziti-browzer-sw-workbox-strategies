@@ -1,3 +1,12 @@
+# [0.68.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.67.0...v0.68.0) (2024-10-08)
+
+
+### Features
+
+* do not process 'null' as a WebSocket event listener ([#227](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/227)) ([58062e4](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/58062e45b46f537bb8b824e7c1279299ba63d07e))
+
+
+
 # [0.67.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.66.0...v0.67.0) (2024-09-26)
 
 
