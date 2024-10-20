@@ -457,7 +457,8 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
             await this._zitiContext.initialize({
               loadWASM: true,   // unlike the ZBR, here in the ZBSW, we always instantiate the internal WebAssembly
               jspi:     this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.jspi,
-              target:   this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target
+              target:   this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target,
+              bootstrapperHost:   this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host
             });
 
             await this._zitiContext.listControllerVersion();
@@ -1496,6 +1497,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
               serviceScheme:  shouldRoute.serviceScheme,
               servicePath:    this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.path,
               serviceConnectAppData:  shouldRoute.serviceConnectAppData,
+              bootstrapperHost: this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host,
               method:         zitiRequest.method, 
               headers:        newHeaders,
               mode:           zitiRequest.mode,
