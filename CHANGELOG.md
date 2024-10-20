@@ -1,3 +1,12 @@
+# [0.69.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.68.0...v0.69.0) (2024-10-20)
+
+
+### Features
+
+* introduce 'target host transformer' to gzip inflator ([#228](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/228)) ([8833200](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/8833200f2e80ce5322974920480c3a55528570ce))
+
+
+
 # [0.68.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.67.0...v0.68.0) (2024-10-08)
 
 
