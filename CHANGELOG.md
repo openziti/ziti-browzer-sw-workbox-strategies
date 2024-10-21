@@ -1,3 +1,12 @@
+# [0.71.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.70.0...v0.71.0) (2024-10-21)
+
+
+### Features
+
+* handle null targetServiceAppData ([#230](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/230)) ([5f64112](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/5f64112c115aa101b2828145559d12db753cc263))
+
+
+
 # [0.70.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.69.0...v0.70.0) (2024-10-21)
 
 
