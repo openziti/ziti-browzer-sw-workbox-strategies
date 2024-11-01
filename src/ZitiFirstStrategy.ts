@@ -198,12 +198,6 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     if (origCSP['script-src']) {
       origCSP['script-src'].push(`${this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.idp.host}`.replace('https://',''));
       origCSP['script-src'].push(`canny.io`);
-      if (isEqual(this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.idp.type, 'keycloak')) {
-        origCSP['script-src'].push(`${keycloakJs}`);
-      }
-      if (this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.eruda) {
-        origCSP['script-src'].push(`${erudaJs}`);
-      }
       if (!origCSP['script-src'].includes("'unsafe-eval'")) {
         origCSP['script-src'].push("'unsafe-eval'");
       }
@@ -443,6 +437,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
               sdkBranch:      buildInfo.sdkBranch,
               sdkRevision:    buildInfo.sdkRevision,
               token_type:     this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.token_type,
+              id_token:       this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.id_token,
               access_token:   this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.access_token,
               bootstrapperTargetService: this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.service,
             });
@@ -1178,13 +1173,6 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
                     let kcElement = $('<meta name="author" content="OpenZiti BrowZer" />')
                    
-                    if (isEqual(self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.idp.type, 'keycloak')) {
-                      kcElement = $('<script></script> ')
-                        .attr('id', 'ziti-browzer-kc')
-                        .attr('type', 'text/javascript')
-                        .attr('src', `${keycloakJs}`);
-                    }
-
                     // Locate the CSP
                     let cspElement = $('meta[http-equiv="content-security-policy"]');
 
@@ -1203,10 +1191,6 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
                       cspElement.after(ppCss2Element);
                       cspElement.after(ppElement);
                       cspElement.after(otElement);
-
-                      if (isEqual(self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.idp.type, 'keycloak')) {
-                        cspElement.after(kcElement);
-                      }
 
                       let otEl = $('meta[id="ziti-browzer-origin-trial"]');
                       // Inject the ZBR immediately after the origin trial meta
@@ -1230,10 +1214,6 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
                       headElement.prepend(ppCss2Element);
                       headElement.prepend(ppCss1Element);
                       headElement.prepend(otElement);
-
-                      if (isEqual(self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.idp.type, 'keycloak')) {
-                        headElement.prepend(kcElement);
-                      }
 
                       buffer += $.html();
                     }
