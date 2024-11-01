@@ -1,3 +1,12 @@
+# [0.72.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.71.0...v0.72.0) (2024-11-01)
+
+
+### Features
+
+* id_token -> access_token refactor ([#231](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/231)) ([9c99f5d](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/9c99f5da375548b14f2aa98939b35b73bdfc2a5b))
+
+
+
 # [0.71.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.70.0...v0.71.0) (2024-10-21)
 
 
