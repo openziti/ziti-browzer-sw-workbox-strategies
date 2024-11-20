@@ -222,6 +222,12 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       origCSP['img-src'].push(`*`);
     }
 
+    if (origCSP['font-src']) {
+      if (!origCSP['font-src'].includes("data:")) {
+        origCSP['font-src'].push("data:");
+      }
+    }
+
     let directives:any = {}
     if (!isUndefined(origCSP['child-src']))       { directives.childSrc       = origCSP['child-src'];}
     if (!isUndefined(origCSP['connect-src']))     { directives.connectSrc     = origCSP['connect-src'];}
