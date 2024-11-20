@@ -1,3 +1,12 @@
+# [0.73.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.72.0...v0.73.0) (2024-11-20)
+
+
+### Features
+
+* CSP 'font-src' tweak (add 'data:') ([#232](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/232)) ([4d8decd](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/4d8decddd3cbda71d682058628eab3d286ff0f5a))
+
+
+
 # [0.72.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.71.0...v0.72.0) (2024-11-01)
 
 
