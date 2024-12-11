@@ -1,3 +1,12 @@
+# [0.74.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.73.0...v0.74.0) (2024-12-11)
+
+
+### Features
+
+* Null ptr exception while mishandling service app-connect data results in 500 Response ([#233](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/233)) ([0a4e3fc](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/0a4e3fcc469c3ecb61094215150f45b95373e325))
+
+
+
 # [0.73.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.72.0...v0.73.0) (2024-11-20)
 
 
