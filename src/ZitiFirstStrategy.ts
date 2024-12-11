@@ -1558,6 +1558,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
         else if (key.toLowerCase() === 'location') {
           this.logger.trace( `location header transform needed for: ${val}`);
           let pathname;
+          let skipTransform = false;
           if (val.startsWith('/')) {
             pathname = val;
           } else {
@@ -1577,16 +1578,20 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
                 pathname = locationUrl.pathname + locationUrl.search;
               } else {
                 let serviceConnectAppData = await this._zitiBrowzerServiceWorkerGlobalScope._zitiContext.getConnectAppDataByServiceName(this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.service, 'https');
-                if (isEqual(locationUrl.hostname, serviceConnectAppData.dst_hostname)) {
-                  pathname = locationUrl.pathname + locationUrl.search;
-                }
-                else if (isEqual(locationUrl.hostname, serviceConnectAppData.dst_ip)) {
-                  pathname = locationUrl.pathname + locationUrl.search;
+                if (!isUndefined(serviceConnectAppData)) {
+                  if (isEqual(locationUrl.hostname, serviceConnectAppData.dst_hostname)) {
+                    pathname = locationUrl.pathname + locationUrl.search;
+                  }
+                  else if (isEqual(locationUrl.hostname, serviceConnectAppData.dst_ip)) {
+                    pathname = locationUrl.pathname + locationUrl.search;
+                  }
+                } else {
+                  skipTransform = true;
                 }
               }
             }
           }
-          if (!isUndefined(pathname)) {
+          if (!isUndefined(pathname) && !skipTransform) {
             let newLocationUrl;
             if (this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.loadbalancer.host) {
               newLocationUrl = new URL(
