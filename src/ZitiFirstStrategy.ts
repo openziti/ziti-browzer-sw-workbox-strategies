@@ -803,38 +803,6 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       }    
     }
 
-    /**
-     * If the ZBR hasn't sent a ping in the last few seconds, it's probably not there.
-     * This can happen when the SW is running, and the user does a hard-reload of the 
-     * page (i.e. clicks browser's refresh button), and the URL was NOT the root URL 
-     * of the web app.  
-     * 
-     * In this case, we initiate a page reboot to get the ZBR back on its feet.
-     */
-    // if (tryZiti && !this._isRootPATH(request)) {
-      // let pingDelta = Date.now() - this._zitiBrowzerServiceWorkerGlobalScope._zbrPingTimestamp;
-      // this.logger.trace(`pingDelta is ${pingDelta}`);
-      // if ( pingDelta > 5000) {
-        // let newUrl = new URL(request.url);
-
-        // let extension = newUrl.pathname.split(/[#?]/)[0]?.split('.')?.pop()?.trim();
-        // this.logger.trace(`newUrl.pathname is ${newUrl.pathname}, extension is ${extension}`);
-        // if (!this._zitiBrowzerServiceWorkerGlobalScope._zbrReloadPending) {
-        // if (extension && extension.includes('/')) {
-        //   this._zitiBrowzerServiceWorkerGlobalScope._zbrPingTimestamp = (Date.now() - 1000);
-        //   let redirectResponse = new Response('', {
-        //       status: 302,
-        //       statusText: 'Found',
-        //       headers: {
-        //         Location: '/'
-        //       }
-        //     }
-        //   );
-        //   return redirectResponse;
-        // }
-      // }
-    // }
-
     if (tryZiti && this._zitiBrowzerServiceWorkerGlobalScope._zbrReloadPending) {
       if (request.url.match( regexZBWASM )) {  // the ZBR loads the WASM during init, so we need to process that request; all others wait
         /* NOP */
@@ -873,11 +841,6 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     let self = this;
     let skipInject = false;
     let useCache = this._shouldUseCache(request);
-
-    // if (request.url.match( regexZBR )) {
-    //   self._zitiBrowzerServiceWorkerGlobalScope._zbrReloadPending = true;
-    //   this.logger.trace(`_handle: setting  _zbrReloadPending=true`);
-    // }
 
     if (useCache) {
       let cachResponse = await handler.cacheMatch(request);
