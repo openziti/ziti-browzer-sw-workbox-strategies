@@ -1,3 +1,12 @@
+# [0.75.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.74.0...v0.75.0) (2024-12-19)
+
+
+### Features
+
+* Make ZAC served from Controller's /zac binding work under browZer ([#234](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/234)) ([0177bf6](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/0177bf6012b4bf6fca5676545e6cac94552afe73))
+
+
+
 # [0.74.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.73.0...v0.74.0) (2024-12-11)
 
 
