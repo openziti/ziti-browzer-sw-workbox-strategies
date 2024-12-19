@@ -771,7 +771,6 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     // we never go over Ziti, and we let the browser route the request 
     // to the Controller or browZer Bootstrapper.  
     if ( 
-      (request.url.match( regexEdgeClt )) ||          // seeking Ziti Controller
       (request.url.match( regexControllerAPI )) ||    //    "     "      "
       (request.url.match( regexZBR )) ||              // seeking Ziti BrowZer Runtime
       (request.url.match( regexZBRnaked )) ||         // seeking Ziti BrowZer Runtime
@@ -802,38 +801,6 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
           tryZiti = false;                                                             // ..otherwise, route over raw internet since it's IdP-related
         }
       }    
-    }
-
-    /**
-     * If the ZBR hasn't sent a ping in the last few seconds, it's probably not there.
-     * This can happen when the SW is running, and the user does a hard-reload of the 
-     * page (i.e. clicks browser's refresh button), and the URL was NOT the root URL 
-     * of the web app.  
-     * 
-     * In this case, we initiate a page reboot to get the ZBR back on its feet.
-     */
-    if (tryZiti && !this._isRootPATH(request)) {
-      let pingDelta = Date.now() - this._zitiBrowzerServiceWorkerGlobalScope._zbrPingTimestamp;
-      this.logger.trace(`pingDelta is ${pingDelta}`);
-      if ( pingDelta > 5000) {
-        let newUrl = new URL(request.url);
-
-        let extension = newUrl.pathname.split(/[#?]/)[0]?.split('.')?.pop()?.trim();
-        this.logger.trace(`newUrl.pathname is ${newUrl.pathname}, extension is ${extension}`);
-        // if (!this._zitiBrowzerServiceWorkerGlobalScope._zbrReloadPending) {
-        // if (extension && extension.includes('/')) {
-        //   this._zitiBrowzerServiceWorkerGlobalScope._zbrPingTimestamp = (Date.now() - 1000);
-        //   let redirectResponse = new Response('', {
-        //       status: 302,
-        //       statusText: 'Found',
-        //       headers: {
-        //         Location: '/'
-        //       }
-        //     }
-        //   );
-        //   return redirectResponse;
-        // }
-      }
     }
 
     if (tryZiti && this._zitiBrowzerServiceWorkerGlobalScope._zbrReloadPending) {
@@ -874,11 +841,6 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     let self = this;
     let skipInject = false;
     let useCache = this._shouldUseCache(request);
-
-    // if (request.url.match( regexZBR )) {
-    //   self._zitiBrowzerServiceWorkerGlobalScope._zbrReloadPending = true;
-    //   this.logger.trace(`_handle: setting  _zbrReloadPending=true`);
-    // }
 
     if (useCache) {
       let cachResponse = await handler.cacheMatch(request);
@@ -1557,6 +1519,41 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
         }
         else if (key.toLowerCase() === 'location') {
           this.logger.trace( `location header transform needed for: ${val}`);
+
+          function updateSignInWithGoogleRedirectUri(url: string, newValue: string, logger: any) {
+
+            let paramName = 'redirect_uri';
+
+            try {
+              let urlObj = new URL(url);
+              let searchParams = urlObj.searchParams;
+
+              // If url is doing a "Sign in with Google"
+              if (isEqual(urlObj.host, 'accounts.google.com') && isEqual(urlObj.pathname, '/o/oauth2/auth') && searchParams.has(paramName)) {
+          
+                // Transform the redirect_uri host to be the browZer bootstrapper
+                let paramValue = searchParams.get(paramName);
+                if (paramValue) {
+                  let redirect_uriObj = new URL(paramValue);
+                  redirect_uriObj.host = newValue;
+                  redirect_uriObj.port = '443';
+                  redirect_uriObj.protocol = 'https';
+                  searchParams.set(paramName, redirect_uriObj.toString());
+                }
+              }
+
+              logger.trace( `updateSignInWithGoogleRedirectUri(): location header transformed to: ${urlObj.toString()}`);
+          
+              return urlObj.toString();
+            }
+            catch (e) {
+              return url;
+            }
+          }
+
+          // NOT YET
+          // val = updateSignInWithGoogleRedirectUri(val, this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host, this.logger);
+        
           let pathname;
           let skipTransform = false;
           if (val.startsWith('/')) {
