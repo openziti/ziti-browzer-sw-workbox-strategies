@@ -1,3 +1,12 @@
+## [0.75.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.75.0...v0.75.1) (2025-01-09)
+
+
+### Bug Fixes
+
+* Drop of very large files into Mattermost causes exception ([#235](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/235)) ([3978157](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/397815701260133e97f49ece32b97d861da0ee62))
+
+
+
 # [0.75.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.74.0...v0.75.0) (2024-12-19)
 
 
