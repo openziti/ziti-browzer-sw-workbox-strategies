@@ -512,7 +512,8 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
   
               self._initialized = true;
         
-              self.logger.trace(`_initialize: complete`);
+              self.logger.trace(`_initialize: ZitiContext '${self._uuid}' initialize complete`);
+
             }
 
             return resolve(null);
@@ -1391,7 +1392,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
 
     try {
 
-      this.logger.debug(`doing Ziti fetch for: `, request.url);
+      this.logger.debug(`doing Ziti fetch for: ${request.url}`);
 
       /**
        * Instantiate a fresh HTTP Request object that we will push through the ziti-browzer-core which will:
@@ -1413,7 +1414,9 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
         newHeaders.append( 'referer', request.referrer );
       }
 
-      newHeaders.append( 'Remote-User', await this._zitiContext.getAccessTokenEmail() );
+      try {
+        newHeaders.append( 'Remote-User', await this._zitiContext.getAccessTokenEmail() );
+      } catch (e) {}
 
       // Propagate any Cookie values we have accumulated
       let cookieHeaderValue = '';
