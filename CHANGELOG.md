@@ -1,3 +1,12 @@
+## [0.75.2](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.75.1...v0.75.2) (2025-01-10)
+
+
+### Bug Fixes
+
+* Bogus access_token from Entra can cause PKCE redirect loop in ZBR ([#236](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/236)) ([19f0a5c](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/19f0a5cc27c9c47e82b59db6c8af63f48862c49b))
+
+
+
 ## [0.75.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.75.0...v0.75.1) (2025-01-09)
 
 
