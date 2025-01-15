@@ -1,3 +1,12 @@
+## [0.75.3](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.75.2...v0.75.3) (2025-01-15)
+
+
+### Bug Fixes
+
+* POST via fetch to private API listening on HTTPS fails ([#237](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/237)) ([7994d01](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/7994d014f52282cabbcb44b099d8dea2d59974d7))
+
+
+
 ## [0.75.2](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.75.1...v0.75.2) (2025-01-10)
 
 
