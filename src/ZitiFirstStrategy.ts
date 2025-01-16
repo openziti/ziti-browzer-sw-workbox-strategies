@@ -608,14 +608,21 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
         }  
         else {
 
-          newUrl.hostname = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.service;
-          newUrl.port = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.port;
+          // Don't muck with URL only because top-level domain of target matches the top-level domain of the load-balancer. 
+          // Only do that if the entire hostname matches, or else sub-domains represented by different Services will be routed 
+          // to the wrong place.
+          if (!isEqual(newUrl.hostname, this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host)) {
 
-          if (
-            isEqual(newUrl.port, this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.port) ||
-            isEqual(newUrl.port, this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.loadbalancer.port)
-          ) {
-            newUrl.port = '';
+            newUrl.hostname = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.service;
+            newUrl.port = this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.port;
+
+            if (
+              isEqual(newUrl.port, this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.port) ||
+              isEqual(newUrl.port, this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.loadbalancer.port)
+            ) {
+              newUrl.port = '';
+            }
+
           }
 
           var pathnameArray = newUrl.pathname.split('/');
