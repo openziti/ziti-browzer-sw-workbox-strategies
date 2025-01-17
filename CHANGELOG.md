@@ -1,3 +1,12 @@
+## [0.75.5](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.75.4...v0.75.5) (2025-01-17)
+
+
+### Bug Fixes
+
+* Correct sub-domain Service-routing issue ([#239](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/239)) ([70427d9](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/70427d9db9470d1104cbcff752e6f1103ad8c4d5))
+
+
+
 ## [0.75.4](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.75.3...v0.75.4) (2025-01-16)
 
 
