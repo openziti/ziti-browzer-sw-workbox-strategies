@@ -1,3 +1,12 @@
+# [0.76.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.75.5...v0.76.0) (2025-01-21)
+
+
+### Features
+
+* Add 'Sec-Fetch-Mode navigate' header to HTTP requests when appropriate ([#240](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/240)) ([cd824dd](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/cd824dd150f01bca670fe24bdde2a2338e4a4bbc))
+
+
+
 ## [0.75.5](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.75.4...v0.75.5) (2025-01-17)
 
 
