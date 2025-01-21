@@ -1,3 +1,12 @@
+## [0.76.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.76.0...v0.76.1) (2025-01-21)
+
+
+### Bug Fixes
+
+* Correct 30x Location header target transform error ([#241](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/241)) ([0206009](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/0206009b204d266f2e05e193c02e1d7f43b7114e))
+
+
+
 # [0.76.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.75.5...v0.76.0) (2025-01-21)
 
 
