@@ -1,3 +1,12 @@
+# [0.77.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.76.1...v0.77.0) (2025-02-13)
+
+
+### Features
+
+* HA OIDC auth mechanisms ([#242](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/242)) ([13e7b07](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/13e7b07a53122d18ed93010e3da4ddf69fceee93))
+
+
+
 ## [0.76.1](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.76.0...v0.76.1) (2025-01-21)
 
 
