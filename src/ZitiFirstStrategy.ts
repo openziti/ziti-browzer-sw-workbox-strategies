@@ -446,6 +446,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
               id_token:       this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.id_token,
               access_token:   this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.access_token,
               bootstrapperTargetService: this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.service,
+              bootstrapperHost: this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host,
             });
             this.logger.trace(`_initialize: ZitiContext created`);
             this._zitiBrowzerServiceWorkerGlobalScope._zitiContext = this._zitiContext;
