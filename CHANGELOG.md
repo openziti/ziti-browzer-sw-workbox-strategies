@@ -1,3 +1,12 @@
+# [0.78.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.77.0...v0.78.0) (2025-02-18)
+
+
+### Features
+
+* fix a 500 error caused by a bad redirect transform ([#244](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/244)) ([89b0743](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/89b0743926c736e7809f2d4b27a1c76524c66894))
+
+
+
 # [0.77.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.76.1...v0.77.0) (2025-02-13)
 
 
