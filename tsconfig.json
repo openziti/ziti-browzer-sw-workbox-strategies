@@ -1,7 +1,9 @@
 {
   "compilerOptions": {
-    "composite": true,
+    "incremental": true,
     "declaration": true,
+    "declarationDir": "./dist",
+    "esModuleInterop": true,
     "lib": ["es2017", "webworker"],
     "module": "esnext",
     "moduleResolution": "node",

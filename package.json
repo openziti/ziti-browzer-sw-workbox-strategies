@@ -1,13 +1,17 @@
 {
   "name": "@openziti/ziti-browzer-sw-workbox-strategies",
   "version": "0.78.0",
+  "type": "module",
   "description": "Custom Workbox Strategies used as part of the OpenZiti browZer stack",
   "main": "src/index.js",
   "scripts": {
     "prebuild": "node scripts/prebuild.mjs",
-    "build": "gulp build",
-    "clean": "gulp clean",
-    "gulp": "gulp",
+    "xbuild": "gulp build",
+    "xclean": "gulp clean",
+    "xgulp": "gulp",
+    "build": "run-s clean bundle-sw",
+    "bundle-sw": "rollup -c",
+    "clean": "rimraf dist",
     "test": "node_modules/.bin/mocha --require @babel/register",
     "preinstall": "node -e \"if(process.env.npm_execpath.indexOf('yarn') === -1) throw new Error('You must use Yarn to install, not NPM')\""
   },
@@ -32,10 +36,11 @@
     "@babel/register": "^7.17.0",
     "@rollup/plugin-babel": "^5.2.0",
     "@rollup/plugin-commonjs": "^22.0.0",
+    "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-multi-entry": "^4.0.0",
     "@rollup/plugin-node-resolve": "^13.3.0",
     "@rollup/plugin-replace": "^4.0.0",
-    "@rollup/plugin-typescript": "^8.3.2",
+    "@rollup/plugin-typescript": "^12.1.2",
     "@surma/rollup-plugin-off-main-thread": "^2.2.3",
     "@types/jwt-decode": "^3.1.0",
     "@types/lodash-es": "^4.17.6",
@@ -46,14 +51,17 @@
     "cpy": "^9.0.0",
     "del": "^6.0.0",
     "execa": "^4.0.3",
+    "globby": "^14.1.0",
     "gulp": "^4.0.2",
     "mocha": "^9.2.1",
+    "npm-run-all": "^4.1.5",
     "rimraf": "^3.0.2",
     "rollup": "^2.70.2",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-terser": "^7.0.2",
     "rollup-plugin-typescript2": "^0.31.2",
+    "tslib": "^2.8.1",
     "typescript": "^4.6.4"
   },
   "workbox": {
@@ -83,14 +91,18 @@
     ]
   },
   "dependencies": {
-    "@openziti/ziti-browzer-core": "^0.52.0",
+    "@openziti/ziti-browzer-core": "^0.58.0",
     "async-mutex": "^0.5.0",
     "cheerio": "^1.0.0-rc.12",
     "jwt-decode": "^3.1.2",
     "lodash-es": "^4.17.21",
-    "uuid": "^8.3.2",
+    "uuid": "^11.1.0",
     "workbox-core": "^6.6.0",
     "workbox-expiration": "^6.6.0",
     "workbox-strategies": "^6.6.0"
+  },
+  "packageManager": "yarn@4.0.2+sha512.4e502bea682e7d8004561f916f1da2dfbe6f718024f6aa50bf8cd86f38ea3a94a7f1bf854a9ca666dd8eafcfb8d44baaa91bf5c7876e79a7aeac952c332f0e88",
+  "resolutions": {
+    "@openziti/ziti-browzer-core": "portal:/Users/curt/Repos/nf/github/ziti-browzer-core"
   }
 }
