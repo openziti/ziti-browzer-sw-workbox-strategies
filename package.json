@@ -6,10 +6,7 @@
   "main": "src/index.js",
   "scripts": {
     "prebuild": "node scripts/prebuild.mjs",
-    "xbuild": "gulp build",
-    "xclean": "gulp clean",
-    "xgulp": "gulp",
-    "build": "run-s clean bundle-sw",
+    "build": "run-s clean prebuild bundle-sw",
     "bundle-sw": "rollup -c",
     "clean": "rimraf dist",
     "test": "node_modules/.bin/mocha --require @babel/register",
