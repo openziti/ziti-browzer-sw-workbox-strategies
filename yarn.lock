@@ -1412,9 +1412,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@openziti/ziti-browzer-core@portal:/Users/curt/Repos/nf/github/ziti-browzer-core::locator=%40openziti%2Fziti-browzer-sw-workbox-strategies%40workspace%3A.":
-  version: 0.0.0-use.local
-  resolution: "@openziti/ziti-browzer-core@portal:/Users/curt/Repos/nf/github/ziti-browzer-core::locator=%40openziti%2Fziti-browzer-sw-workbox-strategies%40workspace%3A."
+"@openziti/ziti-browzer-core@npm:^0.58.0":
+  version: 0.58.0
+  resolution: "@openziti/ziti-browzer-core@npm:0.58.0"
   dependencies:
     "@openziti/libcrypto-js": "npm:^0.24.0"
     "@openziti/ziti-browzer-edge-client": "npm:^0.7.0"
@@ -1455,8 +1455,9 @@ __metadata:
     url: "npm:^0.11.0"
     util: "npm:^0.12.4"
     uuid: "npm:^11.1.0"
+  checksum: c31211ffbc119a37b1abfb90b46e2a9406fd7651728ca68b528847c9f8002dd7ac16464fe129bbd85d05d1dcc064d0b6ae0ca6840c9c5bb8a1b70cb572608b50
   languageName: node
-  linkType: soft
+  linkType: hard
 
 "@openziti/ziti-browzer-edge-client@npm:^0.7.0":
   version: 0.7.0
