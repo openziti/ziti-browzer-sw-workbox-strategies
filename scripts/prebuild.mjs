@@ -23,6 +23,6 @@ export {
 }
 `
 
-fs.writeFileSync(__dirname + '/../src/buildInfo.ts', params, () => {
+fs.writeFileSync(__dirname + '/../src/buildInfo.js', params, () => {
   console.log('Prebuild finished');
 });
