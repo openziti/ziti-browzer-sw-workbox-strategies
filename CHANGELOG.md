@@ -1,3 +1,12 @@
+# [0.81.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.80.0...v0.81.0) (2025-02-26)
+
+
+### Features
+
+* security updates ([#247](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/247)) ([7a0487d](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/7a0487d7864974c071908a582ea2381d08d6c57d))
+
+
+
 # [0.80.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.79.0...v0.80.0) (2025-02-26)
 
 
