@@ -15,7 +15,6 @@ import {
 } from '@openziti/ziti-browzer-core';
 
 import pjson from '../package.json';
-import { buildInfo } from './buildInfo'
 
 
 export interface ZitiFirstOptions extends StrategyOptions {
@@ -440,8 +439,8 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
               controllerApi:  this._controllerApi,
               sdkType:        pjson.name,
               sdkVersion:     pjson.version,
-              sdkBranch:      buildInfo.sdkBranch,
-              sdkRevision:    buildInfo.sdkRevision,
+              sdkBranch:      this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.sdkBranch,
+              sdkRevision:    this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.sdkRevision,
               token_type:     this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.token_type,
               id_token:       this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.id_token,
               access_token:   this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.access_token,
