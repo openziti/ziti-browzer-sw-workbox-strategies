@@ -7,6 +7,11 @@ import typescript from '@rollup/plugin-typescript';
 import { nodeResolve } from "@rollup/plugin-node-resolve";
 import json from '@rollup/plugin-json';
 
+import { build } from './gulp-tasks/build.mjs';
+
+build();
+
+
 const SRC_DIR   = 'src';
 const BUILD_DIR = 'dist';
 
