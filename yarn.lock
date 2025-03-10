@@ -1412,9 +1412,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@openziti/ziti-browzer-core@npm:^0.58.0":
-  version: 0.58.0
-  resolution: "@openziti/ziti-browzer-core@npm:0.58.0"
+"@openziti/ziti-browzer-core@portal:/Users/curt/Repos/nf/github/ziti-browzer-core::locator=%40openziti%2Fziti-browzer-sw-workbox-strategies%40workspace%3A.":
+  version: 0.0.0-use.local
+  resolution: "@openziti/ziti-browzer-core@portal:/Users/curt/Repos/nf/github/ziti-browzer-core::locator=%40openziti%2Fziti-browzer-sw-workbox-strategies%40workspace%3A."
   dependencies:
     "@openziti/libcrypto-js": "npm:^0.24.0"
     "@openziti/ziti-browzer-edge-client": "npm:^0.7.0"
@@ -1455,9 +1455,8 @@ __metadata:
     url: "npm:^0.11.0"
     util: "npm:^0.12.4"
     uuid: "npm:^11.1.0"
-  checksum: c31211ffbc119a37b1abfb90b46e2a9406fd7651728ca68b528847c9f8002dd7ac16464fe129bbd85d05d1dcc064d0b6ae0ca6840c9c5bb8a1b70cb572608b50
   languageName: node
-  linkType: hard
+  linkType: soft
 
 "@openziti/ziti-browzer-edge-client@npm:^0.7.0":
   version: 0.7.0
@@ -1487,6 +1486,7 @@ __metadata:
     "@surma/rollup-plugin-off-main-thread": "npm:^2.2.3"
     "@types/jwt-decode": "npm:^3.1.0"
     "@types/lodash-es": "npm:^4.17.6"
+    "@types/node": "npm:^22.13.5"
     "@types/uuid": "npm:^8.3.4"
     async-mutex: "npm:^0.5.0"
     babel-plugin-dynamic-import-node: "npm:^2.3.3"
@@ -1509,7 +1509,7 @@ __metadata:
     rollup-plugin-terser: "npm:^7.0.2"
     rollup-plugin-typescript2: "npm:^0.31.2"
     tslib: "npm:^2.8.1"
-    typescript: "npm:^4.6.4"
+    typescript: "npm:^5.2.2"
     uuid: "npm:^11.1.0"
     workbox-core: "npm:^6.6.0"
     workbox-expiration: "npm:^6.6.0"
@@ -1755,6 +1755,15 @@ __metadata:
   version: 17.0.23
   resolution: "@types/node@npm:17.0.23"
   checksum: 5c70285a5454aa1daa1f515c1b6df8ccdc85ba18c19d650355f32ac00f82494d9b0ec4c6f943bcc4081acc5662aa68ff84f4e91f35f0b23087b3ed4682f73ad4
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:^22.13.5":
+  version: 22.13.10
+  resolution: "@types/node@npm:22.13.10"
+  dependencies:
+    undici-types: "npm:~6.20.0"
+  checksum: a3865f9503d6f718002374f7b87efaadfae62faa499c1a33b12c527cfb9fd86f733e1a1b026b80c5a0e4a965701174bc3305595a7d36078aa1abcf09daa5dee9
   languageName: node
   linkType: hard
 
@@ -9486,23 +9495,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:^4.6.4":
-  version: 4.6.4
-  resolution: "typescript@npm:4.6.4"
+"typescript@npm:^5.2.2":
+  version: 5.7.3
+  resolution: "typescript@npm:5.7.3"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 92e2c0328485a4f7bd7435f5b105f03addff32f867e241dc3be8c372ed801a138c732d9a55697696d2f82a80dd6ad4bddff1ad6b0d1884bf4a24b92e71094c44
+  checksum: b7580d716cf1824736cc6e628ab4cd8b51877408ba2be0869d2866da35ef8366dd6ae9eb9d0851470a39be17cbd61df1126f9e211d8799d764ea7431d5435afa
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@npm%3A^4.6.4#optional!builtin<compat/typescript>":
-  version: 4.6.4
-  resolution: "typescript@patch:typescript@npm%3A4.6.4#optional!builtin<compat/typescript>::version=4.6.4&hash=5d3a66"
+"typescript@patch:typescript@npm%3A^5.2.2#optional!builtin<compat/typescript>":
+  version: 5.7.3
+  resolution: "typescript@patch:typescript@npm%3A5.7.3#optional!builtin<compat/typescript>::version=5.7.3&hash=e012d7"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 0e3fa814d454942a689daf4c00f82328d323e7ecd4077e3265d45375e64642611631f4c882a71be87774468ba03793e9b8ff4bccfac3018194a9e36d8f72c251
+  checksum: 3b56d6afa03d9f6172d0b9cdb10e6b1efc9abc1608efd7a3d2f38773d5d8cfb9bbc68dfb72f0a7de5e8db04fc847f4e4baeddcd5ad9c9feda072234f0d788896
   languageName: node
   linkType: hard
 
@@ -9571,6 +9580,13 @@ __metadata:
     object.reduce: "npm:^1.0.0"
     undertaker-registry: "npm:^1.0.0"
   checksum: 3442616fca45767e667de467a690803751d57f952807643e29cf017d8bfdc5be2bbd13c888a0f0c0f64bf1583417ee13736605b899d482e0fec8dbe43dfa9ce8
+  languageName: node
+  linkType: hard
+
+"undici-types@npm:~6.20.0":
+  version: 6.20.0
+  resolution: "undici-types@npm:6.20.0"
+  checksum: 68e659a98898d6a836a9a59e6adf14a5d799707f5ea629433e025ac90d239f75e408e2e5ff086afc3cace26f8b26ee52155293564593fbb4a2f666af57fc59bf
   languageName: node
   linkType: hard
 
