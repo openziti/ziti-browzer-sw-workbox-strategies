@@ -47,6 +47,10 @@ var regexOAUTHTOKEN = new RegExp( /\/oauth\/token/,     'g' );
 var regexFavicon  = new RegExp( /\/favicon\.ico/,       'g' );
 var regexJSDelivr = new RegExp( /jsdelivr.net/,         'g' );
 
+var regexZentaoRefreshRandom = new RegExp( /\/index\.php\?m\=user\&f\=refreshRandom/, 'g' );
+var regexZentaoLogin = new RegExp( /\/index\.php\?m\=user\&f\=login/, 'g' );
+var regexZentaoLoginReferer = new RegExp( /\/index\.php\?m\=user\&f\=login\&referer\=/, 'g' );
+
 var regexAtImport = new RegExp( /\@import/,             'gi' );
 var regexSlash    = new RegExp( /^\/$/,                 'g' );
 var regexDotSlash = new RegExp( /^\.\//,                'g' );
@@ -981,6 +985,13 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     const location = response.headers.get('Location');
     const contentType = response.headers.get('Content-Type');
 
+    if (request.url.match( regexZentaoRefreshRandom )) {
+      skipInject = true;
+    }
+    if (request.url.match( regexZentaoLogin ) && !request.url.match(regexZentaoLoginReferer)) {
+      skipInject = true;
+    }
+
     if ( location && response.status >= 300 && response.status < 400 ) {
       if (!this._rootPaths.find((element: string) => element === `${location}`)) {
         this._rootPaths.push(location);
@@ -1442,9 +1453,6 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
                 }
           }
       }
-      // if (cookieHeaderValue !== '') {
-      //     newHeaders.append( 'Cookie', cookieHeaderValue );
-      // }
           
       var blob = await this.getRequestBody( zitiRequest );
 
@@ -1514,8 +1522,15 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
                 } 
               );
               let parts = val[ndx].split('=');
-              const after_ = val[ndx].slice(val[ndx].indexOf('=') + 1);
-              this._zitiBrowzerServiceWorkerGlobalScope._cookieObject[parts[0]] = after_;  
+
+              function extractCookieVal(str: string) {
+                const match = str.match(/=(.*?);/);
+                return match ? match[1] : null;
+              }
+
+              const result = extractCookieVal(val[ndx]);
+
+              this._zitiBrowzerServiceWorkerGlobalScope._cookieObject[parts[0]] = result;  
             }
           }
           else {
