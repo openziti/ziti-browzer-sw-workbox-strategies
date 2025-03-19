@@ -461,6 +461,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       
             await this._zitiContext.initialize({
               loadWASM: true,   // unlike the ZBR, here in the ZBSW, we always instantiate the internal WebAssembly
+              doAuthenticate: true,   // unlike the ZBR, here in the ZBSW, we always auth with Controller
               jspi:     this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.jspi,
               target:   this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target,
               bootstrapperHost:   this._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.self.host
