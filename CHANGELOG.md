@@ -1,3 +1,12 @@
+# [0.84.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.83.0...v0.84.0) (2025-03-19)
+
+
+### Features
+
+* gather OIDC scope from /external-jwt-signers ([#263](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/263)) ([a1b55bc](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/a1b55bc3e9870523bc2ac756574dee124cd4c8ca))
+
+
+
 # [0.83.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.82.0...v0.83.0) (2025-03-19)
 
 
