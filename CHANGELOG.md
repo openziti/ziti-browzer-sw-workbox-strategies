@@ -1,3 +1,12 @@
+# [0.85.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.84.0...v0.85.0) (2025-03-20)
+
+
+### Features
+
+* remove deprecation notice ([#264](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/264)) ([9f255af](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/9f255afa4bc85673bd2831392234fcc50cb08785))
+
+
+
 # [0.84.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.83.0...v0.84.0) (2025-03-19)
 
 
