@@ -314,6 +314,18 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     });
   }
 
+  
+  accessTokenRefreshedEventHandler(accessTokenRefreshedEvent: any) {
+
+    this.logger.trace(`accessTokenRefreshedEventHandler() ${accessTokenRefreshedEvent}`);
+
+    this._zitiBrowzerServiceWorkerGlobalScope._currentAPISession = this._zitiBrowzerServiceWorkerGlobalScope._zitiContext.getCurrentAPISession();
+
+    this._zitiBrowzerServiceWorkerGlobalScope._accessTokenRefreshed(); // This will cause ZBR to ask us for the new data
+
+  }
+
+
   idpAuthHealthEventHandler(idpAuthHealthEvent: any) {
 
     this.logger.trace(`idpAuthHealthEventHandler() ${idpAuthHealthEvent}`);
@@ -481,6 +493,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
             this._zitiContext.on(ZITI_CONSTANTS.ZITI_EVENT_NO_CONFIG_PROTOCOL_FOR_SERVICE,  this.noConfigProtocolForServiceEventHandler);
             this._zitiContext.on(ZITI_CONSTANTS.ZITI_EVENT_WSS_ROUTER_CONNECTION_ERROR,  this.WSSEnabledEdgeRouterConnectionErrorEventHandler);
             this._zitiContext.on(ZITI_CONSTANTS.ZITI_EVENT_CONTROLLER_CONNECTION_ERROR,  this.ControllerConnectionErrorEventHandler);
+            this._zitiContext.on(ZITI_CONSTANTS.ZITI_EVENT_ACCESS_TOKEN_REFRESHED,  this.accessTokenRefreshedEventHandler);
 
       
             this.logger.trace(`_initialize: ZitiContext '${this._uuid}' initialized`);
@@ -516,6 +529,8 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
               self._rootPaths.push(self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.bootstrapper.target.path);
   
               self._initialized = true;
+
+              self._zitiBrowzerServiceWorkerGlobalScope._currentAPISession = self._zitiContext.getCurrentAPISession();
         
               self.logger.trace(`_initialize: ZitiContext '${self._uuid}' initialize complete`);
 
