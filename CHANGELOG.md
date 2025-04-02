@@ -1,3 +1,12 @@
+# [0.87.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.86.0...v0.87.0) (2025-04-02)
+
+
+### Features
+
+* correct ephemeral cert issue on behalf of WebSocket intercept in ZBR ([#269](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/269)) ([2d7de00](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/2d7de00e481c6bf47cf43477d13100c92912dc53))
+
+
+
 # [0.86.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.85.0...v0.86.0) (2025-04-01)
 
 
