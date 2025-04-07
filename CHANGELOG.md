@@ -1,3 +1,12 @@
+# [0.88.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.87.0...v0.88.0) (2025-04-07)
+
+
+### Features
+
+* defensive programming for dumpHeaders UUID ([#270](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/issues/270)) ([83940f9](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/commit/83940f9722fa979b29826e05ef9ee3e895b0bf9a))
+
+
+
 # [0.87.0](https://github.com/openziti/ziti-browzer-sw-workbox-strategies/compare/v0.86.0...v0.87.0) (2025-04-02)
 
 
