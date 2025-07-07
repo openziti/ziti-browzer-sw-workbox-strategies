@@ -51,11 +51,14 @@ var regexZentaoRefreshRandom = new RegExp( /\/index\.php\?m\=user\&f\=refreshRan
 var regexZentaoLogin = new RegExp( /\/index\.php\?m\=user\&f\=login/, 'g' );
 var regexZentaoLoginReferer = new RegExp( /\/index\.php\?m\=user\&f\=login\&referer\=/, 'g' );
 
+var regexLibRdpHtml  = new RegExp( /librdphtml/,    'g' );
+
 var regexAtImport = new RegExp( /\@import/,             'gi' );
 var regexSlash    = new RegExp( /^\/$/,                 'g' );
 var regexDotSlash = new RegExp( /^\.\//,                'g' );
 var regexTextHtml = new RegExp( /text\/html/,           'i' );
 var regexTextXml  = new RegExp( /text\/xml/,            'i' );
+var regexMstsXml  = new RegExp( /application\/x\-msts\-radc\+xml/,            'i' );
 var regexAppJS    = new RegExp( /application\/javascript/, 'i' );
 var regexAppJSON  = new RegExp( /application\/json/,    'i' );
 var regexVideo    = new RegExp( /video/,                'i' );
@@ -758,6 +761,11 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       this.logger.trace(`_shouldUseCache: handling request with search parms; NOT using cache`);
       return false;
     }
+
+    // if (request.url.match( regexLibRdpHtml )) {
+    //   this.logger.trace(`_shouldUseCache: handling request with librdphtml; NOT using cache`);
+    //   return false;
+    // }
     
     // Cache everything else
     this.logger.trace(`_shouldUseCache: we WILL cache response for ${request.url}`);
@@ -816,6 +824,10 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
     } else {
       tryZiti = true;
     }
+
+    // if (request.url.match( regexLibRdpHtml )) {
+    //   await this._zitiBrowzerServiceWorkerGlobalScope._sendMessageToClients( { type: 'REAPPLY_WEBSOCKET_INTERCEPT'} );
+    // }
 
     if (this._isRootPATH(request)) {
       const url = new URL(request.url)    
@@ -1029,6 +1041,19 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
       useCache = false;
     }
 
+    if (contentType && contentType.match( regexTextXml )) {
+      /**
+       * MSFT RDP thing
+       */
+      // useCache = false;
+    }
+    if (contentType && contentType.match( regexMstsXml )) {
+      /**
+       * MSFT RDP thing
+       */
+      // useCache = false;
+    }
+
     if (contentType && contentType.match( regexAppJSON )) {
       useCache = false;
     }
@@ -1169,10 +1194,10 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
                         .attr('rel', 'stylesheet')
                         .attr('href', `${_obtainBootStrapperURL()}/polipop.compact.min.css`);
 
-                    let otElement = $('<meta></meta> ')
-                        .attr('id', 'ziti-browzer-origin-trial')
-                        .attr('http-equiv', 'origin-trial')
-                        .attr('content', `${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.runtime.originTrialToken}`);
+                    // let otElement = $('<meta></meta> ')
+                    //     .attr('id', 'ziti-browzer-origin-trial')
+                    //     .attr('http-equiv', 'origin-trial')
+                    //     .attr('content', `${self._zitiBrowzerServiceWorkerGlobalScope._zitiConfig.browzer.runtime.originTrialToken}`);
 
                     let kcElement = $('<meta name="author" content="OpenZiti BrowZer" />')
                    
@@ -1193,12 +1218,12 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
                       cspElement.after(ppCss1Element);
                       cspElement.after(ppCss2Element);
                       cspElement.after(ppElement);
-                      cspElement.after(otElement);
+                      // cspElement.after(otElement);
 
-                      let otEl = $('meta[id="ziti-browzer-origin-trial"]');
+                      // let otEl = $('meta[id="ziti-browzer-origin-trial"]');
                       // Inject the ZBR immediately after the origin trial meta
-                      otEl.after(zbrElement);
-                      otEl.after(cannyElement);
+                      cspElement.after(zbrElement);
+                      cspElement.after(cannyElement);
 
                       buffer += $.html();
                     }
@@ -1216,7 +1241,7 @@ class ZitiFirstStrategy extends CacheFirst /* NetworkFirst */ {
                       headElement.prepend(ppElement);
                       headElement.prepend(ppCss2Element);
                       headElement.prepend(ppCss1Element);
-                      headElement.prepend(otElement);
+                      // headElement.prepend(otElement);
 
                       buffer += $.html();
                     }
